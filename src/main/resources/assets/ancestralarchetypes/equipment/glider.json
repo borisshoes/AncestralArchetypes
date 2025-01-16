@@ -1,0 +1,13 @@
+{
+  "layers": {
+    "wings": [
+      {
+        "dyeable": {
+          "color_when_undyed": 255
+        },
+        "texture": "ancestralarchetypes:glider_wings",
+        "use_player_texture": false
+      }
+    ]
+  }
+}

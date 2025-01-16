@@ -1,0 +1,7 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "ancestralarchetypes:item/wind_charge_volley"
+  },
+  "hand_animation_on_swap": true
+}

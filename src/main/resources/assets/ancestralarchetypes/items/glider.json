@@ -1,0 +1,13 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "ancestralarchetypes:item/glider",
+    "tints": [
+      {
+        "type": "minecraft:dye",
+        "default": 16777215
+      }
+    ]
+  },
+  "hand_animation_on_swap": false
+}

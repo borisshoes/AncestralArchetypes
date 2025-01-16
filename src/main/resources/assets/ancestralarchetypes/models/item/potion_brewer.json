@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "ancestralarchetypes:item/cauldron_liquid",
+    "layer1": "ancestralarchetypes:item/cauldron_base"
+  }
+}

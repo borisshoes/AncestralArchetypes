@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "ancestralarchetypes",
+  "version": "${version}",
+  "name": "Ancestral Archetypes",
+  "description": "An Origins-inspired server-sided fabric mod",
+  "authors": [
+    "BorisShoes"
+  ],
+  "contact": {
+    "repo": "https://github.com/Boris/Archetypes"
+  },
+  "license": "OSL-3.0",
+  "icon": "assets/ancestralarchetypes/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-datagen": [
+      "net.borisshoes.ancestralarchetypes.datagen.DataGenerator"
+    ],
+    "client": [
+      "net.borisshoes.ancestralarchetypes.AncestralArchetypes"
+    ],
+    "main": [
+      "net.borisshoes.ancestralarchetypes.AncestralArchetypes"
+    ],
+    "cardinal-components-entity": [
+      "net.borisshoes.ancestralarchetypes.cca.PlayerComponentInitializer"
+    ]
+  },
+  "custom": {
+    "cardinal-components": ["ancestralarchetypes:profile"]
+  },
+  "mixins": [
+    "ancestralarchetypes.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": ">=${minecraft_version}"
+  }
+}

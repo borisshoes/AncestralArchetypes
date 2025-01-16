@@ -1,0 +1,27 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.borisshoes.ancestralarchetypes.mixins",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "AbstractHorseDonkeyMixin",
+    "CreeperMixin",
+    "EntityMixin",
+    "FeastingCharmItemMixin",
+    "ItemEntityMixin",
+    "ItemMixin",
+    "ItemStackMixin",
+    "LivingEntityMixin",
+    "PhantomSpawnerMixin",
+    "PhantomSwoopGoalMixin",
+    "PlayerEntityMixin",
+    "PolymerBlockUtilsMixin",
+    "ServerPlayerEntityMixin",
+    "SnowballEntityMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

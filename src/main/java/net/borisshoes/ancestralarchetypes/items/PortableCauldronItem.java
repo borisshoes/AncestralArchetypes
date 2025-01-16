@@ -1,0 +1,145 @@
+package net.borisshoes.ancestralarchetypes.items;
+
+import net.borisshoes.ancestralarchetypes.ArchetypeConfig;
+import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
+import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
+import net.borisshoes.ancestralarchetypes.gui.PotionSelectionGui;
+import net.borisshoes.ancestralarchetypes.utils.SoundUtils;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ConsumableComponents;
+import net.minecraft.component.type.PotionContentsComponent;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.entity.projectile.thrown.PotionEntity;
+import net.minecraft.item.*;
+import net.minecraft.item.consume.UseAction;
+import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
+import net.minecraft.potion.Potion;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Hand;
+import net.minecraft.world.World;
+import xyz.nucleoid.packettweaker.PacketContext;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.log;
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
+
+public class PortableCauldronItem extends AbilityItem{
+   
+   public PortableCauldronItem(Settings settings){
+      super(ArchetypeRegistry.POTION_BREWER, settings);
+   }
+   
+   @Override
+   public Item getPolymerItem(ItemStack itemStack, PacketContext packetContext){
+      return Items.CAULDRON;
+   }
+   
+   @Override
+   public ActionResult use(World world, PlayerEntity user, Hand hand){
+      if(!(user instanceof ServerPlayerEntity player)) return ActionResult.PASS;
+      IArchetypeProfile profile = profile(player);
+      if(profile.getAbilityCooldown(this.ability) > 0){
+         player.sendMessage(Text.translatable("text.ancestralarchetypes.ability_on_cooldown").formatted(Formatting.RED,Formatting.ITALIC),true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.BLOCK_FIRE_EXTINGUISH,0.25f,0.8f);
+         return ActionResult.PASS;
+      }
+      
+      if(player.isSneaking()){
+         PotionSelectionGui gui = new PotionSelectionGui(player);
+         gui.open();
+      }else{
+         ItemStack potionStack = profile.getPotionStack();
+         if(potionStack.isEmpty()) return ActionResult.PASS;
+         
+         ItemStack stack = user.getStackInHand(hand);
+         boolean hasConsumable = stack.contains(DataComponentTypes.CONSUMABLE);
+         if(hasConsumable){
+            player.setCurrentHand(hand);
+         }else{
+            ProjectileEntity.spawnWithVelocity(PotionEntity::new, player.getServerWorld(), potionStack, user, -20.0f, 0.7f, 0.25f);
+            PotionContentsComponent potionComp = potionStack.get(DataComponentTypes.POTION_CONTENTS);
+            AtomicInteger totalDuration = new AtomicInteger();
+            potionComp.forEachEffect(effect -> {
+               totalDuration.addAndGet(effect.getDuration());
+            });
+            profile.setAbilityCooldown(this.ability, (int) Math.max(ArchetypeConfig.getInt(ArchetypeRegistry.CAULDRON_INSTANT_EFFECT_COOLDOWN),totalDuration.get()*ArchetypeConfig.getDouble(ArchetypeRegistry.CAULDRON_THROWABLE_COOLDOWN_MODIFIER)));
+         }
+      }
+      
+      return ActionResult.SUCCESS;
+   }
+   
+   @Override
+   public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user){
+      if(!(user instanceof ServerPlayerEntity player)) return stack;
+      IArchetypeProfile profile = profile(player);
+      ItemStack potionStack = profile.getPotionStack();
+      PotionContentsComponent potionComp = potionStack.get(DataComponentTypes.POTION_CONTENTS);
+      if (potionStack.isOf(Items.POTION) && potionComp != null) {
+         AtomicInteger totalDuration = new AtomicInteger();
+         potionComp.forEachEffect(effect -> {
+            totalDuration.addAndGet(effect.getDuration());
+            player.addStatusEffect(effect);
+         });
+         profile.setAbilityCooldown(this.ability, (int) Math.max(ArchetypeConfig.getInt(ArchetypeRegistry.CAULDRON_INSTANT_EFFECT_COOLDOWN),totalDuration.get()*ArchetypeConfig.getDouble(ArchetypeRegistry.CAULDRON_DRINKABLE_COOLDOWN_MODIFIER)));
+      }
+      
+      player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().selectedSlot : 45, stack));
+      return stack;
+   }
+   
+   @Override
+   public UseAction getUseAction(ItemStack stack){
+      if(stack.contains(DataComponentTypes.CONSUMABLE)){
+         return UseAction.DRINK;
+      }
+      return UseAction.NONE;
+   }
+   
+   @Override
+   public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected){
+      super.inventoryTick(stack, world, entity, slot, selected);
+      if(!(entity instanceof ServerPlayerEntity player)) return;
+      IArchetypeProfile profile = profile(player);
+      ItemStack potionStack = profile.getPotionStack();
+      boolean hasConsumable = stack.contains(DataComponentTypes.CONSUMABLE);
+      boolean hasPotion = stack.contains(DataComponentTypes.POTION_CONTENTS);
+      
+      try{
+         if(potionStack.isEmpty()){
+            if(hasConsumable || hasPotion){
+               stack.remove(DataComponentTypes.CONSUMABLE);
+               stack.remove(DataComponentTypes.POTION_CONTENTS);
+            }
+         }else{
+            boolean shouldHaveConsumable = potionStack.isOf(Items.POTION);
+            if(shouldHaveConsumable && !hasConsumable){
+               stack.set(DataComponentTypes.CONSUMABLE, ConsumableComponents.DRINK);
+            }else if(!shouldHaveConsumable && hasConsumable){
+               stack.remove(DataComponentTypes.CONSUMABLE);
+            }
+            
+            if(!hasPotion){
+               stack.set(DataComponentTypes.POTION_CONTENTS,potionStack.get(DataComponentTypes.POTION_CONTENTS));
+            }else{
+               RegistryEntry<Potion> profilePotion = potionStack.get(DataComponentTypes.POTION_CONTENTS).potion().get();
+               RegistryEntry<Potion> stackPotion = stack.get(DataComponentTypes.POTION_CONTENTS).potion().get();
+               if(profilePotion.value() != stackPotion.value()){
+                  stack.set(DataComponentTypes.POTION_CONTENTS,potionStack.get(DataComponentTypes.POTION_CONTENTS));
+               }
+            }
+         }
+      }catch(Exception e){
+         log(2, e.toString());
+      }
+   }
+}

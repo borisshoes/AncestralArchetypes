@@ -1,0 +1,7 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "ancestralarchetypes:item/horse_spirit_mount"
+  },
+  "hand_animation_on_swap": true
+}
