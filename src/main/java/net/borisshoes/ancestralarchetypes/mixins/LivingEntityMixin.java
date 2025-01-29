@@ -47,7 +47,7 @@ import java.util.UUID;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
-@Mixin(value = LivingEntity.class, priority = 1500)
+@Mixin(value = LivingEntity.class)
 public abstract class LivingEntityMixin {
    
    @Shadow public abstract void playSound(@Nullable SoundEvent sound);
@@ -149,7 +149,7 @@ public abstract class LivingEntityMixin {
       }
    }
    
-   @Inject(method = "tryUseDeathProtector", at = @At("RETURN"), cancellable = true)
+   @Inject(method = "tryUseDeathProtector", at = @At("RETURN"), cancellable = true, order = 1500)
    private void archetypes_deathProtector(DamageSource source, CallbackInfoReturnable<Boolean> cir){
       LivingEntity entity = (LivingEntity) (Object) this;
       if(cir.getReturnValueZ()) return;
@@ -200,8 +200,9 @@ public abstract class LivingEntityMixin {
       }
    }
    
-   @Inject(method = "modifyAppliedDamage", at = @At("RETURN"), cancellable = true)
-   private void archetypes_modifyDamage(DamageSource source, float amount, CallbackInfoReturnable<Float> cir){
+   
+   @Inject(method = "modifyAppliedDamage", at = @At("RETURN"), cancellable = true, order = 956)
+   private void test(DamageSource source, float amount, CallbackInfoReturnable<Float> cir){
       float newReturn = cir.getReturnValueF();
       LivingEntity entity = (LivingEntity) (Object) this;
       Entity attacker = source.getAttacker();
@@ -222,7 +223,9 @@ public abstract class LivingEntityMixin {
                   break;
                }
             }
-            if(!foundAttacker) newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.SNEAK_ATTACK_MODIFIER);
+            if(!foundAttacker){
+               newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.SNEAK_ATTACK_MODIFIER);
+            }
          }
       }
       

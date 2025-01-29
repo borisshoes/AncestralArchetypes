@@ -194,7 +194,7 @@ public class ConfigUtils {
       }
       
       public static class DoubleLimits {
-         double min = Double.MIN_VALUE, max = Double.MIN_VALUE;
+         double min = Double.MIN_VALUE, max = Double.MAX_VALUE;
          
          public DoubleLimits(){}
          
