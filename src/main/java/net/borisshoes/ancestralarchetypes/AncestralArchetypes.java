@@ -6,10 +6,12 @@ import net.borisshoes.ancestralarchetypes.utils.ConfigUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
@@ -46,6 +48,8 @@ public class AncestralArchetypes implements ModInitializer, ClientModInitializer
       CommandRegistrationCallback.EVENT.register(CommandRegisterCallback::registerCommands);
       ServerEntityEvents.ENTITY_UNLOAD.register(EntityLoadCallbacks::unloadEntity);
       UseEntityCallback.EVENT.register(EntityUseCallback::useEntity);
+      ServerPlayConnectionEvents.DISCONNECT.register(PlayerConnectionCallback::onPlayerLeave);
+      ServerPlayerEvents.AFTER_RESPAWN.register(PlayerRespawnCallback::onRespawn);
       
       ArchetypeRegistry.initialize();
       

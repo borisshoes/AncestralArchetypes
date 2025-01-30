@@ -36,6 +36,7 @@ public interface IArchetypeProfile extends ComponentV3 {
    boolean canChangeArchetype();
    boolean giveReminders();
    boolean giveAbilityItems(boolean shortCooldown);
+   float getHealthUpdate();
    
    void setSubarchetype(SubArchetype subarchetype);
    void incrementDeathReductionSizeLevel();
@@ -52,4 +53,5 @@ public interface IArchetypeProfile extends ComponentV3 {
    void changeArchetype(SubArchetype archetype);
    void increaseAllowedChanges(int num);
    void setReminders(boolean reminders);
+   void setHealthUpdate(float health);
 }

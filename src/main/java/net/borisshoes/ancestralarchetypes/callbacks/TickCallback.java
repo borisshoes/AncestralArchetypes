@@ -55,6 +55,13 @@ public class TickCallback {
             PLAYER_MOVEMENT_TRACKER.put(player,new Pair<>(player.getPos(), new Vec3d(0,0,0)));
          }
          
+         if(profile.getHealthUpdate() != 0){
+            if(player.getMaxHealth() >= profile.getHealthUpdate()){
+               player.setHealth(profile.getHealthUpdate());
+               profile.setHealthUpdate(0);
+            }
+         }
+         
          PlayerInventory inv = player.getInventory();
          ItemStack mainhand = player.getMainHandStack();
          ItemStack offhand = player.getOffHandStack();
@@ -190,7 +197,7 @@ public class TickCallback {
             }
          }
          
-         if(profile.hasAbility(ArchetypeRegistry.SLOW_FALLER) && PLAYER_MOVEMENT_TRACKER.get(player).getRight().getY() < -0.6){
+         if(profile.hasAbility(ArchetypeRegistry.SLOW_FALLER) && (PLAYER_MOVEMENT_TRACKER.get(player).getRight().getY() < -ArchetypeConfig.getDouble(ArchetypeRegistry.SLOW_FALLER_TRIGGER_SPEED)) && !player.isGliding() && !player.getAbilities().flying){
             if(!player.hasStatusEffect(StatusEffects.SLOW_FALLING)){
                SoundUtils.playSongToPlayer(player,SoundEvents.ENTITY_ENDER_DRAGON_FLAP,0.3f,1);
             }

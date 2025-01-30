@@ -1,5 +1,6 @@
 package net.borisshoes.ancestralarchetypes.items;
 
+import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.borisshoes.ancestralarchetypes.ArchetypeConfig;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
@@ -36,7 +37,11 @@ public class WindChargeVolleyItem extends AbilityItem{
    
    @Override
    public Item getPolymerItem(ItemStack itemStack, PacketContext packetContext){
-      return Items.WIND_CHARGE;
+      if(PolymerResourcePackUtils.hasMainPack(packetContext)){
+         return Items.BREEZE_ROD;
+      }else{
+         return Items.WIND_CHARGE;
+      }
    }
    
    @Override

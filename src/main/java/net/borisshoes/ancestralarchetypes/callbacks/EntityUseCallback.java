@@ -27,18 +27,17 @@ public class EntityUseCallback {
       boolean spiritMount = !tags.isEmpty();
       if(!spiritMount) return ActionResult.PASS;
       
-      if(entity instanceof Tameable tameable && tameable.getOwner() instanceof ServerPlayerEntity player){
-         if(!player.equals(playerEntity)) return ActionResult.FAIL;
-         if(player.isSneaking()){
-            if(tags.getFirst().contains(ArchetypeRegistry.DONKEY_SPIRIT_MOUNT.getId())){
-               // Access inventory
-               IArchetypeProfile profile = profile(player);
-               MountInventoryGui gui = new MountInventoryGui(player, profile.getMountInventory());
-               gui.open();
-               return ActionResult.SUCCESS;
-            }else{
-               return ActionResult.FAIL;
-            }
+      if(!(entity instanceof Tameable tameable) || !(tameable.getOwner() instanceof ServerPlayerEntity player)) return ActionResult.FAIL;
+      if(!player.equals(playerEntity)) return ActionResult.FAIL;
+      if(player.isSneaking()){
+         if(tags.getFirst().contains(ArchetypeRegistry.DONKEY_SPIRIT_MOUNT.getId())){
+            // Access inventory
+            IArchetypeProfile profile = profile(player);
+            MountInventoryGui gui = new MountInventoryGui(player, profile.getMountInventory());
+            gui.open();
+            return ActionResult.SUCCESS;
+         }else{
+            return ActionResult.FAIL;
          }
       }
       

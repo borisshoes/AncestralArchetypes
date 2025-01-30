@@ -104,8 +104,14 @@ public abstract class LivingEntityMixin {
       List<String> tags = entity.getCommandTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
       if(tags.isEmpty()) return;
       
-      if(entity instanceof Tameable tameable && tameable.getOwner() instanceof ServerPlayerEntity player && entity.getWorld() instanceof ServerWorld entityWorld){
-         boolean remove = !player.getServerWorld().getRegistryKey().getValue().equals(entityWorld.getRegistryKey().getValue());
+      boolean remove = false;
+      block: {
+         if(!(entity instanceof Tameable tameable) || !(tameable.getOwner() instanceof ServerPlayerEntity player) || !(entity.getWorld() instanceof ServerWorld entityWorld)){
+            remove = true;
+            break block;
+         }
+         
+         remove = !player.getServerWorld().getRegistryKey().getValue().equals(entityWorld.getRegistryKey().getValue());
          IArchetypeProfile profile = profile(player);
          ArchetypeAbility ability = MiscUtils.abilityFromTag(tags.getFirst());
          if(entity.getControllingPassenger() != null && !entity.getControllingPassenger().equals(tameable.getOwner())) entity.removeAllPassengers();
@@ -130,22 +136,20 @@ public abstract class LivingEntityMixin {
             }
          }
          
-         block: {
-            if(ability == null || player.distanceTo(entity) > 64){
-               remove = true;
-               break block;
-            }
-            UUID mountId = profile.getMountEntity(ability);
-            if(mountId == null || !mountId.equals(entity.getUuid())){
-               remove = true;
-            }
+         if(ability == null || player.distanceTo(entity) > 64){
+            remove = true;
+            break block;
          }
-         
-         if(remove){
-            entity.discard();
-         }else if(entity.age % 100 == 0){
-            entity.heal((float) ArchetypeConfig.getDouble(ArchetypeRegistry.SPIRIT_MOUNT_REGENERATION_RATE));
+         UUID mountId = profile.getMountEntity(ability);
+         if(mountId == null || !mountId.equals(entity.getUuid())){
+            remove = true;
          }
+      }
+      
+      if(remove){
+         entity.discard();
+      }else if(entity.age % 100 == 0){
+         entity.heal((float) ArchetypeConfig.getDouble(ArchetypeRegistry.SPIRIT_MOUNT_REGENERATION_RATE));
       }
    }
    
@@ -250,7 +254,7 @@ public abstract class LivingEntityMixin {
             newReturn += (float) ArchetypeConfig.getDouble(ArchetypeRegistry.ADDED_STARVE_DAMAGE);
          }
          
-         if(profile.hasAbility(ArchetypeRegistry.STUNNED_BY_DAMAGE)){
+         if(profile.hasAbility(ArchetypeRegistry.STUNNED_BY_DAMAGE) && amount > 0.1){
             StatusEffectInstance slowness = new StatusEffectInstance(StatusEffects.SLOWNESS, ArchetypeConfig.getInt(ArchetypeRegistry.DAMAGE_STUN_DURATION), 9, false, false, true);
             player.addStatusEffect(slowness);
          }

@@ -36,6 +36,7 @@ public class ArchetypeProfile implements IArchetypeProfile {
    private int gliderColor = 0xFFFFFF;
    private int archetypeChangesAllowed = ArchetypeConfig.getInt(ArchetypeRegistry.STARTING_ARCHETYPE_CHANGES);
    private int giveItemsCooldown;
+   private float healthUpdate;
    private ItemStack potionBrewerStack = ItemStack.EMPTY;
    private HorseMarking horseMarking = HorseMarking.NONE;
    private HorseColor horseColor = HorseColor.CHESTNUT;
@@ -58,6 +59,7 @@ public class ArchetypeProfile implements IArchetypeProfile {
       this.giveReminders = tag.getBoolean("giveReminders");
       this.subArchetype = ArchetypeRegistry.SUBARCHETYPES.get(Identifier.of(MOD_ID, tag.getString("subArchetype")));
       this.giveItemsCooldown = tag.getInt("giveItemsCooldown");
+      this.healthUpdate = tag.getFloat("loginHealth");
       this.calculateAbilities();
       
       abilityCooldowns.clear();
@@ -113,6 +115,7 @@ public class ArchetypeProfile implements IArchetypeProfile {
       tag.putInt("horseColor",this.horseColor.getId());
       tag.putInt("archetypeChangesAllowed",this.archetypeChangesAllowed);
       tag.putInt("giveItemsCooldown",this.giveItemsCooldown);
+      tag.putFloat("loginHealth",this.healthUpdate);
       tag.putBoolean("giveReminders",this.giveReminders);
       tag.putString("subArchetype",this.subArchetype != null ? this.subArchetype.getId() : "");
       
@@ -363,6 +366,11 @@ public class ArchetypeProfile implements IArchetypeProfile {
    }
    
    @Override
+   public void setHealthUpdate(float health){
+      if(health >= 0) this.healthUpdate = health;
+   }
+   
+   @Override
    public boolean giveAbilityItems(boolean shortCooldown){
       if(this.giveItemsCooldown > 0) return false;
       
@@ -390,5 +398,10 @@ public class ArchetypeProfile implements IArchetypeProfile {
       this.giveItemsCooldown = shortCooldown ? 100 : 1200;
       
       return true;
+   }
+   
+   @Override
+   public float getHealthUpdate(){
+      return healthUpdate;
    }
 }

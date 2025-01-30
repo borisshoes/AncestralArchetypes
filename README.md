@@ -58,7 +58,7 @@ The following commands can be used to adjust configurable settings in the Ancest
 * ```/archetypes config spiritMountRegenerationRate``` The amount of health a Centaur's Spirit Mount heals every 5 seconds.
 * ```/archetypes config startingArchetypeChanges``` The number of allowed Archetype changes given to new players.
 * ```/archetypes config windChargeCooldown``` The cooldown duration of the Breeze's volley ability.
-
+* ```/archetypes config slowFallerTriggerSpeed``` The minimum downwards speed to trigger the Slow Faller ability in blocks per tick.
 
 ### LICENSE NOTICE
 By using this project in any form, you hereby give your "express assent" for the terms of the license of this project, and acknowledge that I, BorisShoes, have fulfilled my obligation under the license to "make a reasonable effort under the circumstances to obtain the express assent of recipients to the terms of this License.

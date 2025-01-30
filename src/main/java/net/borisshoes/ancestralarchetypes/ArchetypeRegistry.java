@@ -1,18 +1,23 @@
 package net.borisshoes.ancestralarchetypes;
 
 import com.mojang.serialization.Lifecycle;
+import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils;
 import eu.pb4.polymer.core.api.item.PolymerItemUtils;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.items.*;
 import net.borisshoes.ancestralarchetypes.utils.ConfigUtils;
 import net.borisshoes.ancestralarchetypes.utils.MiscUtils;
+import net.borisshoes.arcananovum.ArcanaNovum;
+import net.borisshoes.arcananovum.gui.arcanetome.IngredientCompendiumEntry;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ConsumableComponent;
+import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.component.type.EquippableComponent;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.consume.UseAction;
@@ -135,6 +140,7 @@ public class ArchetypeRegistry {
          new Item.Settings().maxCount(1).rarity(Rarity.EPIC).maxDamage(2048)
                .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.glider_description"))))
                .component(DataComponentTypes.GLIDER, Unit.INSTANCE)
+               .component(DataComponentTypes.DYED_COLOR, new DyedColorComponent(16777215,false))
                .component(DataComponentTypes.EQUIPPABLE, EquippableComponent.builder(EquipmentSlot.CHEST).equipSound(SoundEvents.ITEM_ARMOR_EQUIP_ELYTRA).model(RegistryKey.of(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.of(MOD_ID,"glider"))).damageOnHurt(false).build())
    ));
    public static final Item HORSE_SPIRIT_MOUNT_ITEM = registerItem(HORSE_SPIRIT_MOUNT.getId(), new HorseSpiritMountItem(
@@ -174,7 +180,7 @@ public class ArchetypeRegistry {
          new ConfigUtils.IntegerConfigValue("spiritMountKillCooldown", 6000, new ConfigUtils.IntegerConfigValue.IntLimits(1))));
    
    public static final ArchetypeConfig.ConfigSetting<?> DAMAGE_STUN_DURATION = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.IntegerConfigValue("damageStunDuration", 20, new ConfigUtils.IntegerConfigValue.IntLimits(1))));
+         new ConfigUtils.IntegerConfigValue("damageStunDuration", 15, new ConfigUtils.IntegerConfigValue.IntLimits(1))));
    
    public static final ArchetypeConfig.ConfigSetting<?> CAULDRON_INSTANT_EFFECT_COOLDOWN = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
          new ConfigUtils.IntegerConfigValue("cauldronInstantEffectCooldown", 900, new ConfigUtils.IntegerConfigValue.IntLimits(1))));
@@ -230,6 +236,9 @@ public class ArchetypeRegistry {
    public static final ArchetypeConfig.ConfigSetting<?> IMPALE_VULNERABLE_MODIFIER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
          new ConfigUtils.DoubleConfigValue("impaleVulnerableModifier", 2.5, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
    
+   public static final ArchetypeConfig.ConfigSetting<?> SLOW_FALLER_TRIGGER_SPEED = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
+         new ConfigUtils.DoubleConfigValue("slowFallerTriggerSpeed", 0.65, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   
    static{
       TUFF_FOODS.put(Items.TUFF,new Pair<>(1.0f,25));
       TUFF_FOODS.put(Items.TUFF_STAIRS,new Pair<>(1.5f,25));
@@ -266,6 +275,21 @@ public class ArchetypeRegistry {
       IRON_FOODS.put(Items.IRON_BARS,new Pair<>(1.0f,20));
       IRON_FOODS.put(Items.IRON_DOOR,new Pair<>(5.0f,40));
       IRON_FOODS.put(Items.IRON_TRAPDOOR,new Pair<>(8.0f,60));
+      IRON_FOODS.put(Items.CHAIN,new Pair<>(2.5f,32));
+      IRON_FOODS.put(Items.LANTERN,new Pair<>(2.0f,32));
+      IRON_FOODS.put(Items.SOUL_LANTERN,new Pair<>(2.5f,32));
+      IRON_FOODS.put(Items.HEAVY_WEIGHTED_PRESSURE_PLATE,new Pair<>(4.5f,50));
+      IRON_FOODS.put(Items.CAULDRON,new Pair<>(15.75f,90));
+      IRON_FOODS.put(Items.ANVIL,new Pair<>(50.0f,320));
+      IRON_FOODS.put(Items.MINECART,new Pair<>(11.25f,80));
+      IRON_FOODS.put(Items.SHEARS,new Pair<>(4.5f,40));
+      IRON_FOODS.put(Items.BUCKET,new Pair<>(6.75f,45));
+      IRON_FOODS.put(Items.HOPPER,new Pair<>(11.25f,90));
+      IRON_FOODS.put(Items.COMPASS,new Pair<>(9.0f,90));
+      IRON_FOODS.put(Items.ACTIVATOR_RAIL,new Pair<>(2.5f,36));
+      IRON_FOODS.put(Items.DETECTOR_RAIL,new Pair<>(2.5f,36));
+      IRON_FOODS.put(Items.RAIL,new Pair<>(1.25f,28));
+      IRON_FOODS.put(Items.HOPPER_MINECART,new Pair<>(30.0f,120));
       
       COPPER_FOODS.put(Items.RAW_COPPER,new Pair<>(0.25f,8));
       COPPER_FOODS.put(Items.COPPER_INGOT,new Pair<>(1.0f,26));
@@ -308,6 +332,7 @@ public class ArchetypeRegistry {
       COPPER_FOODS.put(Items.OXIDIZED_COPPER_DOOR,new Pair<>(3.0f,26));
       COPPER_FOODS.put(Items.OXIDIZED_COPPER_TRAPDOOR,new Pair<>(4.25f,26));
       COPPER_FOODS.put(Items.OXIDIZED_COPPER_BULB,new Pair<>(9.0f,25));
+      COPPER_FOODS.put(Items.LIGHTNING_ROD,new Pair<>(3.5f,32));
    }
    
    private static ArchetypeAbility register(ArchetypeAbility ability){
@@ -372,6 +397,18 @@ public class ArchetypeRegistry {
                return client;
             }
       );
+      
+      final ItemGroup ITEM_GROUP = PolymerItemGroupUtils.builder().displayName(Text.translatable("itemGroup.archetype_items")).icon(() -> new ItemStack(CHANGE_ITEM)).entries((displayContext, entries) -> {
+         entries.add(new ItemStack(CHANGE_ITEM));
+         entries.add(new ItemStack(GLIDER_ITEM));
+         entries.add(new ItemStack(WIND_CHARGE_VOLLEY_ITEM));
+         entries.add(new ItemStack(FIREBALL_VOLLEY_ITEM));
+         entries.add(new ItemStack(POTION_BREWER_ITEM));
+         entries.add(new ItemStack(HORSE_SPIRIT_MOUNT_ITEM));
+         entries.add(new ItemStack(DONKEY_SPIRIT_MOUNT_ITEM));
+      }).build();
+      
+      PolymerItemGroupUtils.registerPolymerItemGroup(Identifier.of(MOD_ID,"archetype_items"), ITEM_GROUP);
    }
    
    private static Text getFoodLoreLine(Pair<Float,Integer> pair){

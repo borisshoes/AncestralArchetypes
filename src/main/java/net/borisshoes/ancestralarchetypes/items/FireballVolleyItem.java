@@ -1,5 +1,6 @@
 package net.borisshoes.ancestralarchetypes.items;
 
+import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
 import net.borisshoes.ancestralarchetypes.ArchetypeConfig;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
@@ -39,7 +40,11 @@ public class FireballVolleyItem extends AbilityItem{
    
    @Override
    public Item getPolymerItem(ItemStack itemStack, PacketContext packetContext){
-      return Items.FIRE_CHARGE;
+      if(PolymerResourcePackUtils.hasMainPack(packetContext)){
+         return Items.BLAZE_ROD;
+      }else{
+         return Items.FIRE_CHARGE;
+      }
    }
    
    @Override
