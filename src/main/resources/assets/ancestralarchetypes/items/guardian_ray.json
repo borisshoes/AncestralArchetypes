@@ -1,0 +1,7 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "ancestralarchetypes:item/guardian_ray"
+  },
+  "hand_animation_on_swap": true
+}

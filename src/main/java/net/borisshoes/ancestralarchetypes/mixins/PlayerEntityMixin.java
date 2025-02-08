@@ -1,40 +1,64 @@
 package net.borisshoes.ancestralarchetypes.mixins;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import net.borisshoes.ancestralarchetypes.ArchetypeConfig;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
 @Mixin(PlayerEntity.class)
 public class PlayerEntityMixin {
    
-   @Inject(method = "canFoodHeal", at = @At("RETURN"), cancellable = true)
-   private void archetypes_canFoodHeal(CallbackInfoReturnable<Boolean> cir){
-      if(!cir.getReturnValue()) return;
+   @ModifyReturnValue(method = "canFoodHeal", at = @At("RETURN"))
+   private boolean archetypes_canFoodHeal(boolean original){
+      if(!original) return false;
       PlayerEntity player = (PlayerEntity) (Object) this;
       IArchetypeProfile profile = profile(player);
-      if(profile.hasAbility(ArchetypeRegistry.NO_REGEN)) cir.setReturnValue(false);
+      if(profile.hasAbility(ArchetypeRegistry.NO_REGEN)) return false;
+      return original;
    }
    
    @ModifyExpressionValue(method = "getBlockBreakingSpeed", at = @At(value = "CONSTANT", args = "floatValue=5.0"))
    private float archetypes_offGroundBlockBreakingSpeed(float constant){
       PlayerEntity player = (PlayerEntity) (Object) this;
       IArchetypeProfile profile = profile(player);
-      return profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER) && player.isSubmergedInWater() ? Math.min(constant, 1) : constant;
+      boolean canBreakQuickly =  (profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER) && player.isSubmergedInWater())
+            || (player.getVehicle() != null && !player.getVehicle().getCommandTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList().isEmpty());
+      return canBreakQuickly ? Math.min(constant, 1) : constant;
    }
    
    @ModifyExpressionValue(method = "getBlockBreakingSpeed", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/attribute/EntityAttributeInstance;getValue()D"))
    private double archetypes_underwaterBlockBreakingSpeed(double original){
       PlayerEntity player = (PlayerEntity) (Object) this;
       IArchetypeProfile profile = profile(player);
-      return profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER) && player.isSubmergedInWater() ? Math.max(original, 1) : original;
+      double newValue = original;
+      if(profile.hasAbility(ArchetypeRegistry.GOOD_SWIMMER)) newValue = 0.5;
+      if(profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER)) newValue = 1.5;
+      return Math.max(original, newValue);
+   }
+   
+   @Inject(method = "applyDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;applyArmorToDamage(Lnet/minecraft/entity/damage/DamageSource;F)F"))
+   private void archetypes_thorns(ServerWorld world, DamageSource source, float amount, CallbackInfo ci){
+      LivingEntity entity = (LivingEntity) (Object) this;
+      if(entity instanceof ServerPlayerEntity player && source.getAttacker() instanceof LivingEntity attacker){
+         IArchetypeProfile profile = profile(player);
+         if(profile.hasAbility(ArchetypeRegistry.THORNY) && attacker.isAlive() && !source.isIn(DamageTypeTags.AVOIDS_GUARDIAN_THORNS) && !source.isOf(DamageTypes.THORNS)){
+            attacker.damage(player.getServerWorld(), player.getDamageSources().thorns(player), (float) (amount * ArchetypeConfig.getDouble(ArchetypeRegistry.THORNY_REFLECTION_MODIFIER)));
+         }
+      }
    }
 }

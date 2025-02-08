@@ -7,6 +7,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.StringIdentifiable;
 import org.apache.logging.log4j.Logger;
@@ -87,7 +88,7 @@ public class ConfigUtils {
          
          for(IConfigValue value : this.values){
             if(value.comment != null){
-               output.write("# "+value.comment);
+               output.write("# "+Text.translatable(value.comment).getString());
                output.newLine();
             }
             output.write(value.name + " = " + value.value);

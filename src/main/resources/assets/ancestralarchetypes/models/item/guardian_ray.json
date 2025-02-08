@@ -1,0 +1,24 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "ancestralarchetypes:item/guardian_ray"
+  },
+  "display": {
+    "thirdperson_righthand": {
+      "rotation": [0, 90, -45],
+      "translation": [0, 1, 1]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [180, 90, 45],
+      "translation": [0, 1, 1]
+    },
+    "firstperson_righthand": {
+      "rotation": [0, 90, -25],
+      "translation": [0, 1, 1]
+    },
+    "firstperson_lefthand": {
+      "rotation": [180, 90, 65],
+      "translation": [0, 1, 1]
+    }
+  }
+}

@@ -10,7 +10,7 @@ public class PlayerRespawnCallback {
    
    public static void onRespawn(ServerPlayerEntity oldPlayer, ServerPlayerEntity newPlayer, boolean alive){
       IArchetypeProfile profile = profile(newPlayer);
-      if(profile.hasAbility(ArchetypeRegistry.TALL_SIZED)){
+      if(profile.hasAbility(ArchetypeRegistry.GIANT_SIZED) || profile.hasAbility(ArchetypeRegistry.SLIME_TOTEM)){
          if(alive){
             profile.setHealthUpdate(oldPlayer.getHealth());
          }else{

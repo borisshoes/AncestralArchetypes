@@ -1,5 +1,6 @@
 package net.borisshoes.ancestralarchetypes.mixins;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
@@ -10,7 +11,6 @@ import net.borisshoes.ancestralarchetypes.gui.MountInventoryGui;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
 import net.borisshoes.ancestralarchetypes.items.GraphicalItem;
 import net.borisshoes.ancestralarchetypes.utils.MiscUtils;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
@@ -19,10 +19,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.passive.AbstractHorseEntity;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.screen.*;
@@ -59,20 +56,22 @@ public abstract class LivingEntityMixin {
       }
    }
    
-   @Inject(method = "shouldDropExperience", at = @At("RETURN"), cancellable = true)
-   private void archetypes_mountDropsXP(CallbackInfoReturnable<Boolean> cir){
-      if(!cir.getReturnValueZ()) return;
+   @ModifyReturnValue(method = "shouldDropExperience", at = @At("RETURN"))
+   private boolean archetypes_mountDropsXP(boolean original){
+      if(!original) return false;
       LivingEntity entity = (LivingEntity) (Object) this;
       List<String> tags = entity.getCommandTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
-      if(!tags.isEmpty()) cir.setReturnValue(false);
+      if(!tags.isEmpty()) return false;
+      return original;
    }
    
-   @Inject(method = "shouldDropLoot", at = @At("RETURN"), cancellable = true)
-   private void archetypes_mountDropsLoot(CallbackInfoReturnable<Boolean> cir){
-      if(!cir.getReturnValueZ()) return;
+   @ModifyReturnValue(method = "shouldDropLoot", at = @At("RETURN"))
+   private boolean archetypes_mountDropsLoot(boolean original){
+      if(!original) return false;
       LivingEntity entity = (LivingEntity) (Object) this;
       List<String> tags = entity.getCommandTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
-      if(!tags.isEmpty()) cir.setReturnValue(false);
+      if(!tags.isEmpty()) return false;
+      return original;
    }
    
    @Inject(method = "remove", at = @At("HEAD"))
@@ -153,27 +152,26 @@ public abstract class LivingEntityMixin {
       }
    }
    
-   @Inject(method = "tryUseDeathProtector", at = @At("RETURN"), cancellable = true, order = 1500)
-   private void archetypes_deathProtector(DamageSource source, CallbackInfoReturnable<Boolean> cir){
+   @ModifyReturnValue(method = "tryUseDeathProtector", at = @At("RETURN"))
+   private boolean archetypes_deathProtector(boolean original){
       LivingEntity entity = (LivingEntity) (Object) this;
-      if(cir.getReturnValueZ()) return;
+      if(original) return true;
       
       if(entity instanceof ServerPlayerEntity player){
          IArchetypeProfile profile = profile(player);
-         if(profile.hasAbility(ArchetypeRegistry.REDUCE_SIZE_ON_DEATH_TWICE) && profile.getDeathReductionSizeLevel() <= 1){
-            profile.incrementDeathReductionSizeLevel();
-            player.setHealth(player.getMaxHealth());
+         if(profile.hasAbility(ArchetypeRegistry.MAGMA_TOTEM) && profile.getDeathReductionSizeLevel() <= 1){
+            profile.changeDeathReductionSizeLevel(false);
             player.getServerWorld().spawnParticles(ParticleTypes.TOTEM_OF_UNDYING,player.getX(), player.getY()+player.getHeight()/2, player.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
             playSound(SoundEvents.ENTITY_ZOMBIE_VILLAGER_CURE);
-            cir.setReturnValue(true);
-         }else if(profile.hasAbility(ArchetypeRegistry.REDUCE_SIZE_ON_DEATH_ONCE) && profile.getDeathReductionSizeLevel() <= 0){
-            profile.incrementDeathReductionSizeLevel();
-            player.setHealth(player.getMaxHealth());
+            return true;
+         }else if(profile.hasAbility(ArchetypeRegistry.SLIME_TOTEM) && profile.getDeathReductionSizeLevel() <= 1){
+            profile.changeDeathReductionSizeLevel(false);
             player.getServerWorld().spawnParticles(ParticleTypes.TOTEM_OF_UNDYING,player.getX(), player.getY()+player.getHeight()/2, player.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
             playSound(SoundEvents.ENTITY_ZOMBIE_VILLAGER_CURE);
-            cir.setReturnValue(true);
+            return true;
          }
       }
+      return original;
    }
    
    @ModifyVariable(method = "takeKnockback", at = @At("HEAD"), ordinal = 0, argsOnly = true)
@@ -205,9 +203,9 @@ public abstract class LivingEntityMixin {
    }
    
    
-   @Inject(method = "modifyAppliedDamage", at = @At("RETURN"), cancellable = true, order = 956)
-   private void test(DamageSource source, float amount, CallbackInfoReturnable<Float> cir){
-      float newReturn = cir.getReturnValueF();
+   @ModifyReturnValue(method = "modifyAppliedDamage", at = @At("RETURN"))
+   private float archetypes_modifyDamage(float original, DamageSource source, float amount){
+      float newReturn = original;
       LivingEntity entity = (LivingEntity) (Object) this;
       Entity attacker = source.getAttacker();
       
@@ -254,12 +252,12 @@ public abstract class LivingEntityMixin {
             newReturn += (float) ArchetypeConfig.getDouble(ArchetypeRegistry.ADDED_STARVE_DAMAGE);
          }
          
-         if(profile.hasAbility(ArchetypeRegistry.STUNNED_BY_DAMAGE) && amount > 0.1){
+         if(profile.hasAbility(ArchetypeRegistry.STUNNED_BY_DAMAGE) && amount > ArchetypeConfig.getDouble(ArchetypeRegistry.STARTLE_MIN_DAMAGE) && !source.isIn(ArchetypeRegistry.NO_STARTLE)){
             StatusEffectInstance slowness = new StatusEffectInstance(StatusEffects.SLOWNESS, ArchetypeConfig.getInt(ArchetypeRegistry.DAMAGE_STUN_DURATION), 9, false, false, true);
             player.addStatusEffect(slowness);
          }
       }
       
-      cir.setReturnValue(newReturn);
+      return newReturn;
    }
 }

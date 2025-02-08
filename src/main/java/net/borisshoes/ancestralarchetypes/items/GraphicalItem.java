@@ -33,7 +33,10 @@ public class GraphicalItem extends Item implements PolymerItem {
          new Pair<>(Items.SPECTRAL_ARROW,"gui/left_arrow"),
          new Pair<>(Items.NETHER_STAR,"gui/sort"),
          new Pair<>(Items.HOPPER,"gui/filter"),
-         new Pair<>(Items.BLACK_STAINED_GLASS_PANE,"gui/black")
+         new Pair<>(Items.BLACK_STAINED_GLASS_PANE,"gui/black"),
+         new Pair<>(Items.POTION,"gui/locked_potion"),
+         new Pair<>(Items.SPLASH_POTION,"gui/locked_splash_potion"),
+         new Pair<>(Items.LINGERING_POTION,"gui/locked_lingering_potion")
    ));
    
    private static final ArrayList<Pair<Item,Integer>> DYED_REPLACEMENTS = new ArrayList<>(Arrays.asList(
@@ -192,7 +195,10 @@ public class GraphicalItem extends Item implements PolymerItem {
       MENU_TOP_CONNECTOR("menu_top_connector"),
       MENU_BOTTOM_CONNECTOR("menu_bottom_connector"),
       TRANSMUTATION_BOOK("transmutation_book"),
-      PAGE_BG("page_bg")
+      PAGE_BG("page_bg"),
+      LOCKED_POTION("locked_potion"),
+      LOCKED_SPLASH_POTION("locked_splash_potion"),
+      LOCKED_LINGERING_POTION("locked_lingering_potion")
       ;
       
       public final String id;

@@ -25,8 +25,9 @@ public interface IArchetypeProfile extends ComponentV3 {
    List<ArchetypeAbility> getAbilities();
    int getAbilityCooldown(ArchetypeAbility ability);
    ItemStack getPotionStack();
-   int getGlideTime();
+   float getGlideTime();
    int getMaxGlideTime();
+   boolean isGliderActive();
    UUID getMountEntity(ArchetypeAbility ability);
    float getMountHealth(ArchetypeAbility ability);
    Inventory getMountInventory();
@@ -39,13 +40,13 @@ public interface IArchetypeProfile extends ComponentV3 {
    float getHealthUpdate();
    
    void setSubarchetype(SubArchetype subarchetype);
-   void incrementDeathReductionSizeLevel();
+   void changeDeathReductionSizeLevel(boolean decrease);
    void resetDeathReductionSizeLevel();
    void setAbilityCooldown(ArchetypeAbility ability, int ticks);
    void tick();
    void setPotionType(Pair<Item, RegistryEntry<Potion>> pair);
    void resetAbilityCooldowns();
-   void startGlideTimer();
+   void setGliderActive(boolean active);
    void setMountEntity(ArchetypeAbility ability, UUID uuid);
    void setMountHealth(ArchetypeAbility ability, float health);
    void setHorseVariant(HorseColor color, HorseMarking marking);

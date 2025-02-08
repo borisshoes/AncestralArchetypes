@@ -4,6 +4,7 @@ import net.borisshoes.ancestralarchetypes.*;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
 import net.borisshoes.ancestralarchetypes.utils.MiscUtils;
 import net.minecraft.component.type.PotionContentsComponent;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.passive.HorseColor;
@@ -31,8 +32,9 @@ public class ArchetypeProfile implements IArchetypeProfile {
    
    private final PlayerEntity player;
    private boolean giveReminders = ArchetypeConfig.getBoolean(ArchetypeRegistry.REMINDERS_ON_BY_DEFAULT);
+   private boolean gliderActive;
    private int deathReductionSizeLevel;
-   private int glideTime;
+   private float glideTime;
    private int gliderColor = 0xFFFFFF;
    private int archetypeChangesAllowed = ArchetypeConfig.getInt(ArchetypeRegistry.STARTING_ARCHETYPE_CHANGES);
    private int giveItemsCooldown;
@@ -53,7 +55,8 @@ public class ArchetypeProfile implements IArchetypeProfile {
    @Override
    public void readFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup wrapperLookup){
       this.deathReductionSizeLevel = tag.getInt("deathReductionSizeLevel");
-      this.glideTime = tag.getInt("glideTime");
+      this.glideTime = tag.getFloat("glideTime");
+      this.gliderActive = tag.getBoolean("gliderActive");
       this.archetypeChangesAllowed = tag.getInt("archetypeChangesAllowed");
       if(tag.contains("gliderColor")) this.gliderColor = tag.getInt("gliderColor");
       this.giveReminders = tag.getBoolean("giveReminders");
@@ -109,14 +112,15 @@ public class ArchetypeProfile implements IArchetypeProfile {
    @Override
    public void writeToNbt(NbtCompound tag, RegistryWrapper.WrapperLookup wrapperLookup){
       tag.putInt("deathReductionSizeLevel",this.deathReductionSizeLevel);
-      tag.putInt("glideTime",this.glideTime);
       tag.putInt("gliderColor",this.gliderColor);
       tag.putInt("horseMarking",this.horseMarking.getId());
       tag.putInt("horseColor",this.horseColor.getId());
       tag.putInt("archetypeChangesAllowed",this.archetypeChangesAllowed);
       tag.putInt("giveItemsCooldown",this.giveItemsCooldown);
+      tag.putFloat("glideTime",this.glideTime);
       tag.putFloat("loginHealth",this.healthUpdate);
       tag.putBoolean("giveReminders",this.giveReminders);
+      tag.putBoolean("gliderActive",this.gliderActive);
       tag.putString("subArchetype",this.subArchetype != null ? this.subArchetype.getId() : "");
       
       NbtCompound cooldownTag = new NbtCompound();
@@ -168,13 +172,23 @@ public class ArchetypeProfile implements IArchetypeProfile {
    }
    
    @Override
-   public int getGlideTime(){
+   public float getGlideTime(){
       return this.glideTime;
    }
    
    @Override
    public int getMaxGlideTime(){
       return ArchetypeConfig.getInt(ArchetypeRegistry.GLIDER_DURATION);
+   }
+   
+   @Override
+   public boolean isGliderActive(){
+      return this.gliderActive;
+   }
+   
+   @Override
+   public void setGliderActive(boolean active){
+   
    }
    
    @Override
@@ -259,21 +273,30 @@ public class ArchetypeProfile implements IArchetypeProfile {
    }
    
    @Override
-   public void incrementDeathReductionSizeLevel(){
-      this.deathReductionSizeLevel++;
-      MiscUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
-      MiscUtils.attributeEffect(player, EntityAttributes.SCALE,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
+   public void changeDeathReductionSizeLevel(boolean decrease){
+      if(this.deathReductionSizeLevel > 0 && decrease){
+         this.deathReductionSizeLevel--;
+      }else if(!decrease){
+         this.deathReductionSizeLevel++;
+      }else{
+         return;
+      }
+      
+      MiscUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
+      MiscUtils.attributeEffect(player, EntityAttributes.SCALE,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
       
       double scale = -(1 - Math.pow(0.5,this.deathReductionSizeLevel));
-      MiscUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH,scale, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"death_reduction_size_level"),false);
-      MiscUtils.attributeEffect(player, EntityAttributes.SCALE,scale, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"death_reduction_size_level"),false);
+      MiscUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH,scale, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),false);
+      MiscUtils.attributeEffect(player, EntityAttributes.SCALE,scale, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),false);
+      player.setHealth(player.getMaxHealth());
    }
+   
    
    @Override
    public void resetDeathReductionSizeLevel(){
       this.deathReductionSizeLevel = 0;
-      MiscUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
-      MiscUtils.attributeEffect(player, EntityAttributes.SCALE,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
+      MiscUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
+      MiscUtils.attributeEffect(player, EntityAttributes.SCALE,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
    }
    
    @Override
@@ -285,13 +308,23 @@ public class ArchetypeProfile implements IArchetypeProfile {
    public void tick(){
       abilityCooldowns.forEach((ability, cooldown) -> abilityCooldowns.put(ability, Math.max(0,cooldown-1)));
       
-      if(this.glideTime > 0){
-         this.glideTime++;
-         
-         if(this.glideTime >= getMaxGlideTime()){
-            this.glideTime = 0;
+      boolean wasGliderActive = this.gliderActive;
+      if(player.getEquippedStack(EquipmentSlot.CHEST).isOf(ArchetypeRegistry.GLIDER_ITEM) && player.isGliding()){
+         if(!wasGliderActive) this.gliderActive = true;
+         this.glideTime--;
+      }else{
+         if(wasGliderActive){
+            this.gliderActive = false;
             setAbilityCooldown(ArchetypeRegistry.GLIDER,ArchetypeConfig.getInt(ArchetypeRegistry.GLIDER_COOLDOWN));
          }
+         if(getAbilityCooldown(ArchetypeRegistry.GLIDER) == 0){
+            this.glideTime = (float) Math.min(ArchetypeConfig.getInt(ArchetypeRegistry.GLIDER_DURATION),this.glideTime + ArchetypeConfig.getDouble(ArchetypeRegistry.GLIDER_RECOVERY_TIME));
+         }
+      }
+      
+      if(this.glideTime < 0){
+         this.glideTime = 0;
+         setAbilityCooldown(ArchetypeRegistry.GLIDER,ArchetypeConfig.getInt(ArchetypeRegistry.GLIDER_COOLDOWN));
       }
       
       if(this.giveItemsCooldown > 0) this.giveItemsCooldown--;
@@ -308,12 +341,7 @@ public class ArchetypeProfile implements IArchetypeProfile {
    
    @Override
    public void setPotionType(Pair<Item, RegistryEntry<Potion>> pair){
-      this.potionBrewerStack = PotionContentsComponent.createStack(pair.getLeft(),pair.getRight());
-   }
-   
-   @Override
-   public void startGlideTimer(){
-      this.glideTime = 1;
+      this.potionBrewerStack = pair == null ? ItemStack.EMPTY : PotionContentsComponent.createStack(pair.getLeft(),pair.getRight());
    }
    
    @Override

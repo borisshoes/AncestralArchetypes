@@ -17,6 +17,9 @@ The mod is highly configurable and balanced around a competitive environment. Th
 ## Mod Spotlight /  Tutorial
 [![Mod Tutorial](https://img.youtube.com/vi/QApJcu1rpD0/0.jpg)](https://www.youtube.com/watch?v=QApJcu1rpD0)
 
+## Version 1.2.0 Changes Showcase
+[![1.2.0 Changes Showcase](https://img.youtube.com/vi/ZWrzjhnXP8E/0.jpg)](https://www.youtube.com/watch?v=ZWrzjhnXP8E)
+
 ### Player Commands
 * ```/archetypes changeArchetype``` Opens a GUI for a user to change their Archetype.
 * ```/archetypes items``` Gives a user the Ability Items for their Archetype, has a 1 minute cooldown.
@@ -31,34 +34,57 @@ The mod is highly configurable and balanced around a competitive environment. Th
 
 ### Admin Configuration Commands
 The following commands can be used to adjust configurable settings in the AncestralArchetypes.properties file without a server reboot. These commands can be suffixed with "get" or "set" followed by a value to get or set the current setting. 
-* ```/archetypes config addedStarveDamage``` The amount of added starvation damage dealt to Gelatians.
-* ```/archetypes config biomeDamage``` The amount of damage dealt to Aquarians or Infernals for being in an incompatible biome.
-* ```/archetypes config canAlwaysChangeArchetype``` Whether or not players can change their Archetype at will, or use the limited change system.
-* ```/archetypes config cauldronDrinkableCooldownModifier``` The time modifier multiplied against the cumulative effect duration of drinkable potions to determine the cooldown of the Witch's active ability.
-* ```/archetypes config cauldronInstantEffectCooldown``` The effective duration of instant potion effects for determining the cooldown of the Witch's active ability.
-* ```/archetypes config cauldronThrowableCooldownModifier``` The time modifier multiplied against the cumulative effect duration of throwable potions to determine the cooldown of the Witch's active ability.
+* ```/archetypes config canAlwaysChangeArchetype``` Whether players can change their Archetype at will, or use the limited change system.
+* ```/archetypes config remindersOnByDefault``` Whether new players receive reminders about missing an Archetype or Ability Item.
 * ```/archetypes config changesPerChangeItem``` The number of allowed Archetype changes given for consuming a Change Item.
-* ```/archetypes config coldDamageModifier``` The modifier multiplied to cold damage dealt to Infernals.
-* ```/archetypes config damageStunDuration``` The duration of the movement stun applied to Centaurs.
-* ```/archetypes config fallDamageReduction``` The modifier multiplied to fall damage dealt to Ocelots.
-* ```/archetypes config fireballCooldown``` The cooldown duration of the Blaze's volley ability.
-* ```/archetypes config gliderCooldown``` The cooldown duration of the Parrot's glider ability.
-* ```/archetypes config healthSprintCutoff``` The fraction of a Golem's max health that allows them to sprint.
-* ```/archetypes config impaleVulnerableModifier``` The modifier multiplied per level of impaling to the damage dealt to an Aquarian.
-* ```/archetypes config insatiableHungerRate``` The exhaustion passively given to Gelatians every half-second.
-* ```/archetypes config knockbackIncrease``` The modifier multiplied against the knockback dealt to Copper Golems.
-* ```/archetypes config knockbackDecrease``` The modifier multiplied against the knockback dealt to Iron Golem.
-* ```/archetypes config projectileResistantReduction``` The modifier multiplied against the projectile damage dealt to Golems and Breezes.
-* ```/archetypes config regenerationRate``` The amount of health restored to Axolotl's per tick when below half health.
-* ```/archetypes config remindersOnByDefault``` Whether or not new players receive reminders about missing an Archetype or Ability Item.
-* ```/archetypes config sneakAttackModifier``` The modifier multiplied against the damage dealt to a creature for the first time by an Ocelot.
-* ```/archetypes config snowballDamage``` The amount of damage dealt to Infernals by Snowballs.
-* ```/archetypes config softhitterDamageReduction``` The modifier multiplied against melee damage dealt by Copper Golems and Breezes.
-* ```/archetypes config spiritMountKillCooldown``` The cooldown duration of a Centaur's Spirit Mount when it is killed.
-* ```/archetypes config spiritMountRegenerationRate``` The amount of health a Centaur's Spirit Mount heals every 5 seconds.
 * ```/archetypes config startingArchetypeChanges``` The number of allowed Archetype changes given to new players.
+* ```/archetypes config fireballCooldown``` The cooldown duration of the Blaze's volley ability.
 * ```/archetypes config windChargeCooldown``` The cooldown duration of the Breeze's volley ability.
+* ```/archetypes config gliderDuration``` The duration of the Parrot's glider ability.
+* ```/archetypes config gliderCooldown``` The cooldown of the Parrot's glider ability between being able to start gliding again.
+* ```/archetypes config spiritMountKillCooldown``` The cooldown duration of a Centaur's Spirit Mount when it is killed.
+* ```/archetypes config damageStunDuration``` The duration of the movement stun applied to Centaurs.
+* ```/archetypes config cauldronInstantEffectCooldown``` The effective duration of instant potion effects for determining the cooldown of the Witch's active ability.
+* ```/archetypes config gelatianGrowItemEatDuration``` The amount of time in ticks to consume a regrow item for those with Slime and Magma Totem.
+* ```/archetypes config witheringEffectDuration``` The duration of the wither effect applied by those with Withering in ticks.
+* ```/archetypes config guardianRayWindup``` The duration of the windup of the Guardian's ray ability in ticks.
+* ```/archetypes config guardianRayCooldown``` The duration of the cooldown of the Guardian's ray ability in ticks.
+* ```/archetypes config guardianRayDuration``` The duration of the Guardian's ray ability in ticks.
+* ```/archetypes config cauldronDrinkableCooldownModifier``` The time modifier multiplied against the cumulative effect duration of drinkable potions to determine the cooldown of the Witch's active ability.
+* ```/archetypes config cauldronThrowableCooldownModifier``` The time modifier multiplied against the cumulative effect duration of throwable potions to determine the cooldown of the Witch's active ability.
+* ```/archetypes config spiritMountRegenerationRate``` The amount of health a Centaur's Spirit Mount heals every 5 seconds.
+* ```/archetypes config snowballDamage``` The amount of damage done to those with Damaged by Cold by snowballs.
+* ```/archetypes config regenerationRate``` The amount of health restored to those with Regenerate When Low per tick when below half health.
+* ```/archetypes config insatiableHungerRate``` The exhaustion passively given to those with Insatiable every half-second.
+* ```/archetypes config projectileResistantReduction``` The modifier multiplied against the projectile damage dealt to those with Projectile Resistant.
+* ```/archetypes config softhitterDamageReduction``` The modifier applied against the melee damage dealt by those with Soft Hitter.
+* ```/archetypes config healthSprintCutoff``` The fraction of a Golem's max health that allows them to sprint.
+* ```/archetypes config knockbackReduction``` The modifier multiplied against the knockback dealt to those with Decreased Knockback.
+* ```/archetypes config knockbackIncrease``` The modifier multiplied against the knockback dealt to those with Increased Knockback.
+* ```/archetypes config sneakAttackModifier``` The modifier applied to the damage of the first strike done by those with Ambush.
+* ```/archetypes config biomeDamage``` The amount of damage dealt to Aquarians or Infernals for being in an incompatible biome.
+* ```/archetypes config fallDamageReduction``` The modifier multiplied to fall damage dealt to those with Reduced Fall Damage.
+* ```/archetypes config coldDamageModifier``` The modifier multiplied to cold damage dealt to Infernals.
+* ```/archetypes config addedStarveDamage``` The amount of added starvation damage dealt to those with Insatiable.
+* ```/archetypes config impaleVulnerableModifier``` The modifier multiplied per level of impaling to the damage dealt to an Aquarian.
 * ```/archetypes config slowFallerTriggerSpeed``` The minimum downwards speed to trigger the Slow Faller ability in blocks per tick.
+* ```/archetypes config startleMinDamage``` The minimum damage needed to be dealt to activate the slowness from Startled.
+* ```/archetypes config tuffFoodHealthModifier``` The modifier applied to the health regained by Tuff Eater.
+* ```/archetypes config tuffFoodDurationModifier``` The modifier applied to the consume duration of foods for Tuff Eater.
+* ```/archetypes config ironFoodHealthModifier``` The modifier applied to the health regained by Iron Eater.
+* ```/archetypes config ironFoodDurationModifier``` The modifier applied to the consume duration of foods for Iron Eater.
+* ```/archetypes config copperFoodHealthModifier``` The modifier applied to the health regained by Copper Eater.
+* ```/archetypes config copperFoodDurationModifier``` The modifier applied to the consume duration of foods for Copper Eater.
+* ```/archetypes config longArmsRange``` The additional reach granted by Long Arms.
+* ```/archetypes config mountedRange``` The additional reach granted to Centaurs by being on their mount.
+* ```/archetypes config moonlitSlimeHealthPerPhase``` The health fraction granted to Slimes with Moonlit per moon-phase.
+* ```/archetypes config speedySpeedBoost``` The additional speed modifier added to those with Speedy.
+* ```/archetypes config sneakySpeedBoost``` The additional speed modifier added when sneaking to those with Sneaky.
+* ```/archetypes config thornyReflectionModifier``` The fraction of health reflected by those with Thorny.
+* ```/archetypes config guardianRayDamage``` The damage dealt by each tick of the Guardian's ray ability.
+* ```/archetypes config greatSwimmerMoveSpeedModifier``` The speed modifier added to those with Great Swimmer in rain or water.
+* ```/archetypes config gliderRecoveryTime``` The rate at which the flight duration of the glider ability recovers.
+
 
 ### LICENSE NOTICE
 By using this project in any form, you hereby give your "express assent" for the terms of the license of this project, and acknowledge that I, BorisShoes, have fulfilled my obligation under the license to "make a reasonable effort under the circumstances to obtain the express assent of recipients to the terms of this License.

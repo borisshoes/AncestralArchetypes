@@ -12,11 +12,13 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 public class PlayerConnectionCallback {
    public static void onPlayerLeave(ServerPlayNetworkHandler handler, MinecraftServer server){
       ServerPlayerEntity player = handler.player;
-      if(player.getHealth() > 20 && player.getMaxHealth() > 20){
-         IArchetypeProfile profile = profile(player);
-         if(profile.hasAbility(ArchetypeRegistry.TALL_SIZED)){
+      IArchetypeProfile profile = profile(player);
+      if((player.getHealth() > 20 && player.getMaxHealth() > 20) || profile.getDeathReductionSizeLevel() != 0){
+         if(profile.hasAbility(ArchetypeRegistry.GIANT_SIZED) || profile.hasAbility(ArchetypeRegistry.SLIME_TOTEM) || profile.getDeathReductionSizeLevel() != 0){
             profile.setHealthUpdate(player.getHealth());
          }
       }
+      
+      
    }
 }

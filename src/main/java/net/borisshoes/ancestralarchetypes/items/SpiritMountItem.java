@@ -1,5 +1,6 @@
 package net.borisshoes.ancestralarchetypes.items;
 
+import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.utils.SoundUtils;
@@ -33,7 +34,11 @@ public abstract class SpiritMountItem extends AbilityItem{
    
    @Override
    public Item getPolymerItem(ItemStack itemStack, PacketContext packetContext){
-      return Items.SADDLE;
+      if(PolymerResourcePackUtils.hasMainPack(packetContext)){
+         return Items.ARMADILLO_SCUTE;
+      }else{
+         return Items.SADDLE;
+      }
    }
    
    @Override
@@ -65,11 +70,16 @@ public abstract class SpiritMountItem extends AbilityItem{
                entity.discard();
                profile.setMountEntity(this.ability, null);
                profile.setAbilityCooldown(ability, 20);
-            }else{
-               spawnMount(player);
+               return ActionResult.SUCCESS;
             }
-         }else{
+         }
+         
+         if(player.isOnGround()){
             spawnMount(player);
+         }else{
+            player.sendMessage(Text.translatable("text.ancestralarchetypes.spirit_mount_in_air").formatted(Formatting.RED,Formatting.ITALIC),true);
+            SoundUtils.playSongToPlayer(player, SoundEvents.BLOCK_FIRE_EXTINGUISH,0.25f,0.8f);
+            return ActionResult.PASS;
          }
       }
       

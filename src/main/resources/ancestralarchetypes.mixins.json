@@ -11,6 +11,7 @@
     "ItemEntityMixin",
     "ItemMixin",
     "ItemStackMixin",
+    "LivingEntityAccessor",
     "LivingEntityMixin",
     "PhantomSpawnerMixin",
     "PhantomSwoopGoalMixin",

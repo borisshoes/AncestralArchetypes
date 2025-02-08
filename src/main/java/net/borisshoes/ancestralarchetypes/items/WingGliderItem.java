@@ -46,7 +46,7 @@ public class WingGliderItem extends AbilityItem{
       if(onCooldown){
          stack.setDamage(stack.getMaxDamage() - 1);
       }else{
-         stack.setDamage((int) ((stack.getMaxDamage()-1) * glidePercentage));
+         stack.setDamage((int) ((stack.getMaxDamage()-1) * (1-glidePercentage)));
       }
       
       DyedColorComponent dyedColorComponent = stack.get(DataComponentTypes.DYED_COLOR);
@@ -54,37 +54,24 @@ public class WingGliderItem extends AbilityItem{
          stack.set(DataComponentTypes.DYED_COLOR, new DyedColorComponent(profile.getGliderColor(),false));
       }
       
-      if(stack.equals(player.getEquippedStack(EquipmentSlot.CHEST))){
-         if(profile.getGlideTime() == 0 && !onCooldown) profile.startGlideTimer();
-         if(stack.willBreakNextUse()){
-            int emptySlot = player.getInventory().getEmptySlot();
-            if(emptySlot != -1){
-               player.getInventory().insertStack(stack.copyAndEmpty());
-               player.getInventory().armor.set(EquipmentSlot.CHEST.getEntitySlotId(), ItemStack.EMPTY);
-               SoundUtils.playSongToPlayer(player,SoundEvents.ENTITY_ITEM_BREAK,1,1);
+      if(stack.equals(player.getEquippedStack(EquipmentSlot.CHEST)) && player.isGliding()){
+         int glideValue = (int) (glidePercentage * 100);
+         char[] unicodeChars = {'▁', '▂', '▃', '▅', '▆', '▇', '▌'};
+         StringBuilder message = new StringBuilder("≈ ");
+         for (int i = 0; i < 10; i++) {
+            int segmentValue = glideValue - (i * 10);
+            if (segmentValue <= 0) {
+               message.append(unicodeChars[0]);
+            } else if (segmentValue >= 10) {
+               message.append(unicodeChars[unicodeChars.length - 1]);
+            } else {
+               int charIndex = (int) ((double) segmentValue / 10 * (unicodeChars.length - 1));
+               message.append(unicodeChars[charIndex]);
             }
          }
-         
-         if(!onCooldown){
-            int glideValue = (int) ((1-glidePercentage) * 100);
-            char[] unicodeChars = {'▁', '▂', '▃', '▅', '▆', '▇', '▌'};
-            StringBuilder message = new StringBuilder("≈ ");
-            for (int i = 0; i < 10; i++) {
-               int segmentValue = glideValue - (i * 10);
-               if (segmentValue <= 0) {
-                  message.append(unicodeChars[0]);
-               } else if (segmentValue >= 10) {
-                  message.append(unicodeChars[unicodeChars.length - 1]);
-               } else {
-                  int charIndex = (int) ((double) segmentValue / 10 * (unicodeChars.length - 1));
-                  message.append(unicodeChars[charIndex]);
-               }
-            }
-            message.append(" ≈");
-            player.sendMessage(Text.literal(message.toString()).formatted(Formatting.GRAY), true);
-         }
+         message.append(" ≈");
+         player.sendMessage(Text.literal(message.toString()).formatted(Formatting.GRAY), true);
       }
-      
    }
    
    @Override

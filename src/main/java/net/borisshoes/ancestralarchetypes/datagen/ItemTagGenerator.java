@@ -10,8 +10,8 @@ import net.minecraft.registry.RegistryWrapper;
 
 import java.util.concurrent.CompletableFuture;
 
-public class TagGenerator extends FabricTagProvider<Item> {
-   public TagGenerator(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
+public class ItemTagGenerator extends FabricTagProvider<Item> {
+   public ItemTagGenerator(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
       super(output, RegistryKeys.ITEM, registriesFuture);
    }
    
@@ -38,5 +38,11 @@ public class TagGenerator extends FabricTagProvider<Item> {
             .add(Items.SPIDER_EYE)
             .add(Items.RABBIT_STEW)
             ;
+      getOrCreateTagBuilder(ArchetypeRegistry.SLIME_GROW_ITEMS)
+            .add(Items.SLIME_BALL)
+            ;
+      getOrCreateTagBuilder(ArchetypeRegistry.MAGMA_CUBE_GROW_ITEMS)
+            .add(Items.MAGMA_CREAM)
+      ;
    }
 }

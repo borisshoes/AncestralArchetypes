@@ -1,5 +1,6 @@
 package net.borisshoes.ancestralarchetypes.items;
 
+import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.borisshoes.ancestralarchetypes.ArchetypeConfig;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
@@ -40,7 +41,11 @@ public class PortableCauldronItem extends AbilityItem{
    
    @Override
    public Item getPolymerItem(ItemStack itemStack, PacketContext packetContext){
-      return Items.CAULDRON;
+      if(PolymerResourcePackUtils.hasMainPack(packetContext)){
+         return Items.POTION;
+      }else{
+         return Items.CAULDRON;
+      }
    }
    
    @Override
@@ -54,11 +59,17 @@ public class PortableCauldronItem extends AbilityItem{
       }
       
       if(player.isSneaking()){
+         profile.setPotionType(null);
          PotionSelectionGui gui = new PotionSelectionGui(player);
          gui.open();
       }else{
          ItemStack potionStack = profile.getPotionStack();
-         if(potionStack.isEmpty()) return ActionResult.PASS;
+         if(potionStack.isEmpty() || (potionStack.contains(DataComponentTypes.POTION_CONTENTS) && !PotionSelectionGui.isUnlocked(player, potionStack.get(DataComponentTypes.POTION_CONTENTS).potion().orElse(null)))){
+            profile.setPotionType(null);
+            PotionSelectionGui gui = new PotionSelectionGui(player);
+            gui.open();
+            return ActionResult.SUCCESS;
+         }
          
          ItemStack stack = user.getStackInHand(hand);
          boolean hasConsumable = stack.contains(DataComponentTypes.CONSUMABLE);

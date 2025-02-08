@@ -7,30 +7,122 @@ import net.borisshoes.ancestralarchetypes.AncestralArchetypes;
 import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.items.GraphicalItem;
+import net.borisshoes.ancestralarchetypes.misc.ArcanaCompat;
+import net.borisshoes.ancestralarchetypes.mixins.LivingEntityAccessor;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RaycastContext;
+import net.minecraft.world.World;
 
 import java.util.*;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.hasArcana;
 
 public class MiscUtils {
+   
+   public static void blockWithShield(LivingEntity entity, float damage){
+      if(entity.isBlocking()){
+         ((LivingEntityAccessor) entity).invokeDamageShield(damage);
+         SoundUtils.playSound(entity.getWorld(),entity.getBlockPos(), SoundEvents.ITEM_SHIELD_BLOCK, SoundCategory.PLAYERS,1f,1f);
+         
+         if(hasArcana){
+            ArcanaCompat.triggerShieldOfFortitude(entity,damage);
+         }
+      }
+   }
+   
+   public static LasercastResult lasercast(World world, Vec3d startPos, Vec3d direction, double distance, boolean blockedByShields, Entity entity){
+      Vec3d rayEnd = startPos.add(direction.multiply(distance));
+      BlockHitResult raycast = world.raycast(new RaycastContext(startPos,rayEnd, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, entity));
+      EntityHitResult entityHit;
+      List<Entity> hits = new ArrayList<>();
+      Box box = new Box(startPos,raycast.getPos());
+      box = box.expand(2);
+      // Primary hitscan check
+      do{
+         entityHit = ProjectileUtil.raycast(entity,startPos,raycast.getPos(),box, e -> e instanceof LivingEntity && !e.isSpectator() && !hits.contains(e),100000);
+         if(entityHit != null && entityHit.getType() == HitResult.Type.ENTITY){
+            hits.add(entityHit.getEntity());
+         }
+      }while(entityHit != null && entityHit.getType() == HitResult.Type.ENTITY);
+      
+      // Secondary hitscan check to add lenience
+      List<Entity> hits2 = world.getOtherEntities(entity, box, (e)-> e instanceof LivingEntity && !e.isSpectator() && !hits.contains(e) && inRange(e,startPos,raycast.getPos()));
+      hits.addAll(hits2);
+      hits.sort(Comparator.comparingDouble(e->e.distanceTo(entity)));
+      
+      if(!blockedByShields){
+         return new LasercastResult(startPos, raycast.getPos(), direction, hits);
+      }
+      
+      List<Entity> hits3 = new ArrayList<>();
+      Vec3d endPoint = raycast.getPos();
+      for(Entity hit : hits){
+         boolean blocked = false;
+         if(hit instanceof ServerPlayerEntity hitPlayer && hitPlayer.isBlocking()){
+            double dp = hitPlayer.getRotationVecClient().normalize().dotProduct(direction.normalize());
+            blocked = dp < -0.6;
+            if(blocked){
+               SoundUtils.playSound(world,hitPlayer.getBlockPos(), SoundEvents.ITEM_SHIELD_BLOCK, SoundCategory.PLAYERS,1f,1f);
+               endPoint = startPos.add(direction.normalize().multiply(direction.normalize().dotProduct(hitPlayer.getPos().subtract(startPos)))).subtract(direction.normalize());
+            }
+         }
+         hits3.add(hit);
+         if(blocked){
+            break;
+         }
+      }
+      
+      return new LasercastResult(startPos,endPoint,direction,hits3);
+   }
+   
+   public record LasercastResult(Vec3d startPos, Vec3d endPos, Vec3d direction, List<Entity> sortedHits){}
+   
+   public static boolean inRange(Entity e, Vec3d start, Vec3d end){
+      double range = .25;
+      Box entityBox = e.getBoundingBox().expand(e.getTargetingMargin());
+      double len = end.subtract(start).length();
+      Vec3d trace = end.subtract(start).normalize().multiply(range);
+      int i = 0;
+      Vec3d t2 = trace.multiply(i);
+      while(t2.length() < len){
+         Vec3d t3 = start.add(t2);
+         Box hitBox = new Box(t3.x-range,t3.y-range,t3.z-range,t3.x+range,t3.y+range,t3.z+range);
+         if(entityBox.intersects(hitBox)){
+            return true;
+         }
+         t2 = trace.multiply(i);
+         i++;
+      }
+      return false;
+   }
    
    public static void giveStacks(PlayerEntity player, ItemStack... stacks){
       returnItems(new SimpleInventory(stacks),player);

@@ -45,6 +45,7 @@ public class HorseSpiritMountItem extends SpiritMountItem{
       horse.getAttributeInstance(EntityAttributes.MOVEMENT_SPEED).setBaseValue(0.35f);
       horse.getAttributeInstance(EntityAttributes.JUMP_STRENGTH).setBaseValue(1.25f);
       horse.getAttributeInstance(EntityAttributes.SAFE_FALL_DISTANCE).setBaseValue(10.0f);
+      horse.getAttributeInstance(EntityAttributes.STEP_HEIGHT).setBaseValue(2.0f);
       horse.saddle(new ItemStack(Items.SADDLE), SoundCategory.NEUTRAL);
       ItemStack bodyArmor = new ItemStack(Items.DIAMOND_HORSE_ARMOR);
       bodyArmor.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.builder()

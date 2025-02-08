@@ -10,7 +10,9 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
@@ -35,12 +37,15 @@ public class AncestralArchetypes implements ModInitializer, ClientModInitializer
    public static ConfigUtils CONFIG;
    public static final HashMap<ServerPlayerEntity, Pair<Vec3d,Vec3d>> PLAYER_MOVEMENT_TRACKER = new HashMap<>();
    public static MinecraftServer SERVER = null;
+   public static boolean hasArcana = false;
    
    public static final boolean DEV_MODE = false;
    
    @Override
    public void onInitialize(){
       CONFIG = new ConfigUtils(FabricLoader.getInstance().getConfigDir().resolve(CONFIG_NAME).toFile(), LOGGER, ArchetypeRegistry.CONFIG_SETTINGS.stream().map(ArchetypeConfig.ConfigSetting::makeConfigValue).collect(Collectors.toList()));
+      
+      hasArcana = FabricLoader.getInstance().isModLoaded("arcananovum");
       
       ServerTickEvents.END_WORLD_TICK.register(WorldTickCallback::onWorldTick);
       ServerTickEvents.END_SERVER_TICK.register(TickCallback::onTick);
@@ -50,6 +55,7 @@ public class AncestralArchetypes implements ModInitializer, ClientModInitializer
       UseEntityCallback.EVENT.register(EntityUseCallback::useEntity);
       ServerPlayConnectionEvents.DISCONNECT.register(PlayerConnectionCallback::onPlayerLeave);
       ServerPlayerEvents.AFTER_RESPAWN.register(PlayerRespawnCallback::onRespawn);
+      AttackEntityCallback.EVENT.register(EntityAttackedCallback::attackedEntity);
       
       ArchetypeRegistry.initialize();
       
