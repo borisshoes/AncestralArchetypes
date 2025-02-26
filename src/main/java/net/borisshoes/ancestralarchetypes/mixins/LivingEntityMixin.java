@@ -19,6 +19,8 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.HorseEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.DamageTypeTags;
@@ -102,6 +104,11 @@ public abstract class LivingEntityMixin {
       LivingEntity entity = (LivingEntity) (Object) this;
       List<String> tags = entity.getCommandTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
       if(tags.isEmpty()) return;
+      if(entity instanceof AnimalEntity animal){
+         if(animal.getLoveTicks() > 0){
+            animal.setLoveTicks(0);
+         }
+      }
       
       boolean remove = false;
       block: {

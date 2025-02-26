@@ -283,18 +283,21 @@ public class TickCallback {
             }
             
             boolean shouldTriggerSlowFall = (PLAYER_MOVEMENT_TRACKER.get(player).getRight().getY() < -ArchetypeConfig.getDouble(ArchetypeRegistry.SLOW_FALLER_TRIGGER_SPEED))
-                  && !player.isGliding() && !player.getAbilities().flying && predictedFallDist > player.getAttributeValue(EntityAttributes.SAFE_FALL_DISTANCE) && !player.isSneaking() && !player.isSwimming();
+                  && !player.isGliding() && !player.getAbilities().flying && predictedFallDist > player.getAttributeValue(EntityAttributes.SAFE_FALL_DISTANCE) && !player.isSwimming();
             if(shouldTriggerSlowFall){
-               if(!player.hasStatusEffect(StatusEffects.SLOW_FALLING)){
-                  SoundUtils.playSongToPlayer(player,SoundEvents.ENTITY_ENDER_DRAGON_FLAP,0.3f,1);
-               }else{
-                  if(PLAYER_MOVEMENT_TRACKER.get(player).getRight().getY() < -1.25*ArchetypeConfig.getDouble(ArchetypeRegistry.SLOW_FALLER_TRIGGER_SPEED)){
-                     player.addVelocity(0,0.2,0);
-                     player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player));
+               if(!player.isSneaking()){
+                  if(!player.hasStatusEffect(StatusEffects.SLOW_FALLING)){
+                     SoundUtils.playSongToPlayer(player,SoundEvents.ENTITY_ENDER_DRAGON_FLAP,0.3f,1);
+                  }else{
+                     if(PLAYER_MOVEMENT_TRACKER.get(player).getRight().getY() < -1.25*ArchetypeConfig.getDouble(ArchetypeRegistry.SLOW_FALLER_TRIGGER_SPEED)){
+                        player.addVelocity(0,0.2,0);
+                        player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player));
+                     }
                   }
+                  StatusEffectInstance slowFall = new StatusEffectInstance(StatusEffects.SLOW_FALLING, 60, 0, false, false, true);
+                  player.addStatusEffect(slowFall);
                }
-               StatusEffectInstance slowFall = new StatusEffectInstance(StatusEffects.SLOW_FALLING, 60, 0, false, false, true);
-               player.addStatusEffect(slowFall);
+               player.networkHandler.floatingTicks = 0;
             }
          }
          
