@@ -14,6 +14,9 @@ The mod is highly configurable and balanced around a competitive environment. Th
 <img src="https://i.imgur.com/Ol1Tcf8.png" alt="Requires Fabric API" width="200">
 </a>
 
+## Archetype Summaries
+![Archetype Summaries](non-mod-resources/Infographic.png)
+
 ## Mod Spotlight /  Tutorial
 [![Mod Tutorial](https://img.youtube.com/vi/QApJcu1rpD0/0.jpg)](https://www.youtube.com/watch?v=QApJcu1rpD0)
 
