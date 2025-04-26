@@ -24,6 +24,7 @@ The mod is highly configurable and balanced around a competitive environment. Th
 * ```/archetypes changeArchetype``` Opens a GUI for a user to change their Archetype.
 * ```/archetypes items``` Gives a user the Ability Items for their Archetype, has a 1 minute cooldown.
 * ```/archetypes setHorseVariant <color> <markings>``` Sets the color of your Spirit Horse as a Horse Archetype.
+* ```/archetypes setMountName <name>``` Sets the name of your Spirit Mount as a Centaur Archetype.
 * ```/archetypes setGliderColor <hex color>``` Sets the color of your Glider Wings as a Parrot Archetype.
 * ```/archetypes toggleReminders``` Toggles the periodic reminders for players that are missing an Archetype or an Ability Item
 
@@ -34,6 +35,9 @@ The mod is highly configurable and balanced around a competitive environment. Th
 
 ### Admin Configuration Commands
 The following commands can be used to adjust configurable settings in the AncestralArchetypes.properties file without a server reboot. These commands can be suffixed with "get" or "set" followed by a value to get or set the current setting. 
+* ```/archetypes config spyglassRevealsArchetype``` Enables using spyglasses to reveal Players' Archetypes.
+* ```/archetypes config spyglassRevealAlertsPlayer``` Whether Players are alerted when their Archetype is being revealed.
+* ```/archetypes config spyglassInvestigateDuration``` How long a Player must use a spyglass to reveal a Player's Archetype (in ticks).
 * ```/archetypes config canAlwaysChangeArchetype``` Whether players can change their Archetype at will, or use the limited change system.
 * ```/archetypes config remindersOnByDefault``` Whether new players receive reminders about missing an Archetype or Ability Item.
 * ```/archetypes config changesPerChangeItem``` The number of allowed Archetype changes given for consuming a Change Item.
@@ -81,6 +85,7 @@ The following commands can be used to adjust configurable settings in the Ancest
 * ```/archetypes config speedySpeedBoost``` The additional speed modifier added to those with Speedy.
 * ```/archetypes config sneakySpeedBoost``` The additional speed modifier added when sneaking to those with Sneaky.
 * ```/archetypes config thornyReflectionModifier``` The fraction of health reflected by those with Thorny.
+* ```/archetypes config thornyReflectionCap``` The maximum damage reflected by those with Thorny.
 * ```/archetypes config guardianRayDamage``` The damage dealt by each tick of the Guardian's ray ability.
 * ```/archetypes config greatSwimmerMoveSpeedModifier``` The speed modifier added to those with Great Swimmer in rain or water.
 * ```/archetypes config gliderRecoveryTime``` The rate at which the flight duration of the glider ability recovers.

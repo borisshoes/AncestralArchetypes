@@ -1,14 +1,12 @@
 package net.borisshoes.ancestralarchetypes.callbacks;
 
-import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
-import net.borisshoes.ancestralarchetypes.ArchetypeConfig;
-import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
+import net.borisshoes.ancestralarchetypes.*;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
+import net.borisshoes.ancestralarchetypes.misc.SpyglassRevealEvent;
 import net.borisshoes.ancestralarchetypes.utils.MiscUtils;
 import net.borisshoes.ancestralarchetypes.utils.SoundUtils;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ConsumableComponent;
 import net.minecraft.entity.Entity;
@@ -41,6 +39,7 @@ import net.minecraft.world.biome.Biome;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.ITEMS;
@@ -340,6 +339,78 @@ public class TickCallback {
                            .withColor(Formatting.AQUA)));
             }
          }
+         
+         
+         boolean spyglass = ArchetypeConfig.getBoolean(ArchetypeRegistry.SPYGLASS_REVEALS_ARCHETYPE);
+         if(spyglass){
+            int warmup = ArchetypeConfig.getInt(ArchetypeRegistry.SPYGLASS_INVESTIGATE_DURATION);
+            boolean alert = ArchetypeConfig.getBoolean(ArchetypeRegistry.SPYGLASS_REVEAL_ALERTS_PLAYER);
+            ItemStack activeStack = player.getActiveItem();
+            if(activeStack != null && activeStack.isOf(Items.SPYGLASS)){
+               MiscUtils.LasercastResult lasercast = MiscUtils.lasercast(world, player.getEyePos(), player.getRotationVecClient(), server.getPlayerManager().getViewDistance() * 16, true, player);
+               for(Entity entity : lasercast.sortedHits()){
+                  if(entity instanceof ServerPlayerEntity target){
+                     if(SPYGLASS_REVEAL_EVENTS.stream().anyMatch(event -> event.isReset() && event.getTarget().equals(target) && event.getInspector().equals(player))){
+                        continue;
+                     }
+                     SPYGLASS_REVEAL_EVENTS.add(new SpyglassRevealEvent(player,target, (int) (warmup*1.125),false));
+                     break;
+                  }
+               }
+            }
+            
+            HashMap<ServerPlayerEntity, Integer> revealers = new HashMap<>();
+            for(SpyglassRevealEvent event : SPYGLASS_REVEAL_EVENTS){
+               if(!event.getTarget().equals(player) || event.isReset()) continue;
+               revealers.compute(event.getInspector(), (k, count) -> count == null ? 1 : count + 1);
+            }
+            AtomicInteger highestRevealCount = new AtomicInteger();
+            revealers.forEach((inspector, count) -> {
+               if(count > highestRevealCount.get()){
+                  highestRevealCount.set(count);
+               }
+               double percentage = (double) count / warmup;
+               StringBuilder message = new StringBuilder("\uD83D\uDD0D ");
+               for (int i = 0; i < 20; i++) {
+                  if(percentage*20 > i){
+                     message.append("|");
+                  }else{
+                     message.append("¦");
+                  }
+               }
+               message.append(" \uD83D\uDD0D");
+               if(inspector.getActiveItem() != null && inspector.getActiveItem().isOf(Items.SPYGLASS))
+                  inspector.sendMessage(Text.literal(message.toString()).formatted(Formatting.GOLD),true);
+               if(percentage > 1.0){
+                  SubArchetype subArchetype = profile.getSubArchetype();
+                  if(subArchetype == null){
+                     inspector.sendMessage(Text.translatable("text.ancestralarchetypes.inspect_no_archetype",player.getStyledDisplayName()).formatted(Formatting.AQUA),false);
+                  }else{
+                     inspector.sendMessage(Text.translatable("text.ancestralarchetypes.inspect_results",player.getStyledDisplayName(),subArchetype.getName().formatted(MiscUtils.getClosestFormatting(subArchetype.getColor()))).formatted(Formatting.AQUA),false);
+                  }
+                  if(alert) player.sendMessage(Text.translatable("text.ancestralarchetypes.inspected").formatted(Formatting.RED));
+                  
+                  SPYGLASS_REVEAL_EVENTS.removeIf(event -> event.getInspector().equals(inspector) && event.getTarget().equals(player));
+                  SPYGLASS_REVEAL_EVENTS.add(new SpyglassRevealEvent(inspector, player,1200,true));
+               }
+            });
+            
+            if(alert && highestRevealCount.get() > 0){
+               double percentage = (double) highestRevealCount.get() / warmup;
+               StringBuilder message = new StringBuilder();
+               for (int i = 0; i < 20; i++) {
+                  if(percentage*20 > i){
+                     message.append("|");
+                  }else{
+                     message.append("¦");
+                  }
+               }
+               player.sendMessage(Text.translatable("text.ancestralarchetypes.inspection_in_progress",message.toString()).formatted(Formatting.GOLD),true);
+            }
+         }
       }
+      
+      SPYGLASS_REVEAL_EVENTS.forEach(SpyglassRevealEvent::tickCooldown);
+      SPYGLASS_REVEAL_EVENTS.removeIf(event -> event.getCooldown() < 0);
    }
 }

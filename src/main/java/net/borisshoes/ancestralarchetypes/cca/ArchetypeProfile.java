@@ -42,6 +42,7 @@ public class ArchetypeProfile implements IArchetypeProfile {
    private ItemStack potionBrewerStack = ItemStack.EMPTY;
    private HorseMarking horseMarking = HorseMarking.NONE;
    private HorseColor horseColor = HorseColor.CHESTNUT;
+   private String mountName = null;
    private SubArchetype subArchetype;
    private final ArrayList<ArchetypeAbility> abilities = new ArrayList<>();
    private final HashMap<ArchetypeAbility,Integer> abilityCooldowns = new HashMap<>();
@@ -86,6 +87,9 @@ public class ArchetypeProfile implements IArchetypeProfile {
       if(tag.contains("horseColor")){
          this.horseColor = HorseColor.byId(tag.getInt("horseColor"));
       }
+      if(tag.contains("mountName")){
+         this.mountName = tag.getString("mountName");
+      }
       
       this.mountData.clear();
       if(tag.contains("mountData")){
@@ -122,6 +126,7 @@ public class ArchetypeProfile implements IArchetypeProfile {
       tag.putBoolean("giveReminders",this.giveReminders);
       tag.putBoolean("gliderActive",this.gliderActive);
       tag.putString("subArchetype",this.subArchetype != null ? this.subArchetype.getId() : "");
+      if(this.mountName != null) tag.putString("mountName",this.mountName);
       
       NbtCompound cooldownTag = new NbtCompound();
       abilityCooldowns.forEach((ability, cooldown) -> cooldownTag.putInt(ability.getId(),cooldown));
@@ -251,6 +256,11 @@ public class ArchetypeProfile implements IArchetypeProfile {
    }
    
    @Override
+   public String getMountName(){
+      return this.mountName;
+   }
+   
+   @Override
    public int getGliderColor(){
       return this.gliderColor;
    }
@@ -362,6 +372,11 @@ public class ArchetypeProfile implements IArchetypeProfile {
       }else{
          this.mountData.put(ability, new Pair<>(null,health));
       }
+   }
+   
+   @Override
+   public void setMountName(String name){
+      this.mountName = name;
    }
    
    @Override

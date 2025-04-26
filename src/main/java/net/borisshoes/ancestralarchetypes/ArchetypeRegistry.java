@@ -170,11 +170,20 @@ public class ArchetypeRegistry {
                .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.guardian_ray_description"))))
    ));
    
+   public static final ArchetypeConfig.ConfigSetting<?> SPYGLASS_REVEALS_ARCHETYPE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
+         new ConfigUtils.BooleanConfigValue("spyglassRevealsArchetype", true)));
+   
+   public static final ArchetypeConfig.ConfigSetting<?> SPYGLASS_REVEAL_ALERTS_PLAYER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
+         new ConfigUtils.BooleanConfigValue("spyglassRevealAlertsPlayer", false)));
+   
    public static final ArchetypeConfig.ConfigSetting<?> CAN_ALWAYS_CHANGE_ARCHETYPE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
          new ConfigUtils.BooleanConfigValue("canAlwaysChangeArchetype", false)));
    
    public static final ArchetypeConfig.ConfigSetting<?> REMINDERS_ON_BY_DEFAULT = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
          new ConfigUtils.BooleanConfigValue("remindersOnByDefault", true)));
+   
+   public static final ArchetypeConfig.ConfigSetting<?> SPYGLASS_INVESTIGATE_DURATION = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
+         new ConfigUtils.IntegerConfigValue("spyglassInvestigateDuration", 150, new ConfigUtils.IntegerConfigValue.IntLimits(1))));
    
    public static final ArchetypeConfig.ConfigSetting<?> CHANGES_PER_CHANGE_ITEM = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
          new ConfigUtils.IntegerConfigValue("changesPerChangeItem", 1, new ConfigUtils.IntegerConfigValue.IntLimits(0,1000))));
@@ -310,6 +319,9 @@ public class ArchetypeRegistry {
    
    public static final ArchetypeConfig.ConfigSetting<?> THORNY_REFLECTION_MODIFIER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
          new ConfigUtils.DoubleConfigValue("thornyReflectionModifier", 0.33, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   
+   public static final ArchetypeConfig.ConfigSetting<?> THORNY_REFLECTION_CAP = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
+         new ConfigUtils.DoubleConfigValue("thornyReflectionCap", 20.0, new ConfigUtils.DoubleConfigValue.DoubleLimits())));
    
    public static final ArchetypeConfig.ConfigSetting<?> GUARDIAN_RAY_DAMAGE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
          new ConfigUtils.DoubleConfigValue("guardianRayDamage", 4.0, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));

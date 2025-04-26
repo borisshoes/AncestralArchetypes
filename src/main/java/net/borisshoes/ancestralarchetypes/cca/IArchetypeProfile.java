@@ -33,6 +33,7 @@ public interface IArchetypeProfile extends ComponentV3 {
    Inventory getMountInventory();
    HorseMarking getHorseMarking();
    HorseColor getHorseColor();
+   String getMountName();
    int getGliderColor();
    boolean canChangeArchetype();
    boolean giveReminders();
@@ -49,6 +50,7 @@ public interface IArchetypeProfile extends ComponentV3 {
    void setGliderActive(boolean active);
    void setMountEntity(ArchetypeAbility ability, UUID uuid);
    void setMountHealth(ArchetypeAbility ability, float health);
+   void setMountName(String name);
    void setHorseVariant(HorseColor color, HorseMarking marking);
    void setGliderColor(int color);
    void changeArchetype(SubArchetype archetype);

@@ -2,6 +2,7 @@ package net.borisshoes.ancestralarchetypes;
 
 import net.borisshoes.ancestralarchetypes.callbacks.*;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
+import net.borisshoes.ancestralarchetypes.misc.SpyglassRevealEvent;
 import net.borisshoes.ancestralarchetypes.utils.ConfigUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
@@ -23,6 +24,7 @@ import net.minecraft.util.math.Vec3d;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
@@ -36,6 +38,7 @@ public class AncestralArchetypes implements ModInitializer, ClientModInitializer
    
    public static ConfigUtils CONFIG;
    public static final HashMap<ServerPlayerEntity, Pair<Vec3d,Vec3d>> PLAYER_MOVEMENT_TRACKER = new HashMap<>();
+   public static final ArrayList<SpyglassRevealEvent> SPYGLASS_REVEAL_EVENTS = new ArrayList<>();
    public static MinecraftServer SERVER = null;
    public static boolean hasArcana = false;
    

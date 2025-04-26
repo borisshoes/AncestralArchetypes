@@ -79,31 +79,30 @@ public class MiscUtils {
       hits.sort(Comparator.comparingDouble(e->e.distanceTo(entity)));
       
       if(!blockedByShields){
-         return new LasercastResult(startPos, raycast.getPos(), direction, hits);
+         return new LasercastResult(startPos, raycast.getPos(), direction, hits, null);
       }
       
       List<Entity> hits3 = new ArrayList<>();
+      Entity blocker = null;
       Vec3d endPoint = raycast.getPos();
       for(Entity hit : hits){
-         boolean blocked = false;
+         boolean blocked;
          if(hit instanceof ServerPlayerEntity hitPlayer && hitPlayer.isBlocking()){
             double dp = hitPlayer.getRotationVecClient().normalize().dotProduct(direction.normalize());
             blocked = dp < -0.6;
             if(blocked){
-               SoundUtils.playSound(world,hitPlayer.getBlockPos(), SoundEvents.ITEM_SHIELD_BLOCK, SoundCategory.PLAYERS,1f,1f);
                endPoint = startPos.add(direction.normalize().multiply(direction.normalize().dotProduct(hitPlayer.getPos().subtract(startPos)))).subtract(direction.normalize());
+               blocker = hit;
+               break;
             }
          }
          hits3.add(hit);
-         if(blocked){
-            break;
-         }
       }
       
-      return new LasercastResult(startPos,endPoint,direction,hits3);
+      return new LasercastResult(startPos,endPoint,direction,hits3,blocker);
    }
    
-   public record LasercastResult(Vec3d startPos, Vec3d endPos, Vec3d direction, List<Entity> sortedHits){}
+   public record LasercastResult(Vec3d startPos, Vec3d endPos, Vec3d direction, List<Entity> sortedHits, Entity blocker){}
    
    public static boolean inRange(Entity e, Vec3d start, Vec3d end){
       double range = .25;

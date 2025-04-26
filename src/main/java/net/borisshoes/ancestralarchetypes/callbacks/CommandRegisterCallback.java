@@ -12,8 +12,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import static com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.string;
+import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.DEV_MODE;
 import static net.minecraft.command.argument.EntityArgumentType.getPlayers;
 import static net.minecraft.command.argument.EntityArgumentType.players;
@@ -33,6 +32,9 @@ public class CommandRegisterCallback {
                   .then(argument("targets", players()).executes(context -> ArchetypeCommands.resetAbilityCooldowns(context,getPlayers(context,"targets")))))
             .then(literal("setGliderColor")
                   .then(argument("color", string()).executes(context -> ArchetypeCommands.setGliderColor(context,getString(context,"color")))))
+            .then(literal("setMountName")
+                  .executes(context -> ArchetypeCommands.setMountName(context,null))
+                  .then(argument("name", greedyString()).executes(context -> ArchetypeCommands.setMountName(context,getString(context,"name")))))
             .then(literal("setHorseVariant")
                   .then(argument("color", string()).suggests((context, builder) -> ArchetypeCommands.getEnumSuggestions(context,builder, HorseColor.class))
                         .then(argument("markings", string()).suggests((context, builder) -> ArchetypeCommands.getEnumSuggestions(context,builder, HorseMarking.class))

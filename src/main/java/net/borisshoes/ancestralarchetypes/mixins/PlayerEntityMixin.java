@@ -13,6 +13,7 @@ import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -21,7 +22,9 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
 @Mixin(PlayerEntity.class)
-public class PlayerEntityMixin {
+public abstract class PlayerEntityMixin {
+   
+   @Shadow public abstract boolean damage(ServerWorld world, DamageSource source, float amount);
    
    @ModifyReturnValue(method = "canFoodHeal", at = @At("RETURN"))
    private boolean archetypes_canFoodHeal(boolean original){
@@ -57,7 +60,9 @@ public class PlayerEntityMixin {
       if(entity instanceof ServerPlayerEntity player && source.getAttacker() instanceof LivingEntity attacker){
          IArchetypeProfile profile = profile(player);
          if(profile.hasAbility(ArchetypeRegistry.THORNY) && attacker.isAlive() && !source.isIn(DamageTypeTags.AVOIDS_GUARDIAN_THORNS) && !source.isOf(DamageTypes.THORNS)){
-            attacker.damage(player.getServerWorld(), player.getDamageSources().thorns(player), (float) (amount * ArchetypeConfig.getDouble(ArchetypeRegistry.THORNY_REFLECTION_MODIFIER)));
+            double cap = ArchetypeConfig.getDouble(ArchetypeRegistry.THORNY_REFLECTION_CAP);
+            float damage = (float) Math.min(cap < 0 ? Float.MAX_VALUE : cap, amount * ArchetypeConfig.getDouble(ArchetypeRegistry.THORNY_REFLECTION_MODIFIER));
+            attacker.damage(player.getServerWorld(), player.getDamageSources().thorns(player), damage);
          }
       }
    }

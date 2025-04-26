@@ -6,8 +6,11 @@ import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.minecraft.component.type.ConsumableComponent;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
@@ -73,6 +76,10 @@ public class ItemMixin {
             profile.changeDeathReductionSizeLevel(true);
             playerEntity.getServerWorld().spawnParticles(ParticleTypes.TOTEM_OF_UNDYING,playerEntity.getX(), playerEntity.getY()+playerEntity.getHeight()/2, playerEntity.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
             playerEntity.playSound(SoundEvents.ENTITY_ZOMBIE_VILLAGER_CONVERTED);
+         }
+         
+         if(profile.getSubArchetype() == ArchetypeRegistry.PARROT && stack.isOf(Items.COOKIE)){
+            playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON,100,1,true,true,true),playerEntity);
          }
       }
    }

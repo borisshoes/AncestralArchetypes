@@ -10,11 +10,13 @@ import net.minecraft.entity.passive.HorseColor;
 import net.minecraft.entity.passive.HorseMarking;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.screen.AnvilScreenHandler;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.StringHelper;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -231,6 +233,41 @@ public class ArchetypeCommands {
          
          profile.setHorseVariant(horseColor,marking);
          source.sendFeedback(()->Text.translatable("command.ancestralarchetypes.horse_success",(horseColor.name()+" "+marking.name())), false);
+         
+         return 1;
+      }catch(Exception e){
+         log(2,e.toString());
+         return -1;
+      }
+   }
+   
+   public static int setMountName(CommandContext<ServerCommandSource> context, String name){
+      try{
+         ServerCommandSource source = context.getSource();
+         if(!source.isExecutedByPlayer() || source.getPlayer() == null){
+            source.sendError(Text.translatable("command.ancestralarchetypes.not_player_error"));
+            return -1;
+         }
+         
+         ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
+         IArchetypeProfile profile = profile(player);
+         
+         if(name != null){
+            String sanitized = StringHelper.stripInvalidChars(name);
+            if(sanitized.length() > 50){
+               source.sendError(Text.translatable("command.ancestralarchetypes.mount_name_error"));
+               return -1;
+            }
+            name = sanitized;
+         }
+         
+         profile.setMountName(name);
+         String finalName = name;
+         if(name != null){
+            source.sendFeedback(()->Text.translatable("command.ancestralarchetypes.mount_name_success", finalName), false);
+         }else{
+            source.sendFeedback(()->Text.translatable("command.ancestralarchetypes.mount_name_reset"), false);
+         }
          
          return 1;
       }catch(Exception e){

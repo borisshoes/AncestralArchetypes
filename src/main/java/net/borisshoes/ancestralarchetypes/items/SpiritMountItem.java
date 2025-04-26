@@ -90,6 +90,11 @@ public abstract class SpiritMountItem extends AbilityItem{
       IArchetypeProfile profile = profile(player);
       Vec3d summonPos = player.getEyePos().add(player.getRotationVector().multiply(1));
       LivingEntity newMount = getMountEntity(player);
+      String customName = profile.getMountName();
+      if(customName != null){
+         newMount.setCustomName(Text.literal(customName));
+         newMount.setCustomNameVisible(true);
+      }
       newMount.setPosition(summonPos);
       newMount.refreshPositionAndAngles(summonPos.x, summonPos.y, summonPos.z, player.getYaw(), player.getPitch());
       player.getServerWorld().spawnNewEntityAndPassengers(newMount);
