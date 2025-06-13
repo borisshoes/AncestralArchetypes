@@ -347,6 +347,7 @@ public class ArchetypeProfile implements IArchetypeProfile {
    @Override
    public void resetAbilityCooldowns(){
       abilityCooldowns.forEach((ability, cooldown) -> abilityCooldowns.put(ability,0));
+      this.glideTime = ArchetypeConfig.getInt(ArchetypeRegistry.GLIDER_DURATION);
    }
    
    @Override

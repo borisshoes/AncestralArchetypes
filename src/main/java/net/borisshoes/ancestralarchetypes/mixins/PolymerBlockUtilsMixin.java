@@ -27,6 +27,10 @@ public class PolymerBlockUtilsMixin {
             return true;
          }
          
+         if(profile.hasAbility(ArchetypeRegistry.HASTY)){
+            return true;
+         }
+         
          Entity vehicle = player.getVehicle();
          if(vehicle != null && !vehicle.getCommandTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList().isEmpty()){
             return true;

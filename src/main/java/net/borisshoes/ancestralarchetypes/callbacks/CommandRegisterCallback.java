@@ -14,8 +14,7 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.DEV_MODE;
-import static net.minecraft.command.argument.EntityArgumentType.getPlayers;
-import static net.minecraft.command.argument.EntityArgumentType.players;
+import static net.minecraft.command.argument.EntityArgumentType.*;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -42,13 +41,25 @@ public class CommandRegisterCallback {
             .then(literal("items").executes(ArchetypeCommands::getItems))
             .then(literal("toggleReminders").executes(ArchetypeCommands::toggleReminders))
             .then(literal("changeArchetype").executes(ArchetypeCommands::changeArchetype))
+            .then(literal("abilities")
+                  .executes(context -> ArchetypeCommands.getAbilities(context, null))
+                  .then(argument("archetype_id", string()).suggests(ArchetypeCommands::getSubArchetypeSuggestions)
+                        .executes(context -> ArchetypeCommands.getAbilities(context, getString(context,"archetype_id")))))
+            .then(literal("list").executes(ArchetypeCommands::archetypeList))
+            .then(literal("distribution").requires(source -> source.hasPermissionLevel(2)).executes(ArchetypeCommands::getDistribution))
+            .then(literal("getPlayersOfArchetype").requires(source -> source.hasPermissionLevel(2))
+                  .then(argument("archetype_id", string()).suggests(ArchetypeCommands::getSubArchetypeSuggestions)
+                        .executes(context -> ArchetypeCommands.getPlayersOfArchetype(context, getString(context, "archetype_id")))))
+            .then(literal("getAllPlayerArchetypes").requires(source -> source.hasPermissionLevel(2)).executes(ArchetypeCommands::getAllPlayerArchetypes))
+            .then(literal("getArchetype").requires(source -> source.hasPermissionLevel(2))
+                  .then(argument("target",string()).suggests(ArchetypeCommands::getPlayerSuggestions)
+                        .executes(context -> ArchetypeCommands.getArchetype(context, getString(context, "target")))))
       );
       
       dispatcher.register(AncestralArchetypes.CONFIG.generateCommand());
       
       if(DEV_MODE){
          dispatcher.register(literal("archetypes")
-               .then(literal("getAbilities").requires(source -> source.hasPermissionLevel(2)).executes(ArchetypeCommands::getAbilities))
                .then(literal("test").requires(source -> source.hasPermissionLevel(2)).executes(ArchetypeCommands::test))
          );
       }

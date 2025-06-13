@@ -1,5 +1,6 @@
 package net.borisshoes.ancestralarchetypes.mixins;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.AbstractHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -21,5 +22,13 @@ public class AbstractHorseMixin {
       LivingEntity entity = (LivingEntity) (Object) this;
       List<String> tags = entity.getCommandTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
       if(!tags.isEmpty()) cir.setReturnValue(false);
+   }
+   
+   @ModifyExpressionValue(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/random/Random;nextInt(I)I"))
+   private int archetypes_modifyHorseAnger(int original){
+      LivingEntity entity = (LivingEntity) (Object) this;
+      List<String> tags = entity.getCommandTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
+      if(!tags.isEmpty()) return entity.getRandom().nextInt(5) == 0 ? 1 : 0;
+      return original;
    }
 }

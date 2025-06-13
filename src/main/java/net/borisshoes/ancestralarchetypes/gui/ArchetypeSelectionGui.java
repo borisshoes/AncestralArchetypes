@@ -29,13 +29,15 @@ public class ArchetypeSelectionGui extends SimpleGui {
    
    private final int[][] dynamicSlots = {{},{3},{1,5},{1,3,5},{0,2,4,6},{1,2,3,4,5},{0,1,2,4,5,6},{0,1,2,3,4,5,6}};
    private final SubArchetype subArchetype;
+   private final boolean showOnly;
    private boolean menuOnClose;
    private final HashMap<Integer,SubArchetype> map;
    
-   public ArchetypeSelectionGui(ServerPlayerEntity player, SubArchetype subArchetype){
+   public ArchetypeSelectionGui(ServerPlayerEntity player, SubArchetype subArchetype, boolean showOnly){
       super(getScreenType(subArchetype), player, false);
       this.subArchetype = subArchetype;
       this.map = new HashMap<>();
+      this.showOnly = showOnly;
       setTitle(Text.translatable("text.ancestralarchetypes.gui_title"));
       if(this.subArchetype != null) menuOnClose = true;
       build();
@@ -64,16 +66,16 @@ public class ArchetypeSelectionGui extends SimpleGui {
       IArchetypeProfile profile = profile(player);
       if(subArchetype == null){
          if(this.map.containsKey(index)){
-            ArchetypeSelectionGui gui = new ArchetypeSelectionGui(player,this.map.get(index));
+            ArchetypeSelectionGui gui = new ArchetypeSelectionGui(player,this.map.get(index),this.showOnly);
             gui.open();
-         }else if(index == 4 && profile.getSubArchetype() != null){
+         }else if(index == 4 && profile.getSubArchetype() != null && !showOnly){
             profile.changeArchetype(null);
             this.close();
          }
       }else{
          if(index == (getSize()-9) || index == 4){
             this.close();
-         }else if(index == (getSize()-5) && profile.getSubArchetype() != subArchetype){
+         }else if(index == (getSize()-5) && profile.getSubArchetype() != subArchetype && !showOnly){
             profile.changeArchetype(subArchetype);
             this.menuOnClose = false;
             this.close();
@@ -122,10 +124,12 @@ public class ArchetypeSelectionGui extends SimpleGui {
          }
       }
       
-      setSlot(getSize()-5, GuiElementBuilder.from(GraphicalItem.with(GraphicalItem.GraphicItems.CONFIRM)).hideDefaultTooltip()
-            .setName(Text.translatable("text.ancestralarchetypes.confirm_selection").formatted(Formatting.GREEN))
-            .addLoreLine(Text.translatable("text.ancestralarchetypes.warning").formatted(Formatting.DARK_RED,Formatting.ITALIC))
-      );
+      if(!showOnly){
+         setSlot(getSize()-5, GuiElementBuilder.from(GraphicalItem.with(GraphicalItem.GraphicItems.CONFIRM)).hideDefaultTooltip()
+               .setName(Text.translatable("text.ancestralarchetypes.confirm_selection").formatted(Formatting.GREEN))
+               .addLoreLine(Text.translatable("text.ancestralarchetypes.warning").formatted(Formatting.DARK_RED,Formatting.ITALIC))
+         );
+      }
       
       setSlot(getSize()-9, GuiElementBuilder.from(GraphicalItem.with(GraphicalItem.GraphicItems.LEFT_ARROW)).hideDefaultTooltip()
             .setName(Text.translatable("text.ancestralarchetypes.return").formatted(Formatting.GOLD))
@@ -144,7 +148,7 @@ public class ArchetypeSelectionGui extends SimpleGui {
       GuiElementBuilder head = new GuiElementBuilder(Items.PLAYER_HEAD).setSkullOwner(gameProfile,player.server);
       head.setName(Text.translatable("text.ancestralarchetypes.gui_title").formatted(Formatting.AQUA));
       head.addLoreLine(MiscUtils.removeItalics(Text.translatable("text.ancestralarchetypes.gui_subtitle_1").formatted(Formatting.DARK_AQUA)));
-      if(profile.getSubArchetype() != null){
+      if(profile.getSubArchetype() != null && !showOnly){
          head.addLoreLine(Text.empty());
          head.addLoreLine(MiscUtils.removeItalics(Text.translatable("text.ancestralarchetypes.gui_subtitle_2").formatted(Formatting.RED)));
          head.addLoreLine(MiscUtils.removeItalics(Text.translatable("text.ancestralarchetypes.warning").formatted(Formatting.DARK_RED, Formatting.ITALIC)));
@@ -185,7 +189,7 @@ public class ArchetypeSelectionGui extends SimpleGui {
    @Override
    public void onClose(){
       if(this.menuOnClose){
-         ArchetypeSelectionGui gui = new ArchetypeSelectionGui(player,null);
+         ArchetypeSelectionGui gui = new ArchetypeSelectionGui(player,null, this.showOnly);
          gui.open();
       }
    }

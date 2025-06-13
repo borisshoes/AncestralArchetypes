@@ -2,9 +2,11 @@ package net.borisshoes.ancestralarchetypes.mixins;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.borisshoes.ancestralarchetypes.ArchetypeConfig;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
@@ -16,6 +18,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
@@ -54,6 +57,15 @@ public abstract class PlayerEntityMixin {
       return Math.max(original, newValue);
    }
    
+   @ModifyReturnValue(method = "getBlockBreakingSpeed", at = @At("RETURN"))
+   private float archetypes_overallBlockBreakingSpeed(float original){
+      PlayerEntity player = (PlayerEntity) (Object) this;
+      IArchetypeProfile profile = profile(player);
+      double newValue = original;
+      if(profile.hasAbility(ArchetypeRegistry.HASTY)) newValue *= ArchetypeConfig.getDouble(ArchetypeRegistry.HASTY_MINING_MODIFIER);
+      return (float) newValue;
+   }
+   
    @Inject(method = "applyDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;applyArmorToDamage(Lnet/minecraft/entity/damage/DamageSource;F)F"))
    private void archetypes_thorns(ServerWorld world, DamageSource source, float amount, CallbackInfo ci){
       LivingEntity entity = (LivingEntity) (Object) this;
@@ -65,5 +77,17 @@ public abstract class PlayerEntityMixin {
             attacker.damage(player.getServerWorld(), player.getDamageSources().thorns(player), damage);
          }
       }
+   }
+   
+   @ModifyVariable(method = "attack", at = @At(value = "STORE"), ordinal = 2)
+   private boolean archetypes_lanceCrit(boolean crit, @Local(ordinal = 0) boolean fullCharge){
+      PlayerEntity player = (PlayerEntity) (Object) this;
+      Entity vehicle = player.getVehicle();
+      
+      if(vehicle != null && !vehicle.getCommandTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList().isEmpty()){
+         return fullCharge;
+      }
+      
+      return crit;
    }
 }

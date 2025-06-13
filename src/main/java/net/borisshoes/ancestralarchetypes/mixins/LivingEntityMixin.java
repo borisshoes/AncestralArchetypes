@@ -11,6 +11,7 @@ import net.borisshoes.ancestralarchetypes.gui.MountInventoryGui;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
 import net.borisshoes.ancestralarchetypes.items.GraphicalItem;
 import net.borisshoes.ancestralarchetypes.utils.MiscUtils;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
@@ -22,6 +23,9 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.HorseEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.particle.DustColorTransitionParticleEffect;
+import net.minecraft.particle.DustParticleEffect;
+import net.minecraft.particle.EntityEffectParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.screen.*;
@@ -31,6 +35,7 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -224,16 +229,37 @@ public abstract class LivingEntityMixin {
             newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.SOFT_HITTER_DAMAGE_REDUCTION);
          }
          
+         if(profile.hasAbility(ArchetypeRegistry.HARD_HITTER) && source.isDirect()){
+            newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.HARD_HITTER_DAMAGE_INCREASE);
+         }
+         
          if(profile.hasAbility(ArchetypeRegistry.SNEAK_ATTACK)){
-            boolean foundAttacker = false;
-            for(DamageRecord damageRecord : entity.getDamageTracker().recentDamage){
-               if(player.equals(damageRecord.damageSource().getAttacker()) || player.equals(damageRecord.damageSource().getSource())){
-                  foundAttacker = true;
-                  break;
+            if(entity instanceof ServerPlayerEntity target){
+               Vec3d targetEyePos = target.getEyePos();
+               Vec3d targetRot = target.getRotationVecClient();
+               Vec3d attackerEyePos = player.getEyePos();
+               Vec3d eyeDiff = attackerEyePos.subtract(targetEyePos).normalize();
+               double thresh = Math.cos(Math.toRadians(60));
+               double dp = eyeDiff.dotProduct(targetRot.normalize().negate());
+               boolean behind = dp >= thresh;
+               if(behind){
+                  newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.PLAYER_SNEAK_ATTACK_MODIFIER);
+                  DustColorTransitionParticleEffect particle = new DustColorTransitionParticleEffect(0xee1c1c,0x621313,1.0f);
+                  player.getServerWorld().spawnParticles(particle,entity.getX(), entity.getY()+entity.getHeight()/2, entity.getZ(), 25, 0.25, 0.25, 0.25, 0.5);
                }
-            }
-            if(!foundAttacker){
-               newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.SNEAK_ATTACK_MODIFIER);
+            }else{
+               boolean foundAttacker = false;
+               for(DamageRecord damageRecord : entity.getDamageTracker().recentDamage){
+                  if(player.equals(damageRecord.damageSource().getAttacker()) || player.equals(damageRecord.damageSource().getSource())){
+                     foundAttacker = true;
+                     break;
+                  }
+               }
+               if(!foundAttacker){
+                  newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.MOB_SNEAK_ATTACK_MODIFIER);
+                  DustColorTransitionParticleEffect particle = new DustColorTransitionParticleEffect(0xee1c1c,0x621313,1.0f);
+                  player.getServerWorld().spawnParticles(particle,entity.getX(), entity.getY()+entity.getHeight()/2, entity.getZ(), 25, 0.25, 0.25, 0.25, 0.5);
+               }
             }
          }
       }
@@ -254,6 +280,13 @@ public abstract class LivingEntityMixin {
          }
          if(profile.hasAbility(ArchetypeRegistry.PROJECTILE_RESISTANT) && source.isIn(DamageTypeTags.IS_PROJECTILE)){
             newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.PROJECTILE_RESISTANT_REDUCTION);
+         }
+         if(profile.hasAbility(ArchetypeRegistry.SLIPPERY) && player.isTouchingWaterOrRain()){
+            if(profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER)){
+               newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.GREAT_SWIMMER_SLIPPERY_DAMAGE_MODIFIER);
+            }else{
+               newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.SLIPPERY_DAMAGE_MODIFIER);
+            }
          }
          if(profile.hasAbility(ArchetypeRegistry.INSATIABLE) && source.isOf(DamageTypes.STARVE)){
             newReturn += (float) ArchetypeConfig.getDouble(ArchetypeRegistry.ADDED_STARVE_DAMAGE);

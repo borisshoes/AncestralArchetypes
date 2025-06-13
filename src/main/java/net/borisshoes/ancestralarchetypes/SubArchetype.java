@@ -4,6 +4,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 
 public class SubArchetype {
@@ -47,5 +50,13 @@ public class SubArchetype {
    
    public ArchetypeAbility[] getAbilities(){
       return abilities;
+   }
+   
+   public ArrayList<ArchetypeAbility> getActualAbilities(){
+      ArrayList<ArchetypeAbility> list = new ArrayList<>();
+      list.addAll(Arrays.asList(getAbilities()));
+      list.addAll(Arrays.asList(getArchetype().getAbilities()));
+      list.removeIf(a1 -> list.stream().anyMatch(a2 -> a2.overrides(a1)));
+      return list;
    }
 }

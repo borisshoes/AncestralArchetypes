@@ -25,16 +25,23 @@ The mod is highly configurable and balanced around a competitive environment. Th
 
 ### Player Commands
 * ```/archetypes changeArchetype``` Opens a GUI for a user to change their Archetype.
+* ```/archetypes list``` Opens a GUI for a user to view all Archetypes.
 * ```/archetypes items``` Gives a user the Ability Items for their Archetype, has a 1 minute cooldown.
 * ```/archetypes setHorseVariant <color> <markings>``` Sets the color of your Spirit Horse as a Horse Archetype.
 * ```/archetypes setMountName <name>``` Sets the name of your Spirit Mount as a Centaur Archetype.
 * ```/archetypes setGliderColor <hex color>``` Sets the color of your Glider Wings as a Parrot Archetype.
 * ```/archetypes toggleReminders``` Toggles the periodic reminders for players that are missing an Archetype or an Ability Item
+* ```/archetypes abilities``` Shows the abilities and descriptions for your Archetype, as well as any relevant config values
+* ```/archetypes abilities <archetype>``` Shows the above command for the specified Archetype
 
 ### Admin Commands
 * ```/archetypes resetCooldowns <targets>``` Resets the abilities of the selected players.
 * ```/archetypes setArchetype <targets> <archetype>``` Sets the Archetypes of the selected players.
 * ```/archetypes addChanges <targets> <changes>``` Gives a number of allowed Archetype changes to the selected players.
+* ```/archetypes getArchetype <player>``` Gets a player's Archetype.
+* ```/archetypes distribution``` Gets the distribution of all players' selected Archetypes.
+* ```/archetypes getPlayersOfArchetype <archetype>``` Lists all players of a given Archetype.
+* ```/archetypes getAllPlayerArchetypes``` Lists all players and their Archetype.
 
 ### Admin Configuration Commands
 The following commands can be used to adjust configurable settings in the AncestralArchetypes.properties file without a server reboot. These commands can be suffixed with "get" or "set" followed by a value to get or set the current setting. 
@@ -65,10 +72,13 @@ The following commands can be used to adjust configurable settings in the Ancest
 * ```/archetypes config insatiableHungerRate``` The exhaustion passively given to those with Insatiable every half-second.
 * ```/archetypes config projectileResistantReduction``` The modifier multiplied against the projectile damage dealt to those with Projectile Resistant.
 * ```/archetypes config softhitterDamageReduction``` The modifier applied against the melee damage dealt by those with Soft Hitter.
+* ```/archetypes config hardhitterDamageModifier``` The damage modifier applied to damage dealt by those with Hard Hitter.
+* ```/archetypes config hardhitterKnockbackIncrease``` The extra attack knockback given to those with Hard Hitter.
 * ```/archetypes config healthSprintCutoff``` The fraction of a Golem's max health that allows them to sprint.
 * ```/archetypes config knockbackReduction``` The modifier multiplied against the knockback dealt to those with Decreased Knockback.
 * ```/archetypes config knockbackIncrease``` The modifier multiplied against the knockback dealt to those with Increased Knockback.
-* ```/archetypes config sneakAttackModifier``` The modifier applied to the damage of the first strike done by those with Ambush.
+* ```/archetypes config mobSneakAttackModifier``` The damage modifier applied to damage dealt to mobs the first time by those with Sneak Attack.
+* ```/archetypes config playerSneakAttackModifier``` The damage modifier applied to damage dealt to players when behind them by those with Sneak Attack.
 * ```/archetypes config biomeDamage``` The amount of damage dealt to Aquarians or Infernals for being in an incompatible biome.
 * ```/archetypes config fallDamageReduction``` The modifier multiplied to fall damage dealt to those with Reduced Fall Damage.
 * ```/archetypes config coldDamageModifier``` The modifier multiplied to cold damage dealt to Infernals.
@@ -85,13 +95,19 @@ The following commands can be used to adjust configurable settings in the Ancest
 * ```/archetypes config longArmsRange``` The additional reach granted by Long Arms.
 * ```/archetypes config mountedRange``` The additional reach granted to Centaurs by being on their mount.
 * ```/archetypes config moonlitSlimeHealthPerPhase``` The health fraction granted to Slimes with Moonlit per moon-phase.
+* ```/archetypes config moonlitSlimeSizePerPhase``` The size fraction granted to Slimes with Moonlit per moon-phase.
 * ```/archetypes config speedySpeedBoost``` The additional speed modifier added to those with Speedy.
 * ```/archetypes config sneakySpeedBoost``` The additional speed modifier added when sneaking to those with Sneaky.
 * ```/archetypes config thornyReflectionModifier``` The fraction of health reflected by those with Thorny.
 * ```/archetypes config thornyReflectionCap``` The maximum damage reflected by those with Thorny.
 * ```/archetypes config guardianRayDamage``` The damage dealt by each tick of the Guardian's ray ability.
 * ```/archetypes config greatSwimmerMoveSpeedModifier``` The speed modifier added to those with Great Swimmer in rain or water.
+* ```/archetypes config greatSwimmerSlipperyDamageModifier``` The modifier multiplied against damage to those in water with Slippery and Great Swimmer.
+* ```/archetypes config slipperyDamageModifier``` The modifier multiplied against damage to those in water with Slippery.
 * ```/archetypes config gliderRecoveryTime``` The rate at which the flight duration of the glider ability recovers.
+* ```/archetypes config hastyMiningModifier``` The modifier multiplied against mining speed to those with Hasty.
+* ```/archetypes config hastyAttackSpeedIncrease``` The attack speed increase given to those with Hasty.
+* ```/archetypes config jumpyJumpBoost``` The extra jump power given to those with Jumpy.
 
 
 ### LICENSE NOTICE

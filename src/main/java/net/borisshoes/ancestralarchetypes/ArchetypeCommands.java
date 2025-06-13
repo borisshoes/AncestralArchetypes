@@ -1,29 +1,53 @@
 package net.borisshoes.ancestralarchetypes;
 
+import com.google.common.collect.Iterables;
+import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.gui.ArchetypeSelectionGui;
+import net.borisshoes.ancestralarchetypes.utils.ConfigUtils;
+import net.borisshoes.ancestralarchetypes.utils.MiscUtils;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.EntitySelectorReader;
 import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.entity.passive.HorseColor;
 import net.minecraft.entity.passive.HorseMarking;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.screen.AnvilScreenHandler;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.PlayerManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.StringHelper;
+import net.minecraft.util.UserCache;
 
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 
 public class ArchetypeCommands {
+   
+   public static CompletableFuture<Suggestions> getPlayerSuggestions(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder) {
+      String start = builder.getRemaining().toLowerCase(Locale.ROOT);
+      Set<String> items = new HashSet<>();
+      context.getSource().getPlayerNames().forEach(name -> items.add(name.toLowerCase(Locale.ROOT)));
+      items.stream().filter(s -> s.startsWith(start)).forEach(builder::suggest);
+      return builder.buildFuture();
+   }
    
    public static CompletableFuture<Suggestions> getSubArchetypeSuggestions(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder){
       String start = builder.getRemaining().toLowerCase(Locale.ROOT);
@@ -86,9 +110,7 @@ public class ArchetypeCommands {
       }
    }
    
-   public static int getAbilities(CommandContext<ServerCommandSource> context){
-      if(!DEV_MODE)
-         return 0;
+   public static int getAbilities(CommandContext<ServerCommandSource> context, String archetypeId){
       try{
          ServerCommandSource source = context.getSource();
          if(!source.isExecutedByPlayer() || source.getPlayer() == null){
@@ -99,15 +121,40 @@ public class ArchetypeCommands {
          ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
          IArchetypeProfile profile = profile(player);
          
-         if(profile.getSubArchetype() != null){
-            source.sendFeedback(() -> Text.literal("You are a " + profile.getSubArchetype().getId() + ", a subarchetype of " + profile.getArchetype().getId()).formatted(Formatting.AQUA), false);
-            source.sendFeedback(() -> Text.literal("\nYour abilities are: ").formatted(Formatting.AQUA), false);
-            for(ArchetypeAbility ability : profile.getAbilities()){
-               source.sendFeedback(() -> ability.getName().formatted(Formatting.DARK_AQUA), false);
+         SubArchetype subArchetype;
+         boolean personal = false;
+         if(archetypeId == null || archetypeId.isEmpty()){
+            subArchetype = profile.getSubArchetype();
+            personal = true;
+            if(subArchetype == null){
+               source.sendError(Text.literal("You have no archetype"));
+               return 0;
             }
          }else{
-            source.sendError(Text.literal("You have no archetype"));
+            subArchetype = ArchetypeRegistry.SUBARCHETYPES.get(Identifier.of(MOD_ID,archetypeId));
+            if(subArchetype == null){
+               source.sendError(Text.translatable("command.ancestralarchetypes.invalid_archetype",archetypeId));
+               return 0;
+            }
          }
+         
+         MutableText feedback = Text.empty();
+         if(personal){
+            feedback.append(Text.translatable("command.ancestralarchetypes.abilities_get_personal",
+                  subArchetype.getName().formatted(MiscUtils.getClosestFormatting(subArchetype.getColor()),Formatting.BOLD),
+                  subArchetype.getArchetype().getName().formatted(MiscUtils.getClosestFormatting(subArchetype.getArchetype().getColor()),Formatting.BOLD)).formatted(Formatting.AQUA)).append(Text.literal("\n"));
+         }else{
+            feedback.append(Text.translatable("command.ancestralarchetypes.archetype_get",
+                  subArchetype.getName().formatted(MiscUtils.getClosestFormatting(subArchetype.getColor()),Formatting.BOLD),
+                  subArchetype.getArchetype().getName().formatted(MiscUtils.getClosestFormatting(subArchetype.getArchetype().getColor()),Formatting.BOLD)).formatted(Formatting.AQUA)).append(Text.literal("\n"));
+         }
+         for(ArchetypeAbility ability : subArchetype.getActualAbilities()){
+            feedback.append(ability.getName().formatted(Formatting.DARK_AQUA)).append(Text.literal("\n"));
+            for(ArchetypeConfig.ConfigSetting<?> config : ability.getReliantConfigs()){
+               feedback.append(Text.translatable("text.ancestralarchetypes.list_item",CONFIG.getGetter(config.getName())).formatted(Formatting.DARK_GREEN)).append(Text.literal("\n"));
+            }
+         }
+         source.sendFeedback(() -> feedback,false);
          
          return 1;
       }catch(Exception e){
@@ -337,8 +384,201 @@ public class ArchetypeCommands {
             return -1;
          }
          
-         ArchetypeSelectionGui selectionGui = new ArchetypeSelectionGui(player, null);
+         ArchetypeSelectionGui selectionGui = new ArchetypeSelectionGui(player, null, false);
          selectionGui.open();
+         
+         return 1;
+      }catch(Exception e){
+         log(2,e.toString());
+         return -1;
+      }
+   }
+   
+   public static int archetypeList(CommandContext<ServerCommandSource> context){
+      try{
+         ServerCommandSource source = context.getSource();
+         if(!source.isExecutedByPlayer() || source.getPlayer() == null){
+            source.sendError(Text.translatable("command.ancestralarchetypes.not_player_error"));
+            return -1;
+         }
+         
+         ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
+         IArchetypeProfile profile = profile(player);
+         
+         ArchetypeSelectionGui selectionGui = new ArchetypeSelectionGui(player, null, true);
+         selectionGui.open();
+         
+         return 1;
+      }catch(Exception e){
+         log(2,e.toString());
+         return -1;
+      }
+   }
+   
+   private static HashMap<ServerPlayerEntity,IArchetypeProfile> getAllPlayerData(MinecraftServer server){
+      HashMap<ServerPlayerEntity,IArchetypeProfile> data = new HashMap<>();
+      try{
+         PlayerManager playerManager = server.getPlayerManager();
+         UserCache userCache = server.getUserCache();
+         List<ServerPlayerEntity> allPlayers = new ArrayList<>();
+         List<UserCache.Entry> cacheEntries = userCache.load();
+         
+         for(UserCache.Entry cacheEntry : cacheEntries){
+            GameProfile reqProfile = cacheEntry.getProfile();
+            ServerPlayerEntity reqPlayer = playerManager.getPlayer(reqProfile.getName());
+            
+            if(reqPlayer == null){ // Player Offline
+               reqPlayer = playerManager.createPlayer(reqProfile, SyncedClientOptions.createDefault());
+               server.getPlayerManager().loadPlayerData(reqPlayer);
+            }
+            allPlayers.add(reqPlayer);
+         }
+         
+         for(ServerPlayerEntity player : allPlayers){
+            IArchetypeProfile profile = AncestralArchetypes.profile(player);
+            data.put(player,profile);
+         }
+         
+         return data;
+      }catch(Exception e){
+         log(2,e.toString());
+         return data;
+      }
+   }
+   
+   public static int getDistribution(CommandContext<ServerCommandSource> context){
+      try{
+         ServerCommandSource src = context.getSource();
+         
+         HashMap<SubArchetype,Integer> archetypeCounter = new HashMap<>();
+         for(SubArchetype subarchetype : ArchetypeRegistry.SUBARCHETYPES){
+            archetypeCounter.put(subarchetype,0);
+         }
+         archetypeCounter.put(null,0);
+         
+         for(IArchetypeProfile profile : getAllPlayerData(src.getServer()).values()){
+            if(profile == null){
+               log(1,"An error occurred loading a null profile");
+            }else{
+               SubArchetype subArchetype = profile.getSubArchetype();
+               archetypeCounter.compute(subArchetype, (k, count) -> count + 1);
+            }
+         }
+         
+         StringBuilder masterString = new StringBuilder(Text.translatable("text.ancestralarchetypes.distribution_header").getString());
+         src.sendFeedback(() -> Text.translatable("text.ancestralarchetypes.distribution_header"),false);
+         archetypeCounter.forEach((subArchetype, integer) -> {
+            int color = subArchetype == null ? 0xFFFFFF : subArchetype.getColor();
+            MutableText name = subArchetype == null ? Text.translatable("text.ancestralarchetypes.none") : subArchetype.getName();
+            Text text = Text.empty().formatted(MiscUtils.getClosestFormatting(color)).append(name).append(Text.literal(" - ").append(Text.literal(String.format("%,d",integer))));
+            src.sendFeedback(() -> text, false);
+            masterString.append("\n").append(text.getString());
+         });
+         src.sendFeedback(() -> Text.translatable("text.ancestralarchetypes.dump_copy").styled(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, masterString.toString()))),false);
+         
+         return 1;
+      }catch(Exception e){
+         log(2,e.toString());
+         return -1;
+      }
+   }
+   
+   public static int getAllPlayerArchetypes(CommandContext<ServerCommandSource> context){
+      try{
+         ServerCommandSource src = context.getSource();
+         
+         log(0,Text.translatable("text.ancestralarchetypes.dump_init").getString());
+         StringBuilder masterString = new StringBuilder(Text.translatable("text.ancestralarchetypes.dump_header").getString());
+         
+         getAllPlayerData(src.getServer()).forEach((player, profile) -> {
+            SubArchetype subArchetype = profile.getSubArchetype();
+            Archetype archetype = profile.getArchetype();
+            MutableText subName = subArchetype == null ? Text.translatable("text.ancestralarchetypes.none") : subArchetype.getName();
+            MutableText name = archetype == null ? Text.translatable("text.ancestralarchetypes.none") : archetype.getName();
+            String str = "\n"+Text.translatable("text.ancestralarchetypes.archetype_player_get",player.getStyledDisplayName(),subName,name).getString();
+            masterString.append(str);
+         });
+         
+         src.sendFeedback(() -> Text.translatable("text.ancestralarchetypes.dump_copy").styled(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, masterString.toString()))),false);
+         log(0,masterString.toString());
+         
+         return 1;
+      }catch(Exception e){
+         log(2,e.toString());
+         return -1;
+      }
+   }
+   
+   public static int getPlayersOfArchetype(CommandContext<ServerCommandSource> context, String archetypeId){
+      try{
+         ServerCommandSource src = context.getSource();
+         
+         SubArchetype subArchetype = ArchetypeRegistry.SUBARCHETYPES.get(Identifier.of(MOD_ID,archetypeId));
+         if(subArchetype == null && !archetypeId.equals("none")){
+            src.sendError(Text.translatable("command.ancestralarchetypes.invalid_archetype",archetypeId));
+            return 0;
+         }
+         MutableText subName = subArchetype == null ? Text.translatable("text.ancestralarchetypes.none") : subArchetype.getName();
+         
+         log(0,Text.translatable("text.ancestralarchetypes.type_dump_init",subName).getString());
+         StringBuilder masterString = new StringBuilder(Text.translatable("text.ancestralarchetypes.dump_type_header",subName).getString());
+         
+         getAllPlayerData(src.getServer()).forEach((player, profile) -> {
+            SubArchetype playerArchetype = profile.getSubArchetype();
+            if(playerArchetype == subArchetype){
+               Archetype archetype = profile.getArchetype();
+               MutableText name = archetype == null ? Text.translatable("text.ancestralarchetypes.none") : archetype.getName();
+               String str = "\n"+Text.translatable("text.ancestralarchetypes.archetype_player_get",player.getStyledDisplayName(),subName,name).getString();
+               masterString.append(str);
+            }
+         });
+         
+         src.sendFeedback(() -> Text.translatable("text.ancestralarchetypes.dump_copy").styled(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, masterString.toString()))),false);
+         log(0,masterString.toString());
+         
+         return 1;
+      }catch(Exception e){
+         log(2,e.toString());
+         return -1;
+      }
+   }
+   
+   public static int getArchetype(CommandContext<ServerCommandSource> context, String target){
+      try{
+         ServerCommandSource source = context.getSource();
+         MinecraftServer server = source.getServer();
+         PlayerManager manger = server.getPlayerManager();
+         ServerPlayerEntity player = manger.getPlayer(target);
+         
+         IArchetypeProfile profile = null;
+         if(player != null){
+            profile = AncestralArchetypes.profile(player);
+         }else{
+            UserCache userCache = server.getUserCache();
+            List<UserCache.Entry> cacheEntries = userCache.load();
+            
+            for(UserCache.Entry cacheEntry : cacheEntries){
+               GameProfile reqProfile = cacheEntry.getProfile();
+               if(reqProfile.getName().equalsIgnoreCase(target)){
+                  player = server.getPlayerManager().createPlayer(reqProfile, SyncedClientOptions.createDefault());
+                  server.getPlayerManager().loadPlayerData(player);
+                  profile = AncestralArchetypes.profile(player);
+                  break;
+               }
+            }
+            if(profile == null){
+               source.sendError(Text.translatable("text.ancestralarchetypes.no_player_found"));
+               return 0;
+            }
+         }
+         
+         SubArchetype subArchetype = profile.getSubArchetype();
+         Archetype archetype = profile.getArchetype();
+         MutableText subName = subArchetype == null ? Text.translatable("text.ancestralarchetypes.none") : subArchetype.getName();
+         MutableText name = archetype == null ? Text.translatable("text.ancestralarchetypes.none") : archetype.getName();
+         int color = subArchetype == null ? 0xFFFFFF : subArchetype.getColor();
+         ServerPlayerEntity finalPlayer = player;
+         source.sendFeedback(() -> Text.translatable("text.ancestralarchetypes.archetype_player_get", finalPlayer.getStyledDisplayName(),subName,name).formatted(MiscUtils.getClosestFormatting(color)),false);
          
          return 1;
       }catch(Exception e){

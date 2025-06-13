@@ -10,5 +10,6 @@ public class DataGenerator implements DataGeneratorEntrypoint {
       FabricDataGenerator.Pack pack = fabricDataGenerator.createPack();
       pack.addProvider(ItemTagGenerator::new);
       pack.addProvider(DamageTagGenerator::new);
+      pack.addProvider(BiomeTagGenerator::new);
    }
 }

@@ -15,6 +15,7 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.passive.AbstractHorseEntity;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
@@ -23,6 +24,7 @@ import net.minecraft.item.Items;
 import net.minecraft.item.consume.UseAction;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -36,6 +38,7 @@ import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeKeys;
 
 import java.util.HashMap;
 import java.util.List;
@@ -172,7 +175,12 @@ public class TickCallback {
             
             MiscUtils.attributeEffect(player, EntityAttributes.SNEAKING_SPEED, ArchetypeConfig.getDouble(ArchetypeRegistry.SNEAKY_SPEED_BOOST), EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"sneaky"),!profile.hasAbility(ArchetypeRegistry.SNEAKY));
             
-            //MiscUtils.attributeEffect(player, EntityAttributes.SAFE_FALL_DISTANCE, 1.5, EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"jumpy"),!profile.hasAbility(ArchetypeRegistry.JUMPY));
+            MiscUtils.attributeEffect(player, EntityAttributes.JUMP_STRENGTH, ArchetypeConfig.getDouble(ArchetypeRegistry.JUMPY_JUMP_BOOST), EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"jumpy"),!profile.hasAbility(ArchetypeRegistry.JUMPY));
+            MiscUtils.attributeEffect(player, EntityAttributes.SAFE_FALL_DISTANCE, ArchetypeConfig.getDouble(ArchetypeRegistry.JUMPY_JUMP_BOOST)*10, EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"jumpy"),!profile.hasAbility(ArchetypeRegistry.JUMPY));
+            
+            MiscUtils.attributeEffect(player, EntityAttributes.ATTACK_KNOCKBACK, ArchetypeConfig.getDouble(ArchetypeRegistry.HARD_HITTER_KNOCKBACK_INCREASE), EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"hard_hitter"),!profile.hasAbility(ArchetypeRegistry.HARD_HITTER));
+            
+            MiscUtils.attributeEffect(player, EntityAttributes.ATTACK_SPEED, ArchetypeConfig.getDouble(ArchetypeRegistry.HASTY_ATTACK_SPEED_INCREASE), EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"hasty"),!profile.hasAbility(ArchetypeRegistry.HASTY));
             
             Entity vehicle = player.getVehicle();
             boolean gaveReach = false;
@@ -196,8 +204,10 @@ public class TickCallback {
                Identifier id = Identifier.of(MOD_ID,"slime_moonlit_"+i);
                if(moonLevel == i && profile.hasAbility(ArchetypeRegistry.MOONLIT) && profile.hasAbility(ArchetypeRegistry.SLIME_TOTEM)){
                   MiscUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH, ArchetypeConfig.getDouble(ArchetypeRegistry.MOONLIT_SLIME_HEALTH_PER_PHASE) * i, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, id,false);
+                  MiscUtils.attributeEffect(player, EntityAttributes.SCALE, ArchetypeConfig.getDouble(ArchetypeRegistry.MOONLIT_SLIME_SIZE_PER_PHASE) * i, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, id,false);
                }else{
                   MiscUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH, ArchetypeConfig.getDouble(ArchetypeRegistry.MOONLIT_SLIME_HEALTH_PER_PHASE) * i, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, id,true);
+                  MiscUtils.attributeEffect(player, EntityAttributes.SCALE, ArchetypeConfig.getDouble(ArchetypeRegistry.MOONLIT_SLIME_SIZE_PER_PHASE) * i, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, id,true);
                }
             }
             
@@ -205,21 +215,6 @@ public class TickCallback {
                StatusEffectInstance fireRes = new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 110, 0, false, false, true);
                player.addStatusEffect(fireRes);
                if(player.isOnFire()) player.extinguish();
-            }
-            
-            if(profile.hasAbility(ArchetypeRegistry.JUMPY)){
-               StatusEffectInstance jumpBoost = new StatusEffectInstance(StatusEffects.JUMP_BOOST, 110, 2, false, false, true);
-               player.addStatusEffect(jumpBoost);
-            }
-            
-            if(profile.hasAbility(ArchetypeRegistry.HASTY)){
-               StatusEffectInstance haste = new StatusEffectInstance(StatusEffects.HASTE, 110, 1, false, false, true);
-               player.addStatusEffect(haste);
-            }
-            
-            if(profile.hasAbility(ArchetypeRegistry.SLIPPERY) && player.isTouchingWaterOrRain()){
-               StatusEffectInstance res = new StatusEffectInstance(StatusEffects.RESISTANCE, 110, profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER) ? 1 : 0, false, false, true);
-               player.addStatusEffect(res);
             }
             
             if(profile.hasAbility(ArchetypeRegistry.INSATIABLE)){
@@ -232,15 +227,17 @@ public class TickCallback {
             RegistryEntry<Biome> biome = player.getServerWorld().getBiome(player.getBlockPos());
             float temp = biome.value().getTemperature();
             
-            if(temp < 0.1 && profile.hasAbility(ArchetypeRegistry.DAMAGED_BY_COLD) && !player.hasStatusEffect(StatusEffects.WATER_BREATHING) && !(player.isCreative() || player.isSpectator())){
+            boolean shouldFreeze = (biome.isIn(ArchetypeRegistry.COLD_DAMAGE_INCLUDE_BIOMES) || (temp < 0.1 && !biome.isIn(ArchetypeRegistry.COLD_DAMAGE_EXCEPTION_BIOMES))) &&
+                  profile.hasAbility(ArchetypeRegistry.DAMAGED_BY_COLD) && !player.hasStatusEffect(StatusEffects.WATER_BREATHING) && !(player.isCreative() || player.isSpectator());
+            if(shouldFreeze){
                player.damage(world, world.getDamageSources().freeze(), (float) ArchetypeConfig.getDouble(ArchetypeRegistry.BIOME_DAMAGE));
                player.sendMessage(Text.translatable("text.ancestralarchetypes.freeze_warning").formatted(Formatting.AQUA,Formatting.ITALIC),true);
                SoundUtils.playSongToPlayer(player, SoundEvents.ENTITY_PLAYER_HURT_FREEZE,1,1f);
             }
             
-            boolean shouldDryOut = !biome.value().hasPrecipitation() && !player.isTouchingWater() && profile.hasAbility(ArchetypeRegistry.DRIES_OUT)
-                  && !player.hasStatusEffect(StatusEffects.FIRE_RESISTANCE) && !(player.isCreative() || player.isSpectator())
-                  && !player.getEquippedStack(EquipmentSlot.HEAD).isOf(Items.TURTLE_HELMET);
+            boolean shouldDryOut = (biome.isIn(ArchetypeRegistry.DRY_OUT_INCLUDE_BIOMES) || (!biome.value().hasPrecipitation() && !biome.isIn(ArchetypeRegistry.DRY_OUT_EXCEPTION_BIOMES))) &&
+                  profile.hasAbility(ArchetypeRegistry.DRIES_OUT) && !player.isTouchingWater() && !player.hasStatusEffect(StatusEffects.FIRE_RESISTANCE) &&
+                  !(player.isCreative() || player.isSpectator()) && !player.getEquippedStack(EquipmentSlot.HEAD).isOf(Items.TURTLE_HELMET);
             if(shouldDryOut){
                player.damage(world, world.getDamageSources().dryOut(), (float) ArchetypeConfig.getDouble(ArchetypeRegistry.BIOME_DAMAGE));
                player.sendMessage(Text.translatable("text.ancestralarchetypes.dry_out_warning").formatted(Formatting.RED,Formatting.ITALIC),true);

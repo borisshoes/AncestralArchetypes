@@ -1,5 +1,6 @@
 package net.borisshoes.ancestralarchetypes;
 
+import com.mojang.authlib.GameProfile;
 import net.borisshoes.ancestralarchetypes.callbacks.*;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.misc.SpyglassRevealEvent;
@@ -17,6 +18,7 @@ import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Pair;
@@ -26,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static net.borisshoes.ancestralarchetypes.cca.PlayerComponentInitializer.PLAYER_DATA;
@@ -82,6 +85,20 @@ public class AncestralArchetypes implements ModInitializer, ClientModInitializer
          log(3,e.toString());
       }
       return null;
+   }
+   
+   public static IArchetypeProfile getPlayerOrOffline(UUID playerId){
+      MinecraftServer server = AncestralArchetypes.SERVER;
+      ServerPlayerEntity player = server.getPlayerManager().getPlayer(playerId);
+      if(player != null){
+         return PLAYER_DATA.get(player);
+      }else{
+         GameProfile profile = server.getUserCache().getByUuid(playerId).orElse(null);
+         if(profile == null) return null;
+         player = server.getPlayerManager().createPlayer(profile, SyncedClientOptions.createDefault());
+         server.getPlayerManager().loadPlayerData(player);
+         return PLAYER_DATA.get(player);
+      }
    }
    
    /**

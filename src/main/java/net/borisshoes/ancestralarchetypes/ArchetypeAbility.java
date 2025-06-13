@@ -13,11 +13,13 @@ public class ArchetypeAbility {
    private final boolean active;
    private final ArchetypeAbility[] overrides;
    private final ItemStack displayStack;
+   private final ArchetypeConfig.ConfigSetting<?>[] reliantConfigs;
    
-   public ArchetypeAbility(String id, boolean activeAbility, ItemStack displayStack, ArchetypeAbility... overrides){
+   public ArchetypeAbility(String id, boolean activeAbility, ItemStack displayStack, ArchetypeConfig.ConfigSetting<?>[] reliantConfigs, ArchetypeAbility... overrides){
       this.id = id;
       this.active = activeAbility;
       this.displayStack = displayStack;
+      this.reliantConfigs = reliantConfigs;
       this.overrides = overrides;
    }
    
@@ -45,6 +47,10 @@ public class ArchetypeAbility {
       return overrides;
    }
    
+   public ArchetypeConfig.ConfigSetting<?>[] getReliantConfigs(){
+      return reliantConfigs;
+   }
+   
    public boolean overrides(ArchetypeAbility other){
       for(ArchetypeAbility override : overrides){
          if(other == override) return true;
@@ -56,11 +62,13 @@ public class ArchetypeAbility {
       private final String id;
       private boolean active = false;
       private ArchetypeAbility[] overrides;
+      private ArchetypeConfig.ConfigSetting<?>[] configs;
       private ItemStack displayStack;
       
       public ArchetypeAbilityBuilder(String id){
          this.id = id;
          this.overrides = new ArchetypeAbility[]{};
+         this.configs = new ArchetypeConfig.ConfigSetting[]{};
          this.displayStack = new ItemStack(Items.BARRIER);
       }
       
@@ -83,8 +91,13 @@ public class ArchetypeAbility {
          return this;
       }
       
+      public ArchetypeAbilityBuilder setReliantConfigs(ArchetypeConfig.ConfigSetting<?>... configs){
+         this.configs = configs;
+         return this;
+      }
+      
       public ArchetypeAbility build(){
-         return new ArchetypeAbility(this.id, this.active, this.displayStack, this.overrides);
+         return new ArchetypeAbility(this.id, this.active, this.displayStack, this.configs, this.overrides);
       }
    }
 }

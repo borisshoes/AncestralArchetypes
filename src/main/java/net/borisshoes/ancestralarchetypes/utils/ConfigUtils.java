@@ -54,8 +54,8 @@ public class ConfigUtils {
             if(!configLine.contains("=")) continue;
             
             int splitIndex = configLine.indexOf('=');
-            String valueName = configLine.substring(0, splitIndex);
-            String valueValue = configLine.substring(splitIndex + 1);
+            String valueName = configLine.substring(0, splitIndex).strip();
+            String valueValue = configLine.substring(splitIndex + 1).strip();
             
             for(IConfigValue value : this.values){
                if(!valueName.equals(value.name)) continue;
@@ -126,6 +126,10 @@ public class ConfigUtils {
    
    public Object getValue(String name){
       return values.stream().filter(value -> value.name.equals(name)).findFirst().map(iConfigValue -> iConfigValue.value).orElse(null);
+   }
+   
+   public MutableText getGetter(String name){
+      return values.stream().filter(value -> value.name.equals(name)).findFirst().map(iConfigValue -> MutableText.of(new TranslatableTextContent(iConfigValue.command.getterText, null, new String[] {String.valueOf(iConfigValue.value.toString())}))).orElse(Text.empty());
    }
    
    public abstract static class IConfigValue<T>{
@@ -443,7 +447,8 @@ public class ConfigUtils {
    }
    
    private static String getTranslation(String name, String suffix){
+      if(suffix.equals("error")) return "command."+MOD_ID+".error";
+      if(suffix.equals("setter") || suffix.equals("getter")) suffix = "getter_setter";
       return "command."+MOD_ID+"."+name.replaceAll("([a-z])([A-Z]+)", "$1_$2").toLowerCase(Locale.ROOT)+"."+suffix;
    }
-   
 }
