@@ -1,6 +1,7 @@
 package net.borisshoes.ancestralarchetypes.mixins;
 
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
+import net.borisshoes.ancestralarchetypes.utils.PlayerMovementEntry;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -23,7 +24,7 @@ public class ServerPlayerEntityMixin {
    private void archetypesResetVelTrackerTeleport2(TeleportTarget teleportTarget, CallbackInfoReturnable<ServerPlayerEntity> cir){
       ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
       if(PLAYER_MOVEMENT_TRACKER.containsKey(player)){
-         PLAYER_MOVEMENT_TRACKER.put(player, new Pair<>(teleportTarget.position(), new Vec3d(0,0,0)));
+         PLAYER_MOVEMENT_TRACKER.put(player, PlayerMovementEntry.blankEntry(player));
       }
    }
    
@@ -31,7 +32,7 @@ public class ServerPlayerEntityMixin {
    private void archetypes_resetVelTrackerTeleport(CallbackInfo ci){
       ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
       if(PLAYER_MOVEMENT_TRACKER.containsKey(player)){
-         PLAYER_MOVEMENT_TRACKER.put(player, new Pair<>(player.getPos(), new Vec3d(0,0,0)));
+         PLAYER_MOVEMENT_TRACKER.put(player, PlayerMovementEntry.blankEntry(player));
       }
    }
    

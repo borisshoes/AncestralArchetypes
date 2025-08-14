@@ -5,6 +5,7 @@ import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
 import net.borisshoes.ancestralarchetypes.misc.SpyglassRevealEvent;
 import net.borisshoes.ancestralarchetypes.utils.MiscUtils;
+import net.borisshoes.ancestralarchetypes.utils.PlayerMovementEntry;
 import net.borisshoes.ancestralarchetypes.utils.SoundUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.component.DataComponentTypes;
@@ -49,20 +50,11 @@ import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.ITEMS;
 
 
 public class TickCallback {
+   
    public static void onTick(MinecraftServer server){
-      
       for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList()){
          IArchetypeProfile profile = profile(player);
          ServerWorld world = player.getServerWorld();
-         
-         if(PLAYER_MOVEMENT_TRACKER.containsKey(player) && !player.isDead()){
-            Pair<Vec3d,Vec3d> tracker = PLAYER_MOVEMENT_TRACKER.get(player);
-            Vec3d oldPos = tracker.getLeft();
-            Vec3d newPos = player.getPos();
-            PLAYER_MOVEMENT_TRACKER.put(player,new Pair<>(newPos, newPos.subtract(oldPos)));
-         }else{
-            PLAYER_MOVEMENT_TRACKER.put(player,new Pair<>(player.getPos(), new Vec3d(0,0,0)));
-         }
          
          if(profile.getHealthUpdate() != 0){
             double scale = -(1 - Math.pow(0.5,profile.getDeathReductionSizeLevel()));
@@ -278,14 +270,15 @@ public class TickCallback {
                }
             }
             
-            boolean shouldTriggerSlowFall = (PLAYER_MOVEMENT_TRACKER.get(player).getRight().getY() < -ArchetypeConfig.getDouble(ArchetypeRegistry.SLOW_FALLER_TRIGGER_SPEED))
+            double yMov = PLAYER_MOVEMENT_TRACKER.getOrDefault(player,PlayerMovementEntry.blankEntry(player)).velocity().getY();
+            boolean shouldTriggerSlowFall = (yMov < -ArchetypeConfig.getDouble(ArchetypeRegistry.SLOW_FALLER_TRIGGER_SPEED))
                   && !player.isGliding() && !player.getAbilities().flying && predictedFallDist > player.getAttributeValue(EntityAttributes.SAFE_FALL_DISTANCE) && !player.isSwimming();
             if(shouldTriggerSlowFall){
                if(!player.isSneaking()){
                   if(!player.hasStatusEffect(StatusEffects.SLOW_FALLING)){
                      SoundUtils.playSongToPlayer(player,SoundEvents.ENTITY_ENDER_DRAGON_FLAP,0.3f,1);
                   }else{
-                     if(PLAYER_MOVEMENT_TRACKER.get(player).getRight().getY() < -1.25*ArchetypeConfig.getDouble(ArchetypeRegistry.SLOW_FALLER_TRIGGER_SPEED)){
+                     if(yMov < -1.25*ArchetypeConfig.getDouble(ArchetypeRegistry.SLOW_FALLER_TRIGGER_SPEED)){
                         player.addVelocity(0,0.2,0);
                         player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player));
                      }

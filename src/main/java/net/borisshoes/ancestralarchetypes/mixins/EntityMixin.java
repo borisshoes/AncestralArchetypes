@@ -32,13 +32,12 @@ public class EntityMixin {
          
          if(profile.hasAbility(ArchetypeRegistry.BOUNCY) && !player.isDead()){
             if (!player.bypassesLandingEffects()) {
-               Pair<Vec3d, Vec3d> trackedMove = PLAYER_MOVEMENT_TRACKER.get(player);
-               Vec3d oldVel = trackedMove.getRight();
+               Vec3d oldVel = PLAYER_MOVEMENT_TRACKER.get(player).velocity();
                if (oldVel.y < 0.0) {
-                  double newY = oldVel.y > -0.4 ? 0 : -0.9*oldVel.y;
+                  double newY = oldVel.y > -0.425 ? 0 : -0.9*oldVel.y;
                   Vec3d newVel = new Vec3d(oldVel.x, newY, oldVel.z);
                   player.fallDistance = 0;
-                  player.setVelocity(newVel.x, newVel.y, newVel.z);
+                  player.setVelocity(newVel);
                   player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player.getId(), newVel));
                }
             }

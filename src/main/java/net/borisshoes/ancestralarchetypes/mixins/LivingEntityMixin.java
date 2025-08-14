@@ -11,7 +11,6 @@ import net.borisshoes.ancestralarchetypes.gui.MountInventoryGui;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
 import net.borisshoes.ancestralarchetypes.items.GraphicalItem;
 import net.borisshoes.ancestralarchetypes.utils.MiscUtils;
-import net.minecraft.client.particle.Particle;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
@@ -21,11 +20,8 @@ import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.HorseEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.DustColorTransitionParticleEffect;
-import net.minecraft.particle.DustParticleEffect;
-import net.minecraft.particle.EntityEffectParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.screen.*;
@@ -210,10 +206,25 @@ public abstract class LivingEntityMixin {
          IArchetypeProfile profile = profile(player);
          if(profile.hasAbility(ArchetypeRegistry.NO_FALL_DAMAGE) && source.isIn(DamageTypeTags.IS_FALL)){
             cir.setReturnValue(false);
+         }else if(profile.hasAbility(ArchetypeRegistry.BOUNCY) && source.isIn(DamageTypeTags.IS_FALL) && !player.isSneaking()){
+            cir.setReturnValue(false);
          }
       }
    }
    
+   @ModifyReturnValue(method = "canHaveStatusEffect", at = @At("RETURN"))
+   private boolean archetypes_effectImmunity(boolean original, StatusEffectInstance effect){
+      LivingEntity entity = (LivingEntity) (Object) this;
+      if(entity instanceof ServerPlayerEntity player){
+         IArchetypeProfile profile = profile(player);
+         if(profile.hasAbility(ArchetypeRegistry.ANTIVENOM) && effect.equals(StatusEffects.POISON)){
+            return false;
+         }else if(profile.hasAbility(ArchetypeRegistry.WITHERING) && effect.equals(StatusEffects.WITHER)){
+            return false;
+         }
+      }
+      return original;
+   }
    
    @ModifyReturnValue(method = "modifyAppliedDamage", at = @At("RETURN"))
    private float archetypes_modifyDamage(float original, DamageSource source, float amount){

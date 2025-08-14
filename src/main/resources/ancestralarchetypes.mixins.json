@@ -19,6 +19,7 @@
     "PlayerEntityMixin",
     "PolymerBlockUtilsMixin",
     "ServerPlayerEntityMixin",
+    "ServerPlayNetworkHandlerMixin",
     "SnowballEntityMixin"
   ],
   "client": [

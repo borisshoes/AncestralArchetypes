@@ -5,6 +5,7 @@ import net.borisshoes.ancestralarchetypes.callbacks.*;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.misc.SpyglassRevealEvent;
 import net.borisshoes.ancestralarchetypes.utils.ConfigUtils;
+import net.borisshoes.ancestralarchetypes.utils.PlayerMovementEntry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -40,7 +41,7 @@ public class AncestralArchetypes implements ModInitializer, ClientModInitializer
    public static final String MOD_ID = "ancestralarchetypes";
    
    public static ConfigUtils CONFIG;
-   public static final HashMap<ServerPlayerEntity, Pair<Vec3d,Vec3d>> PLAYER_MOVEMENT_TRACKER = new HashMap<>();
+   public static final HashMap<ServerPlayerEntity, PlayerMovementEntry> PLAYER_MOVEMENT_TRACKER = new HashMap<>();
    public static final ArrayList<SpyglassRevealEvent> SPYGLASS_REVEAL_EVENTS = new ArrayList<>();
    public static MinecraftServer SERVER = null;
    public static boolean hasArcana = false;
@@ -60,6 +61,7 @@ public class AncestralArchetypes implements ModInitializer, ClientModInitializer
       ServerEntityEvents.ENTITY_UNLOAD.register(EntityLoadCallbacks::unloadEntity);
       UseEntityCallback.EVENT.register(EntityUseCallback::useEntity);
       ServerPlayConnectionEvents.DISCONNECT.register(PlayerConnectionCallback::onPlayerLeave);
+      ServerPlayConnectionEvents.JOIN.register(PlayerConnectionCallback::onPlayerJoin);
       ServerPlayerEvents.AFTER_RESPAWN.register(PlayerRespawnCallback::onRespawn);
       AttackEntityCallback.EVENT.register(EntityAttackedCallback::attackedEntity);
       
