@@ -7,6 +7,7 @@ import net.borisshoes.ancestralarchetypes.utils.SoundUtils;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.component.type.EquippableComponent;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,6 +15,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -36,8 +38,8 @@ public class WingGliderItem extends AbilityItem{
    }
    
    @Override
-   public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected){
-      super.inventoryTick(stack, world, entity, slot, selected);
+   public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot){
+      super.inventoryTick(stack, world, entity, slot);
       
       if(!(entity instanceof ServerPlayerEntity player)) return;
       IArchetypeProfile profile = profile(player);
@@ -51,7 +53,8 @@ public class WingGliderItem extends AbilityItem{
       
       DyedColorComponent dyedColorComponent = stack.get(DataComponentTypes.DYED_COLOR);
       if(dyedColorComponent == null || dyedColorComponent.rgb() != profile.getGliderColor()){
-         stack.set(DataComponentTypes.DYED_COLOR, new DyedColorComponent(profile.getGliderColor(),false));
+         stack.set(DataComponentTypes.DYED_COLOR, new DyedColorComponent(profile.getGliderColor()));
+         stack.set(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT.with(DataComponentTypes.DYED_COLOR,true));
       }
       
       if(stack.equals(player.getEquippedStack(EquipmentSlot.CHEST)) && player.isGliding()){

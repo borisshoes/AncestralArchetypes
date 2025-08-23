@@ -61,7 +61,7 @@ public class WindChargeVolleyItem extends AbilityItem{
       shootWindCharge(player,7.0f,0.75f);
       profile(player).setAbilityCooldown(this.ability, ArchetypeConfig.getInt(ArchetypeRegistry.WIND_CHARGE_COOLDOWN));
       SoundUtils.playSound(player.getServerWorld(),player.getBlockPos(),SoundEvents.ENTITY_BREEZE_SHOOT, SoundCategory.PLAYERS,1f, 0.4f / (world.getRandom().nextFloat() * 0.4f + 0.8f));
-      player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().selectedSlot : 45, player.getStackInHand(hand)));
+      player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, player.getStackInHand(hand)));
       return ActionResult.SUCCESS;
    }
    

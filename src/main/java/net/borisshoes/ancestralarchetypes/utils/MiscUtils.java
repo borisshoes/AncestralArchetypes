@@ -47,17 +47,6 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.hasArcana;
 
 public class MiscUtils {
    
-   public static void blockWithShield(LivingEntity entity, float damage){
-      if(entity.isBlocking()){
-         ((LivingEntityAccessor) entity).invokeDamageShield(damage);
-         SoundUtils.playSound(entity.getWorld(),entity.getBlockPos(), SoundEvents.ITEM_SHIELD_BLOCK, SoundCategory.PLAYERS,1f,1f);
-         
-         if(hasArcana){
-            ArcanaCompat.triggerShieldOfFortitude(entity,damage);
-         }
-      }
-   }
-   
    public static LasercastResult lasercast(World world, Vec3d startPos, Vec3d direction, double distance, boolean blockedByShields, Entity entity){
       Vec3d rayEnd = startPos.add(direction.multiply(distance));
       BlockHitResult raycast = world.raycast(new RaycastContext(startPos,rayEnd, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, entity));

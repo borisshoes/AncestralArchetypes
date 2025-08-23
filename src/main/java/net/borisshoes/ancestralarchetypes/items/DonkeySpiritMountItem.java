@@ -41,9 +41,9 @@ public class DonkeySpiritMountItem  extends SpiritMountItem{
       donkey.getAttributeInstance(EntityAttributes.JUMP_STRENGTH).setBaseValue(0.85f);
       donkey.getAttributeInstance(EntityAttributes.SAFE_FALL_DISTANCE).setBaseValue(10.0f);
       donkey.getAttributeInstance(EntityAttributes.STEP_HEIGHT).setBaseValue(1.75f);
-      donkey.saddle(new ItemStack(Items.SADDLE), SoundCategory.NEUTRAL);
+      donkey.equipStack(EquipmentSlot.SADDLE,new ItemStack(Items.SADDLE));
       donkey.setHealth(60.0f);
-      donkey.setOwnerUuid(player.getUuid());
+      donkey.setOwner(player);
       donkey.setTame(true);
       donkey.setHasChest(true);
       return donkey;

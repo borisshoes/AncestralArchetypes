@@ -474,7 +474,7 @@ public class ArchetypeCommands {
             src.sendFeedback(() -> text, false);
             masterString.append("\n").append(text.getString());
          });
-         src.sendFeedback(() -> Text.translatable("text.ancestralarchetypes.dump_copy").styled(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, masterString.toString()))),false);
+         src.sendFeedback(() -> Text.translatable("text.ancestralarchetypes.dump_copy").styled(s -> s.withClickEvent(new ClickEvent.CopyToClipboard(masterString.toString()))),false);
          
          return 1;
       }catch(Exception e){
@@ -499,7 +499,7 @@ public class ArchetypeCommands {
             masterString.append(str);
          });
          
-         src.sendFeedback(() -> Text.translatable("text.ancestralarchetypes.dump_copy").styled(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, masterString.toString()))),false);
+         src.sendFeedback(() -> Text.translatable("text.ancestralarchetypes.dump_copy").styled(s -> s.withClickEvent(new ClickEvent.CopyToClipboard(masterString.toString()))),false);
          log(0,masterString.toString());
          
          return 1;
@@ -533,7 +533,7 @@ public class ArchetypeCommands {
             }
          });
          
-         src.sendFeedback(() -> Text.translatable("text.ancestralarchetypes.dump_copy").styled(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, masterString.toString()))),false);
+         src.sendFeedback(() -> Text.translatable("text.ancestralarchetypes.dump_copy").styled(s -> s.withClickEvent(new ClickEvent.CopyToClipboard(masterString.toString()))),false);
          log(0,masterString.toString());
          
          return 1;

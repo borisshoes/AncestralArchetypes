@@ -6,6 +6,7 @@ import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.utils.ItemUtils;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.DyedColorComponent;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -168,7 +169,8 @@ public class GraphicalItem extends Item implements PolymerItem {
    public static ItemStack withColor(GraphicItems id, int color){
       ItemStack stack = new ItemStack(ArchetypeRegistry.GRAPHICAL_ITEM);
       ItemUtils.putProperty(stack,GRAPHICS_TAG,id.id);
-      stack.set(DataComponentTypes.DYED_COLOR, new DyedColorComponent(color, false));
+      stack.set(DataComponentTypes.DYED_COLOR, new DyedColorComponent(color));
+      stack.set(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT.with(DataComponentTypes.DYED_COLOR,true));
       return stack;
    }
    

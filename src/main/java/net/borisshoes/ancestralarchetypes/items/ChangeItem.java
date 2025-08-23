@@ -41,8 +41,8 @@ public class ChangeItem extends Item implements PolymerItem {
       profile.increaseAllowedChanges(ArchetypeConfig.getInt(ArchetypeRegistry.CHANGES_PER_CHANGE_ITEM));
       if(!couldChange && profile.canChangeArchetype()){
          player.sendMessage(Text.translatable("text.ancestralarchetypes.change_reminder").styled(s ->
-               s.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/archetypes changeArchetype"))
-                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("text.ancestralarchetypes.change_hover")))
+               s.withClickEvent(new ClickEvent.RunCommand("/archetypes changeArchetype"))
+                     .withHoverEvent(new HoverEvent.ShowText(Text.translatable("text.ancestralarchetypes.change_hover")))
                      .withColor(Formatting.AQUA)));
       }
       player.getItemCooldownManager().set(user.getStackInHand(hand),20);

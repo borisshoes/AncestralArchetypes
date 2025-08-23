@@ -294,8 +294,8 @@ public class TickCallback {
          if(server.getTicks() % 18000 == 0 && profile.giveReminders()){ // Ability and Archetype check
             if(profile.getSubArchetype() == null && profile.canChangeArchetype()){
                player.sendMessage(Text.translatable("text.ancestralarchetypes.archetype_reminder").styled(s ->
-                     s.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/archetypes changeArchetype"))
-                           .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("text.ancestralarchetypes.change_hover")))
+                     s.withClickEvent(new ClickEvent.RunCommand("/archetypes changeArchetype"))
+                           .withHoverEvent(new HoverEvent.ShowText(Text.translatable("text.ancestralarchetypes.change_hover")))
                            .withColor(Formatting.AQUA)));
             }
             
@@ -324,8 +324,8 @@ public class TickCallback {
             }
             if(giveWarning){
                player.sendMessage(Text.translatable("text.ancestralarchetypes.ability_reminder").styled(s ->
-                     s.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/archetypes items"))
-                           .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("text.ancestralarchetypes.items_hover")))
+                     s.withClickEvent(new ClickEvent.RunCommand("/archetypes items"))
+                           .withHoverEvent(new HoverEvent.ShowText(Text.translatable("text.ancestralarchetypes.items_hover")))
                            .withColor(Formatting.AQUA)));
             }
          }

@@ -9,10 +9,7 @@ import net.borisshoes.ancestralarchetypes.items.*;
 import net.borisshoes.ancestralarchetypes.utils.ConfigUtils;
 import net.borisshoes.ancestralarchetypes.utils.MiscUtils;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ConsumableComponent;
-import net.minecraft.component.type.DyedColorComponent;
-import net.minecraft.component.type.EquippableComponent;
-import net.minecraft.component.type.LoreComponent;
+import net.minecraft.component.type.*;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.damage.DamageType;
 import net.minecraft.item.Item;
@@ -347,7 +344,8 @@ public class ArchetypeRegistry {
          new Item.Settings().maxCount(1).rarity(Rarity.EPIC).maxDamage(2048)
                .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.glider_description"))))
                .component(DataComponentTypes.GLIDER, Unit.INSTANCE)
-               .component(DataComponentTypes.DYED_COLOR, new DyedColorComponent(16777215,false))
+               .component(DataComponentTypes.DYED_COLOR, new DyedColorComponent(16777215))
+               .component(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT.with(DataComponentTypes.DYED_COLOR,true))
                .component(DataComponentTypes.EQUIPPABLE, EquippableComponent.builder(EquipmentSlot.CHEST).equipSound(SoundEvents.ITEM_ARMOR_EQUIP_ELYTRA).model(RegistryKey.of(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.of(MOD_ID,"glider"))).damageOnHurt(false).build())
    ));
    public static final Item HORSE_SPIRIT_MOUNT_ITEM = registerItem(HORSE_SPIRIT_MOUNT.getId(), new HorseSpiritMountItem(

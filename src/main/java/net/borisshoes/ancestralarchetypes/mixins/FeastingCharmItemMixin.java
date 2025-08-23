@@ -5,8 +5,10 @@ import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.arcananovum.items.charms.FeastingCharm;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
@@ -19,7 +21,7 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 public class FeastingCharmItemMixin {
    
    @ModifyExpressionValue(method = "inventoryTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;getStack(I)Lnet/minecraft/item/ItemStack;", ordinal = 0))
-   private ItemStack archetypes_arcanaFeastingCharm(ItemStack original, ItemStack stack, World world, Entity entity, int slot, boolean selected){
+   private ItemStack archetypes_arcanaFeastingCharm(ItemStack original, ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot){
       if(entity instanceof ServerPlayerEntity player){
          IArchetypeProfile profile = profile(player);
          if(profile.hasAbility(ArchetypeRegistry.CARNIVORE) && !original.isIn(ArchetypeRegistry.CARNIVORE_FOODS)){

@@ -46,7 +46,7 @@ public class HorseSpiritMountItem extends SpiritMountItem{
       horse.getAttributeInstance(EntityAttributes.JUMP_STRENGTH).setBaseValue(1.25f);
       horse.getAttributeInstance(EntityAttributes.SAFE_FALL_DISTANCE).setBaseValue(10.0f);
       horse.getAttributeInstance(EntityAttributes.STEP_HEIGHT).setBaseValue(2.0f);
-      horse.saddle(new ItemStack(Items.SADDLE), SoundCategory.NEUTRAL);
+      horse.equipStack(EquipmentSlot.SADDLE,new ItemStack(Items.SADDLE));
       ItemStack bodyArmor = new ItemStack(Items.DIAMOND_HORSE_ARMOR);
       bodyArmor.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.builder()
             .add(EntityAttributes.ARMOR, new EntityAttributeModifier(Identifier.ofVanilla("armor.body"), 15.0, EntityAttributeModifier.Operation.ADD_VALUE), AttributeModifierSlot.BODY)
@@ -57,7 +57,7 @@ public class HorseSpiritMountItem extends SpiritMountItem{
       horse.equipBodyArmor(bodyArmor);
       horse.setHorseVariant(profile.getHorseColor(), profile.getHorseMarking());
       horse.setHealth(60.0f);
-      horse.setOwnerUuid(player.getUuid());
+      horse.setOwner(player);
       horse.setTame(true);
       return horse;
    }

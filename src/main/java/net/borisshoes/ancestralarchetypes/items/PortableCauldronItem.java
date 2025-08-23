@@ -10,16 +10,20 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ConsumableComponents;
 import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.entity.projectile.thrown.LingeringPotionEntity;
 import net.minecraft.entity.projectile.thrown.PotionEntity;
+import net.minecraft.entity.projectile.thrown.SplashPotionEntity;
 import net.minecraft.item.*;
 import net.minecraft.item.consume.UseAction;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.potion.Potion;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -76,12 +80,16 @@ public class PortableCauldronItem extends AbilityItem{
          if(hasConsumable){
             player.setCurrentHand(hand);
          }else{
-            ProjectileEntity.spawnWithVelocity(PotionEntity::new, player.getServerWorld(), potionStack, user, -20.0f, 0.7f, 0.25f);
+            if(potionStack.isOf(Items.SPLASH_POTION)){
+               ProjectileEntity.spawnWithVelocity(SplashPotionEntity::new, player.getServerWorld(), potionStack, user, -20.0f, 0.7f, 0.25f);
+            }else if(potionStack.isOf(Items.LINGERING_POTION)){
+               ProjectileEntity.spawnWithVelocity(LingeringPotionEntity::new, player.getServerWorld(), potionStack, user, -20.0f, 0.7f, 0.25f);
+            }
             PotionContentsComponent potionComp = potionStack.get(DataComponentTypes.POTION_CONTENTS);
             AtomicInteger totalDuration = new AtomicInteger();
             potionComp.forEachEffect(effect -> {
                totalDuration.addAndGet(effect.getDuration());
-            });
+            }, 1);
             profile.setAbilityCooldown(this.ability, (int) Math.max(ArchetypeConfig.getInt(ArchetypeRegistry.CAULDRON_INSTANT_EFFECT_COOLDOWN),totalDuration.get()*ArchetypeConfig.getDouble(ArchetypeRegistry.CAULDRON_THROWABLE_COOLDOWN_MODIFIER)));
          }
       }
@@ -100,11 +108,11 @@ public class PortableCauldronItem extends AbilityItem{
          potionComp.forEachEffect(effect -> {
             totalDuration.addAndGet(effect.getDuration());
             player.addStatusEffect(effect);
-         });
+         }, 1);
          profile.setAbilityCooldown(this.ability, (int) Math.max(ArchetypeConfig.getInt(ArchetypeRegistry.CAULDRON_INSTANT_EFFECT_COOLDOWN),totalDuration.get()*ArchetypeConfig.getDouble(ArchetypeRegistry.CAULDRON_DRINKABLE_COOLDOWN_MODIFIER)));
       }
       
-      player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().selectedSlot : 45, stack));
+      player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, stack));
       return stack;
    }
    
@@ -117,8 +125,8 @@ public class PortableCauldronItem extends AbilityItem{
    }
    
    @Override
-   public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected){
-      super.inventoryTick(stack, world, entity, slot, selected);
+   public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot){
+      super.inventoryTick(stack, world, entity, slot);
       if(!(entity instanceof ServerPlayerEntity player)) return;
       IArchetypeProfile profile = profile(player);
       ItemStack potionStack = profile.getPotionStack();

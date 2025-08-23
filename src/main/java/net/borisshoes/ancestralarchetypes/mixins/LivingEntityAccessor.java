@@ -8,6 +8,5 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin({LivingEntity.class})
 public interface LivingEntityAccessor {
-   @Invoker
-   void invokeDamageShield(float var1);
+
 }

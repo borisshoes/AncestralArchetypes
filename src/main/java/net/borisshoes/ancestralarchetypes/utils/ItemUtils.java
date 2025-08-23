@@ -12,50 +12,50 @@ public class ItemUtils {
       NbtComponent nbtComponent = stack.get(DataComponentTypes.CUSTOM_DATA);
       if(nbtComponent == null) return new NbtCompound();
       NbtCompound data = nbtComponent.copyNbt();
-      if(data != null && data.contains(AncestralArchetypes.MOD_ID, NbtElement.COMPOUND_TYPE)){
-         return data.getCompound(AncestralArchetypes.MOD_ID);
+      if(data.contains(AncestralArchetypes.MOD_ID)){
+         return data.getCompound(AncestralArchetypes.MOD_ID).orElse(new NbtCompound());
       }
       return new NbtCompound();
    }
    
    public static int getIntProperty(ItemStack stack, String key){
       NbtCompound archetypeTag = getArchetypeTag(stack);
-      return  archetypeTag == null || !archetypeTag.contains(key, NbtElement.INT_TYPE) ? 0 : archetypeTag.getInt(key);
+      return  archetypeTag == null || !archetypeTag.contains(key) ? 0 : archetypeTag.getInt(key,0);
    }
    
    public static String getStringProperty(ItemStack stack, String key){
       NbtCompound archetypeTag = getArchetypeTag(stack);
-      return  archetypeTag == null || !archetypeTag.contains(key, NbtElement.STRING_TYPE) ? "" : archetypeTag.getString(key);
+      return  archetypeTag == null || !archetypeTag.contains(key) ? "" : archetypeTag.getString(key,"");
    }
    
    public static boolean getBooleanProperty(ItemStack stack, String key){
       NbtCompound archetypeTag = getArchetypeTag(stack);
-      return archetypeTag == null || !archetypeTag.contains(key, NbtElement.BYTE_TYPE) ? false : archetypeTag.getBoolean(key);
+      return archetypeTag == null || !archetypeTag.contains(key) ? false : archetypeTag.getBoolean(key,false);
    }
    
    public static double getDoubleProperty(ItemStack stack, String key){
       NbtCompound archetypeTag = getArchetypeTag(stack);
-      return  archetypeTag == null || !archetypeTag.contains(key, NbtElement.DOUBLE_TYPE) ? 0.0 : archetypeTag.getDouble(key);
+      return  archetypeTag == null || !archetypeTag.contains(key) ? 0.0 : archetypeTag.getDouble(key,0.0);
    }
    
    public static float getFloatProperty(ItemStack stack, String key){
       NbtCompound archetypeTag = getArchetypeTag(stack);
-      return  archetypeTag == null || !archetypeTag.contains(key, NbtElement.FLOAT_TYPE) ? 0.0f : archetypeTag.getFloat(key);
+      return  archetypeTag == null || !archetypeTag.contains(key) ? 0.0f : archetypeTag.getFloat(key, 0f);
    }
    
    public static long getLongProperty(ItemStack stack, String key){
       NbtCompound archetypeTag = getArchetypeTag(stack);
-      return  archetypeTag == null || !archetypeTag.contains(key, NbtElement.LONG_TYPE) ? 0 : archetypeTag.getLong(key);
+      return  archetypeTag == null || !archetypeTag.contains(key) ? 0 : archetypeTag.getLong(key, 0L);
    }
    
-   public static NbtList getListProperty(ItemStack stack, String key, int listType){
+   public static NbtList getListProperty(ItemStack stack, String key){
       NbtCompound archetypeTag = getArchetypeTag(stack);
-      return  archetypeTag == null || !archetypeTag.contains(key, NbtElement.LIST_TYPE) ? new NbtList() : archetypeTag.getList(key,listType);
+      return  archetypeTag == null || !archetypeTag.contains(key) ? new NbtList() : archetypeTag.getList(key).orElse(new NbtList());
    }
    
    public static NbtCompound getCompoundProperty(ItemStack stack, String key){
       NbtCompound archetypeTag = getArchetypeTag(stack);
-      return  archetypeTag == null || !archetypeTag.contains(key, NbtElement.COMPOUND_TYPE) ? new NbtCompound() : archetypeTag.getCompound(key);
+      return  archetypeTag == null || !archetypeTag.contains(key) ? new NbtCompound() : archetypeTag.getCompound(key).orElse(new NbtCompound());
    }
    
    public static void putProperty(ItemStack stack, String key, int property){
@@ -90,11 +90,6 @@ public class ItemUtils {
    public static boolean hasProperty(ItemStack stack, String key){
       NbtCompound archetypeTag = getArchetypeTag(stack);
       return archetypeTag.contains(key);
-   }
-   
-   public static boolean hasProperty(ItemStack stack, String key, int type){
-      NbtCompound archetypeTag = getArchetypeTag(stack);
-      return archetypeTag.contains(key,type);
    }
    
    public static boolean removeProperty(ItemStack stack, String key){

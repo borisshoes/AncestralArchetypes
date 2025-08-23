@@ -55,59 +55,59 @@ public class ArchetypeProfile implements IArchetypeProfile {
    
    @Override
    public void readFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup wrapperLookup){
-      this.deathReductionSizeLevel = tag.getInt("deathReductionSizeLevel");
-      this.glideTime = tag.getFloat("glideTime");
-      this.gliderActive = tag.getBoolean("gliderActive");
-      this.archetypeChangesAllowed = tag.getInt("archetypeChangesAllowed");
-      if(tag.contains("gliderColor")) this.gliderColor = tag.getInt("gliderColor");
-      this.giveReminders = tag.getBoolean("giveReminders");
-      this.subArchetype = ArchetypeRegistry.SUBARCHETYPES.get(Identifier.of(MOD_ID, tag.getString("subArchetype")));
-      this.giveItemsCooldown = tag.getInt("giveItemsCooldown");
-      this.healthUpdate = tag.getFloat("loginHealth");
+      this.deathReductionSizeLevel = tag.getInt("deathReductionSizeLevel",0);
+      this.glideTime = tag.getFloat("glideTime",0f);
+      this.gliderActive = tag.getBoolean("gliderActive",false);
+      this.archetypeChangesAllowed = tag.getInt("archetypeChangesAllowed",0);
+      if(tag.contains("gliderColor")) this.gliderColor = tag.getInt("gliderColor",0xffffff);
+      this.giveReminders = tag.getBoolean("giveReminders",ArchetypeConfig.getBoolean(ArchetypeRegistry.REMINDERS_ON_BY_DEFAULT));
+      this.subArchetype = ArchetypeRegistry.SUBARCHETYPES.get(Identifier.of(MOD_ID, tag.getString("subArchetype","")));
+      this.giveItemsCooldown = tag.getInt("giveItemsCooldown",0);
+      this.healthUpdate = tag.getFloat("loginHealth",20f);
       this.calculateAbilities();
       
       abilityCooldowns.clear();
       if(tag.contains("cooldowns")){
-         NbtCompound cooldownTag = tag.getCompound("cooldowns");
+         NbtCompound cooldownTag = tag.getCompound("cooldowns").orElse(new NbtCompound());
          for(String key : cooldownTag.getKeys()){
             ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.get(Identifier.of(MOD_ID, key));
             if(ability != null){
-               abilityCooldowns.put(ability,cooldownTag.getInt(key));
+               abilityCooldowns.put(ability,cooldownTag.getInt(key,0));
             }
          }
       }
       
       if(tag.contains("potionBrewerStack")){
-         this.potionBrewerStack = ItemStack.fromNbtOrEmpty(wrapperLookup,tag.getCompound("potionBrewerStack"));
+         this.potionBrewerStack = ItemStack.fromNbt(wrapperLookup,tag.getCompound("potionBrewerStack").orElse(new NbtCompound())).orElse(ItemStack.EMPTY);
       }
       
       if(tag.contains("horseMarking")){
-         this.horseMarking = HorseMarking.byIndex(tag.getInt("horseMarking"));
+         this.horseMarking = HorseMarking.byIndex(tag.getInt("horseMarking",0));
       }
       if(tag.contains("horseColor")){
-         this.horseColor = HorseColor.byId(tag.getInt("horseColor"));
+         this.horseColor = HorseColor.byIndex(tag.getInt("horseColor",0));
       }
       if(tag.contains("mountName")){
-         this.mountName = tag.getString("mountName");
+         this.mountName = tag.getString("mountName","");
       }
       
       this.mountData.clear();
       if(tag.contains("mountData")){
-         NbtCompound mountDataTag = tag.getCompound("mountData");
+         NbtCompound mountDataTag = tag.getCompound("mountData").orElse(new NbtCompound());
          for(String key : mountDataTag.getKeys()){
             ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.get(Identifier.of(MOD_ID, key));
             if(ability != null){
-               NbtCompound entryTag = mountDataTag.getCompound(key);
-               UUID uuid = MiscUtils.getUUIDOrNull(entryTag.getString("id"));
-               mountData.put(ability,new Pair<>(uuid,entryTag.getFloat("hp")));
+               NbtCompound entryTag = mountDataTag.getCompound(key).orElse(new NbtCompound());
+               UUID uuid = MiscUtils.getUUIDOrNull(entryTag.getString("id",""));
+               mountData.put(ability,new Pair<>(uuid,entryTag.getFloat("hp",1f)));
             }
          }
       }
       
-      NbtList nbtList = tag.getList("mountInventory", NbtElement.COMPOUND_TYPE);
+      NbtList nbtList = tag.getList("mountInventory").orElse(new NbtList());
       for (int i = 0; i < nbtList.size(); ++i) {
-         NbtCompound nbtCompound = nbtList.getCompound(i);
-         int j = nbtCompound.getByte("Slot") & 0xFF;
+         NbtCompound nbtCompound = nbtList.getCompound(i).orElse(new NbtCompound());
+         int j = nbtCompound.getByte("Slot", (byte) 0) & 0xFF;
          if (j >= mountInventory.size()) continue;
          mountInventory.setStack(j, ItemStack.fromNbt(wrapperLookup, nbtCompound).orElse(ItemStack.EMPTY));
       }
@@ -117,8 +117,8 @@ public class ArchetypeProfile implements IArchetypeProfile {
    public void writeToNbt(NbtCompound tag, RegistryWrapper.WrapperLookup wrapperLookup){
       tag.putInt("deathReductionSizeLevel",this.deathReductionSizeLevel);
       tag.putInt("gliderColor",this.gliderColor);
-      tag.putInt("horseMarking",this.horseMarking.getId());
-      tag.putInt("horseColor",this.horseColor.getId());
+      tag.putInt("horseMarking",this.horseMarking.getIndex());
+      tag.putInt("horseColor",this.horseColor.getIndex());
       tag.putInt("archetypeChangesAllowed",this.archetypeChangesAllowed);
       tag.putInt("giveItemsCooldown",this.giveItemsCooldown);
       tag.putFloat("glideTime",this.glideTime);
@@ -131,7 +131,7 @@ public class ArchetypeProfile implements IArchetypeProfile {
       NbtCompound cooldownTag = new NbtCompound();
       abilityCooldowns.forEach((ability, cooldown) -> cooldownTag.putInt(ability.getId(),cooldown));
       tag.put("cooldowns",cooldownTag);
-      tag.put("potionBrewerStack",potionBrewerStack.toNbtAllowEmpty(wrapperLookup));
+      tag.put("potionBrewerStack",potionBrewerStack.toNbt(wrapperLookup));
       
       NbtCompound mountDataTag = new NbtCompound();
       mountData.forEach((ability, pair) -> {

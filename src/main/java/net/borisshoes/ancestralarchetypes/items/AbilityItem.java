@@ -4,11 +4,13 @@ import eu.pb4.polymer.core.api.item.PolymerItem;
 import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +29,7 @@ public abstract class AbilityItem extends Item implements PolymerItem {
    }
    
    @Override
-   public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected){
+   public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, @Nullable EquipmentSlot slot){
       boolean dontDestroy = false;
       
       if(entity instanceof ServerPlayerEntity player){

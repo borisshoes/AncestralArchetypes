@@ -85,7 +85,7 @@ public class FireballVolleyItem extends AbilityItem{
       shootFireball(player,5.0f);
       shootFireball(player,5.0f);
       profile(player).setAbilityCooldown(this.ability,ArchetypeConfig.getInt(ArchetypeRegistry.FIREBALL_COOLDOWN));
-      player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().selectedSlot : 45, stack));
+      player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, stack));
       return stack;
    }
    
