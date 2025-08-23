@@ -66,7 +66,7 @@ public class ArchetypeProfile implements IArchetypeProfile {
       this.glideTime = view.getFloat("glideTime",0f);
       this.gliderActive = view.getBoolean("gliderActive",false);
       this.archetypeChangesAllowed = view.getInt("archetypeChangesAllowed",0);
-      if(view.contains("gliderColor")) this.gliderColor = view.getInt("gliderColor",0xffffff);
+      this.gliderColor = view.getInt("gliderColor",0xffffff);
       this.giveReminders = view.getBoolean("giveReminders",ArchetypeConfig.getBoolean(ArchetypeRegistry.REMINDERS_ON_BY_DEFAULT));
       this.subArchetype = ArchetypeRegistry.SUBARCHETYPES.get(Identifier.of(MOD_ID, view.getString("subArchetype","")));
       this.giveItemsCooldown = view.getInt("giveItemsCooldown",0);
@@ -74,40 +74,27 @@ public class ArchetypeProfile implements IArchetypeProfile {
       this.calculateAbilities();
       
       abilityCooldowns.clear();
-      if(view.contains("cooldowns")){
-         NbtCompound cooldownTag = view.read("cooldowns",NbtCompound.CODEC).orElse(new NbtCompound());
-         for(String key : cooldownTag.getKeys()){
-            ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.get(Identifier.of(MOD_ID, key));
-            if(ability != null){
-               abilityCooldowns.put(ability,cooldownTag.getInt(key,0));
-            }
+      NbtCompound cooldownTag = view.read("cooldowns",NbtCompound.CODEC).orElse(new NbtCompound());
+      for(String key : cooldownTag.getKeys()){
+         ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.get(Identifier.of(MOD_ID, key));
+         if(ability != null){
+            abilityCooldowns.put(ability,cooldownTag.getInt(key,0));
          }
       }
       
-      if(view.contains("potionBrewerStack")){
-         this.potionBrewerStack = view.read("potionBrewerStack",ItemStack.CODEC).orElse(ItemStack.EMPTY);
-      }
-      
-      if(view.contains("horseMarking")){
-         this.horseMarking = HorseMarking.byIndex(view.getInt("horseMarking",0));
-      }
-      if(view.contains("horseColor")){
-         this.horseColor = HorseColor.byIndex(view.getInt("horseColor",0));
-      }
-      if(view.contains("mountName")){
-         this.mountName = view.getString("mountName","");
-      }
+      this.potionBrewerStack = view.read("potionBrewerStack",ItemStack.CODEC).orElse(ItemStack.EMPTY);
+      this.horseMarking = HorseMarking.byIndex(view.getInt("horseMarking",0));
+      this.horseColor = HorseColor.byIndex(view.getInt("horseColor",0));
+      this.mountName = view.getString("mountName","");
       
       this.mountData.clear();
-      if(view.contains("mountData")){
-         NbtCompound mountDataTag = view.read("mountData",NbtCompound.CODEC).orElse(new NbtCompound());
-         for(String key : mountDataTag.getKeys()){
-            ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.get(Identifier.of(MOD_ID, key));
-            if(ability != null){
-               NbtCompound entryTag = mountDataTag.getCompound(key).orElse(new NbtCompound());
-               UUID uuid = MiscUtils.getUUIDOrNull(entryTag.getString("id",""));
-               mountData.put(ability,new Pair<>(uuid,entryTag.getFloat("hp",1f)));
-            }
+      NbtCompound mountDataTag = view.read("mountData",NbtCompound.CODEC).orElse(new NbtCompound());
+      for(String key : mountDataTag.getKeys()){
+         ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.get(Identifier.of(MOD_ID, key));
+         if(ability != null){
+            NbtCompound entryTag = mountDataTag.getCompound(key).orElse(new NbtCompound());
+            UUID uuid = MiscUtils.getUUIDOrNull(entryTag.getString("id",""));
+            mountData.put(ability,new Pair<>(uuid,entryTag.getFloat("hp",1f)));
          }
       }
       
