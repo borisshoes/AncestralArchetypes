@@ -74,7 +74,7 @@ public class ItemMixin {
          if((profile.hasAbility(ArchetypeRegistry.SLIME_TOTEM) && stack.isIn(ArchetypeRegistry.SLIME_GROW_ITEMS))
                || (profile.hasAbility(ArchetypeRegistry.MAGMA_TOTEM) && stack.isIn(ArchetypeRegistry.MAGMA_CUBE_GROW_ITEMS))){
             profile.changeDeathReductionSizeLevel(true);
-            playerEntity.getServerWorld().spawnParticles(ParticleTypes.TOTEM_OF_UNDYING,playerEntity.getX(), playerEntity.getY()+playerEntity.getHeight()/2, playerEntity.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
+            playerEntity.getWorld().spawnParticles(ParticleTypes.TOTEM_OF_UNDYING,playerEntity.getX(), playerEntity.getY()+playerEntity.getHeight()/2, playerEntity.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
             playerEntity.playSound(SoundEvents.ENTITY_ZOMBIE_VILLAGER_CONVERTED);
          }
          

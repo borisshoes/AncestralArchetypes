@@ -118,7 +118,7 @@ public abstract class LivingEntityMixin {
             break block;
          }
          
-         remove = !player.getServerWorld().getRegistryKey().getValue().equals(entityWorld.getRegistryKey().getValue());
+         remove = !player.getWorld().getRegistryKey().getValue().equals(entityWorld.getRegistryKey().getValue());
          IArchetypeProfile profile = profile(player);
          ArchetypeAbility ability = MiscUtils.abilityFromTag(tags.getFirst());
          if(entity.getControllingPassenger() != null && !entity.getControllingPassenger().equals(tameable.getOwner())) entity.removeAllPassengers();
@@ -169,12 +169,12 @@ public abstract class LivingEntityMixin {
          IArchetypeProfile profile = profile(player);
          if(profile.hasAbility(ArchetypeRegistry.MAGMA_TOTEM) && profile.getDeathReductionSizeLevel() <= 1){
             profile.changeDeathReductionSizeLevel(false);
-            player.getServerWorld().spawnParticles(ParticleTypes.TOTEM_OF_UNDYING,player.getX(), player.getY()+player.getHeight()/2, player.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
+            player.getWorld().spawnParticles(ParticleTypes.TOTEM_OF_UNDYING,player.getX(), player.getY()+player.getHeight()/2, player.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
             playSound(SoundEvents.ENTITY_ZOMBIE_VILLAGER_CURE);
             return true;
          }else if(profile.hasAbility(ArchetypeRegistry.SLIME_TOTEM) && profile.getDeathReductionSizeLevel() <= 1){
             profile.changeDeathReductionSizeLevel(false);
-            player.getServerWorld().spawnParticles(ParticleTypes.TOTEM_OF_UNDYING,player.getX(), player.getY()+player.getHeight()/2, player.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
+            player.getWorld().spawnParticles(ParticleTypes.TOTEM_OF_UNDYING,player.getX(), player.getY()+player.getHeight()/2, player.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
             playSound(SoundEvents.ENTITY_ZOMBIE_VILLAGER_CURE);
             return true;
          }
@@ -256,7 +256,7 @@ public abstract class LivingEntityMixin {
                if(behind){
                   newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.PLAYER_SNEAK_ATTACK_MODIFIER);
                   DustColorTransitionParticleEffect particle = new DustColorTransitionParticleEffect(0xee1c1c,0x621313,1.0f);
-                  player.getServerWorld().spawnParticles(particle,entity.getX(), entity.getY()+entity.getHeight()/2, entity.getZ(), 25, 0.25, 0.25, 0.25, 0.5);
+                  player.getWorld().spawnParticles(particle,entity.getX(), entity.getY()+entity.getHeight()/2, entity.getZ(), 25, 0.25, 0.25, 0.25, 0.5);
                }
             }else{
                boolean foundAttacker = false;
@@ -269,7 +269,7 @@ public abstract class LivingEntityMixin {
                if(!foundAttacker){
                   newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.MOB_SNEAK_ATTACK_MODIFIER);
                   DustColorTransitionParticleEffect particle = new DustColorTransitionParticleEffect(0xee1c1c,0x621313,1.0f);
-                  player.getServerWorld().spawnParticles(particle,entity.getX(), entity.getY()+entity.getHeight()/2, entity.getZ(), 25, 0.25, 0.25, 0.25, 0.5);
+                  player.getWorld().spawnParticles(particle,entity.getX(), entity.getY()+entity.getHeight()/2, entity.getZ(), 25, 0.25, 0.25, 0.25, 0.5);
                }
             }
          }

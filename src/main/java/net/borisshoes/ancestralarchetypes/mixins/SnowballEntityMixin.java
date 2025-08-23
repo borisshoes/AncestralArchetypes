@@ -24,7 +24,7 @@ public class SnowballEntityMixin {
       if(entity instanceof ServerPlayerEntity player){
          IArchetypeProfile profile = profile(player);
          if(profile.hasAbility(ArchetypeRegistry.DAMAGED_BY_COLD)){
-            entity.damage(player.getServerWorld(), snowball.getDamageSources().thrown(snowball, snowball.getOwner()), (float) ArchetypeConfig.getDouble(ArchetypeRegistry.SNOWBALL_DAMAGE));
+            entity.damage(player.getWorld(), snowball.getDamageSources().thrown(snowball, snowball.getOwner()), (float) ArchetypeConfig.getDouble(ArchetypeRegistry.SNOWBALL_DAMAGE));
          }
       }
    }

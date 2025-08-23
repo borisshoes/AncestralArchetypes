@@ -10,14 +10,14 @@ import net.minecraft.registry.RegistryWrapper;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ItemTagGenerator extends FabricTagProvider<Item> {
+public class ItemTagGenerator extends FabricTagProvider.ItemTagProvider {
    public ItemTagGenerator(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
-      super(output, RegistryKeys.ITEM, registriesFuture);
+      super(output, registriesFuture);
    }
    
    @Override
    protected void configure(RegistryWrapper.WrapperLookup lookup) {
-      getOrCreateTagBuilder(ArchetypeRegistry.CARNIVORE_FOODS)
+      valueLookupBuilder(ArchetypeRegistry.CARNIVORE_FOODS)
             .add(Items.BEEF)
             .add(Items.COOKED_BEEF)
             .add(Items.PORKCHOP)
@@ -38,10 +38,10 @@ public class ItemTagGenerator extends FabricTagProvider<Item> {
             .add(Items.SPIDER_EYE)
             .add(Items.RABBIT_STEW)
             ;
-      getOrCreateTagBuilder(ArchetypeRegistry.SLIME_GROW_ITEMS)
+      valueLookupBuilder(ArchetypeRegistry.SLIME_GROW_ITEMS)
             .add(Items.SLIME_BALL)
             ;
-      getOrCreateTagBuilder(ArchetypeRegistry.MAGMA_CUBE_GROW_ITEMS)
+      valueLookupBuilder(ArchetypeRegistry.MAGMA_CUBE_GROW_ITEMS)
             .add(Items.MAGMA_CREAM)
       ;
    }

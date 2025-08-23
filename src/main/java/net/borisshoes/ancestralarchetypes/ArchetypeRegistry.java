@@ -490,8 +490,8 @@ public class ArchetypeRegistry {
    public static void initialize(){
       PolymerResourcePackUtils.addModAssets(MOD_ID);
       
-      PolymerItemUtils.ITEM_CHECK.register(
-            (itemStack) -> {
+      PolymerItemUtils.CONTEXT_ITEM_CHECK.register(
+            (itemStack, packetContext) -> {
                boolean isGolemFood = TUFF_FOODS.containsKey(itemStack.getItem()) || IRON_FOODS.containsKey(itemStack.getItem()) || COPPER_FOODS.containsKey(itemStack.getItem());
                boolean isGrowItem = itemStack.isIn(SLIME_GROW_ITEMS) || itemStack.isIn(MAGMA_CUBE_GROW_ITEMS);
                return isGolemFood || isGrowItem;

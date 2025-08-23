@@ -18,13 +18,13 @@ public class BiomeTagGenerator extends FabricTagProvider<Biome> {
    
    @Override
    protected void configure(RegistryWrapper.WrapperLookup lookup) {
-      getOrCreateTagBuilder(ArchetypeRegistry.COLD_DAMAGE_EXCEPTION_BIOMES)
+      builder(ArchetypeRegistry.COLD_DAMAGE_EXCEPTION_BIOMES)
             .add(BiomeKeys.THE_VOID)
       ;
-      getOrCreateTagBuilder(ArchetypeRegistry.COLD_DAMAGE_INCLUDE_BIOMES)
+      builder(ArchetypeRegistry.COLD_DAMAGE_INCLUDE_BIOMES)
             .add(BiomeKeys.DEEP_FROZEN_OCEAN)
       ;
-      getOrCreateTagBuilder(ArchetypeRegistry.DRY_OUT_EXCEPTION_BIOMES)
+      builder(ArchetypeRegistry.DRY_OUT_EXCEPTION_BIOMES)
             .add(BiomeKeys.THE_VOID)
             .add(BiomeKeys.THE_END)
             .add(BiomeKeys.END_BARRENS)
@@ -32,6 +32,6 @@ public class BiomeTagGenerator extends FabricTagProvider<Biome> {
             .add(BiomeKeys.END_MIDLANDS)
             .add(BiomeKeys.SMALL_END_ISLANDS)
       ;
-      getOrCreateTagBuilder(ArchetypeRegistry.DRY_OUT_INCLUDE_BIOMES);
+      builder(ArchetypeRegistry.DRY_OUT_INCLUDE_BIOMES);
    }
 }

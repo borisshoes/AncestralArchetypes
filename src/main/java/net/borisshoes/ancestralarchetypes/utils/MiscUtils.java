@@ -1,14 +1,15 @@
 package net.borisshoes.ancestralarchetypes.utils;
 
 import com.google.common.collect.HashMultimap;
+import com.mojang.authlib.GameProfile;
+import com.mojang.logging.LogUtils;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import net.borisshoes.ancestralarchetypes.AncestralArchetypes;
 import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.items.GraphicalItem;
-import net.borisshoes.ancestralarchetypes.misc.ArcanaCompat;
-import net.borisshoes.ancestralarchetypes.mixins.LivingEntityAccessor;
+import net.borisshoes.ancestralarchetypes.mixins.EntityAccessor;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
@@ -19,19 +20,25 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.inventory.StackWithSlot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.ErrorReporter;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -43,9 +50,58 @@ import net.minecraft.world.World;
 import java.util.*;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.hasArcana;
 
 public class MiscUtils {
+   
+   public static void writeData(WriteView view, String key, DefaultedList<ItemStack> stacks) {
+      writeData(view, key, stacks, true);
+   }
+   
+   public static void writeData(WriteView view, String key, DefaultedList<ItemStack> stacks, boolean setIfEmpty) {
+      WriteView.ListAppender<StackWithSlot> listAppender = view.getListAppender(key, StackWithSlot.CODEC);
+      
+      for(int i = 0; i < stacks.size(); ++i) {
+         ItemStack itemStack = stacks.get(i);
+         if (!itemStack.isEmpty()) {
+            listAppender.add(new StackWithSlot(i, itemStack));
+         }
+      }
+      
+      if (listAppender.isEmpty() && !setIfEmpty) {
+         view.remove(key);
+      }
+      
+   }
+   
+   public static void readData(ReadView view, String key, DefaultedList<ItemStack> stacks) {
+      for(StackWithSlot stackWithSlot : view.getTypedListView(key, StackWithSlot.CODEC)){
+         if(stackWithSlot.isValidSlot(stacks.size())){
+            stacks.set(stackWithSlot.slot(), stackWithSlot.stack());
+         }
+      }
+      
+   }
+   
+   
+   public static ServerPlayerEntity getRequestedPlayer(MinecraftServer server, GameProfile requestedProfile){
+      ServerPlayerEntity requestedPlayer = server.getPlayerManager().getPlayer(requestedProfile.getName());
+      
+      if (requestedPlayer == null) {
+         requestedPlayer = new ServerPlayerEntity(server, server.getOverworld(), requestedProfile, SyncedClientOptions.createDefault());
+         Optional<ReadView> readViewOpt = server.getPlayerManager().loadPlayerData(requestedPlayer, new ErrorReporter.Logging(LogUtils.getLogger()));
+         
+         if (readViewOpt.isPresent()) {
+            ReadView readView = readViewOpt.get();
+            Optional<String> dimension = readView.getOptionalString("Dimension");
+            
+            if (dimension.isPresent()) {
+               ServerWorld world = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier.tryParse(dimension.get())));
+               if(world != null) ((EntityAccessor) requestedPlayer).callSetWorld(world);
+            }
+         }
+      }
+      return requestedPlayer;
+   }
    
    public static LasercastResult lasercast(World world, Vec3d startPos, Vec3d direction, double distance, boolean blockedByShields, Entity entity){
       Vec3d rayEnd = startPos.add(direction.multiply(distance));
@@ -56,7 +112,7 @@ public class MiscUtils {
       box = box.expand(2);
       // Primary hitscan check
       do{
-         entityHit = ProjectileUtil.raycast(entity,startPos,raycast.getPos(),box, e -> e instanceof LivingEntity && !e.isSpectator() && !hits.contains(e),100000);
+         entityHit = ProjectileUtil.raycast(entity,startPos,raycast.getPos(),box, e -> e instanceof LivingEntity && !e.isSpectator() && !hits.contains(e),distance*2);
          if(entityHit != null && entityHit.getType() == HitResult.Type.ENTITY){
             hits.add(entityHit.getEntity());
          }

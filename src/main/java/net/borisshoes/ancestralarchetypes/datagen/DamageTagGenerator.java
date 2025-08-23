@@ -20,7 +20,7 @@ public class DamageTagGenerator extends FabricTagProvider<DamageType> {
    
    @Override
    protected void configure(RegistryWrapper.WrapperLookup lookup) {
-      getOrCreateTagBuilder(ArchetypeRegistry.NO_STARTLE)
+      builder(ArchetypeRegistry.NO_STARTLE)
             .add(DamageTypes.IN_FIRE)
             .add(DamageTypes.LAVA)
             .add(DamageTypes.DRAGON_BREATH)

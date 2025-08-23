@@ -54,7 +54,7 @@ public abstract class SpiritMountItem extends AbilityItem{
       UUID mountId = profile.getMountEntity(this.ability);
       if(player.isSneaking()){
          if(mountId != null){
-            Entity entity = player.getServerWorld().getEntity(mountId);
+            Entity entity = player.getWorld().getEntity(mountId);
             if(entity != null && entity.isAlive()){
                profile.setMountHealth(this.ability, ((LivingEntity)entity).getHealth());
                entity.discard();
@@ -64,7 +64,7 @@ public abstract class SpiritMountItem extends AbilityItem{
          }
       }else{
          if(mountId != null){
-            Entity entity = player.getServerWorld().getEntity(mountId);
+            Entity entity = player.getWorld().getEntity(mountId);
             if(entity != null && entity.isAlive()){
                profile.setMountHealth(this.ability, ((LivingEntity)entity).getHealth());
                entity.discard();
@@ -97,7 +97,7 @@ public abstract class SpiritMountItem extends AbilityItem{
       }
       newMount.setPosition(summonPos);
       newMount.refreshPositionAndAngles(summonPos.x, summonPos.y, summonPos.z, player.getYaw(), player.getPitch());
-      player.getServerWorld().spawnNewEntityAndPassengers(newMount);
+      player.getWorld().spawnNewEntityAndPassengers(newMount);
       if(profile.getMountHealth(this.ability) != 0) newMount.setHealth(profile.getMountHealth(this.ability));
       newMount.addCommandTag(getSpiritMountTag());
       profile.setMountEntity(this.ability,newMount.getUuid());

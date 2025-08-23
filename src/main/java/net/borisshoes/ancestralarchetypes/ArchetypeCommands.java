@@ -418,19 +418,13 @@ public class ArchetypeCommands {
    private static HashMap<ServerPlayerEntity,IArchetypeProfile> getAllPlayerData(MinecraftServer server){
       HashMap<ServerPlayerEntity,IArchetypeProfile> data = new HashMap<>();
       try{
-         PlayerManager playerManager = server.getPlayerManager();
          UserCache userCache = server.getUserCache();
          List<ServerPlayerEntity> allPlayers = new ArrayList<>();
          List<UserCache.Entry> cacheEntries = userCache.load();
          
          for(UserCache.Entry cacheEntry : cacheEntries){
             GameProfile reqProfile = cacheEntry.getProfile();
-            ServerPlayerEntity reqPlayer = playerManager.getPlayer(reqProfile.getName());
-            
-            if(reqPlayer == null){ // Player Offline
-               reqPlayer = playerManager.createPlayer(reqProfile, SyncedClientOptions.createDefault());
-               server.getPlayerManager().loadPlayerData(reqPlayer);
-            }
+            ServerPlayerEntity reqPlayer = MiscUtils.getRequestedPlayer(server,reqProfile);
             allPlayers.add(reqPlayer);
          }
          
@@ -560,8 +554,7 @@ public class ArchetypeCommands {
             for(UserCache.Entry cacheEntry : cacheEntries){
                GameProfile reqProfile = cacheEntry.getProfile();
                if(reqProfile.getName().equalsIgnoreCase(target)){
-                  player = server.getPlayerManager().createPlayer(reqProfile, SyncedClientOptions.createDefault());
-                  server.getPlayerManager().loadPlayerData(player);
+                  player = MiscUtils.getRequestedPlayer(server,reqProfile);
                   profile = AncestralArchetypes.profile(player);
                   break;
                }

@@ -28,7 +28,7 @@ public class EntityMixin {
       Entity entity = (Entity)(Object) this;
       if(entity instanceof ServerPlayerEntity player){
          IArchetypeProfile profile = profile(player);
-         ServerWorld world = player.getServerWorld();
+         ServerWorld world = player.getWorld();
          
          if(profile.hasAbility(ArchetypeRegistry.BOUNCY) && !player.isDead()){
             if (!player.bypassesLandingEffects()) {

@@ -74,7 +74,7 @@ public abstract class PlayerEntityMixin {
          if(profile.hasAbility(ArchetypeRegistry.THORNY) && attacker.isAlive() && !source.isIn(DamageTypeTags.AVOIDS_GUARDIAN_THORNS) && !source.isOf(DamageTypes.THORNS)){
             double cap = ArchetypeConfig.getDouble(ArchetypeRegistry.THORNY_REFLECTION_CAP);
             float damage = (float) Math.min(cap < 0 ? Float.MAX_VALUE : cap, amount * ArchetypeConfig.getDouble(ArchetypeRegistry.THORNY_REFLECTION_MODIFIER));
-            attacker.damage(player.getServerWorld(), player.getDamageSources().thorns(player), damage);
+            attacker.damage(player.getWorld(), player.getDamageSources().thorns(player), damage);
          }
       }
    }

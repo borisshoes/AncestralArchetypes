@@ -54,7 +54,7 @@ public class TickCallback {
    public static void onTick(MinecraftServer server){
       for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList()){
          IArchetypeProfile profile = profile(player);
-         ServerWorld world = player.getServerWorld();
+         ServerWorld world = player.getWorld();
          
          if(profile.getHealthUpdate() != 0){
             double scale = -(1 - Math.pow(0.5,profile.getDeathReductionSizeLevel()));
@@ -216,7 +216,7 @@ public class TickCallback {
          }
          
          if(server.getTicks() % 40 == 0){
-            RegistryEntry<Biome> biome = player.getServerWorld().getBiome(player.getBlockPos());
+            RegistryEntry<Biome> biome = player.getWorld().getBiome(player.getBlockPos());
             float temp = biome.value().getTemperature();
             
             boolean shouldFreeze = (biome.isIn(ArchetypeRegistry.COLD_DAMAGE_INCLUDE_BIOMES) || (temp < 0.1 && !biome.isIn(ArchetypeRegistry.COLD_DAMAGE_EXCEPTION_BIOMES))) &&
@@ -260,10 +260,10 @@ public class TickCallback {
          
          if(profile.hasAbility(ArchetypeRegistry.SLOW_FALLER)){
             int predictedFallDist = 0;
-            for(int y = player.getBlockY(); y >= player.getBlockY()-player.getServerWorld().getHeight(); y--){
+            for(int y = player.getBlockY(); y >= player.getBlockY()-player.getWorld().getHeight(); y--){
                BlockPos blockPos = new BlockPos(player.getBlockX(),y,player.getBlockZ());
-               BlockState state = player.getServerWorld().getBlockState(blockPos);
-               if(state.isAir() || state.getCollisionShape(player.getServerWorld(),blockPos).isEmpty()){
+               BlockState state = player.getWorld().getBlockState(blockPos);
+               if(state.isAir() || state.getCollisionShape(player.getWorld(),blockPos).isEmpty()){
                   predictedFallDist++;
                }else{
                   break;

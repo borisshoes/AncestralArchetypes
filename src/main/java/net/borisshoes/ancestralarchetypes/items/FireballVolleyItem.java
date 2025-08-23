@@ -119,6 +119,6 @@ public class FireballVolleyItem extends AbilityItem{
       SmallFireballEntity smallFireballEntity = new SmallFireballEntity(player.getWorld(), player, rotatedVector.multiply(1.5));
       smallFireballEntity.setPosition(smallFireballEntity.getX(), player.getBodyY(0.5) + 0.5, smallFireballEntity.getZ());
       player.getWorld().spawnEntity(smallFireballEntity);
-      SoundUtils.playSound(player.getServerWorld(),player.getBlockPos(),SoundEvents.ENTITY_BLAZE_SHOOT, SoundCategory.PLAYERS,1f, 0.75f + player.getRandom().nextFloat()*0.5f);
+      SoundUtils.playSound(player.getWorld(),player.getBlockPos(),SoundEvents.ENTITY_BLAZE_SHOOT, SoundCategory.PLAYERS,1f, 0.75f + player.getRandom().nextFloat()*0.5f);
    }
 }

@@ -5,6 +5,7 @@ import net.borisshoes.ancestralarchetypes.callbacks.*;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.misc.SpyglassRevealEvent;
 import net.borisshoes.ancestralarchetypes.utils.ConfigUtils;
+import net.borisshoes.ancestralarchetypes.utils.MiscUtils;
 import net.borisshoes.ancestralarchetypes.utils.PlayerMovementEntry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
@@ -97,8 +98,7 @@ public class AncestralArchetypes implements ModInitializer, ClientModInitializer
       }else{
          GameProfile profile = server.getUserCache().getByUuid(playerId).orElse(null);
          if(profile == null) return null;
-         player = server.getPlayerManager().createPlayer(profile, SyncedClientOptions.createDefault());
-         server.getPlayerManager().loadPlayerData(player);
+         player = MiscUtils.getRequestedPlayer(server,profile);
          return PLAYER_DATA.get(player);
       }
    }
