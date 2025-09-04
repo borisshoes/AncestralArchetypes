@@ -120,7 +120,7 @@ public class ArchetypeProfile implements IArchetypeProfile {
       NbtCompound cooldownTag = new NbtCompound();
       abilityCooldowns.forEach((ability, cooldown) -> cooldownTag.putInt(ability.getId(),cooldown));
       view.put("cooldowns",NbtCompound.CODEC,cooldownTag);
-      view.put("potionBrewerStack",ItemStack.CODEC,potionBrewerStack);
+      if(!this.potionBrewerStack.isEmpty()) view.put("potionBrewerStack",ItemStack.CODEC,potionBrewerStack);
       
       NbtCompound mountDataTag = new NbtCompound();
       mountData.forEach((ability, pair) -> {

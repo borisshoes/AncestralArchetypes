@@ -30,7 +30,7 @@ public class ItemUtils {
    
    public static boolean getBooleanProperty(ItemStack stack, String key){
       NbtCompound archetypeTag = getArchetypeTag(stack);
-      return archetypeTag == null || !archetypeTag.contains(key) ? false : archetypeTag.getBoolean(key,false);
+      return archetypeTag != null && archetypeTag.contains(key) && archetypeTag.getBoolean(key, false);
    }
    
    public static double getDoubleProperty(ItemStack stack, String key){
