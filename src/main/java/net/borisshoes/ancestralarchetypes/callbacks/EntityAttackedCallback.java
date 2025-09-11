@@ -1,6 +1,5 @@
 package net.borisshoes.ancestralarchetypes.callbacks;
 
-import net.borisshoes.ancestralarchetypes.ArchetypeConfig;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.minecraft.entity.Entity;
@@ -14,6 +13,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.world.World;
 
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
 public class EntityAttackedCallback {
@@ -22,7 +22,7 @@ public class EntityAttackedCallback {
          IArchetypeProfile profile = profile(player);
          
          if(profile.hasAbility(ArchetypeRegistry.WITHERING) && livingEntity.isAlive()){
-            livingEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, ArchetypeConfig.getInt(ArchetypeRegistry.WITHERING_EFFECT_DURATION), 0, false, true, true), player);
+            livingEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, CONFIG.getInt(ArchetypeRegistry.WITHERING_EFFECT_DURATION), 0, false, true, true), player);
          }
       }
       return ActionResult.PASS;

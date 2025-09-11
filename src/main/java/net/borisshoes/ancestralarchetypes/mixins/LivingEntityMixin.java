@@ -3,14 +3,14 @@ package net.borisshoes.ancestralarchetypes.mixins;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
+import net.borisshoes.ancestralarchetypes.AncestralArchetypes;
 import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
-import net.borisshoes.ancestralarchetypes.ArchetypeConfig;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.gui.MountInventoryGui;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
-import net.borisshoes.ancestralarchetypes.items.GraphicalItem;
-import net.borisshoes.ancestralarchetypes.utils.MiscUtils;
+import net.borisshoes.borislib.gui.GraphicalItem;
+import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
@@ -44,8 +44,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 import java.util.UUID;
 
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 
 @Mixin(value = LivingEntity.class)
 public abstract class LivingEntityMixin {
@@ -85,14 +84,14 @@ public abstract class LivingEntityMixin {
       
       if(entity instanceof Tameable tameable && tameable.getOwner() instanceof ServerPlayerEntity player && entity.getWorld() instanceof ServerWorld entityWorld){
          IArchetypeProfile profile = profile(player);
-         ArchetypeAbility ability = MiscUtils.abilityFromTag(tags.getFirst());
+         ArchetypeAbility ability = AncestralArchetypes.abilityFromTag(tags.getFirst());
          
          if(ability != null){
             UUID mountId = profile.getMountEntity(ability);
             if(mountId != null && entity.getUuid().equals(mountId)){
                if(reason == Entity.RemovalReason.KILLED){
                   profile.setMountHealth(ability, 0);
-                  profile.setAbilityCooldown(ability, ArchetypeConfig.getInt(ArchetypeRegistry.SPIRIT_MOUNT_KILL_COOLDOWN));
+                  profile.setAbilityCooldown(ability, CONFIG.getInt(ArchetypeRegistry.SPIRIT_MOUNT_KILL_COOLDOWN));
                }
                player.sendMessage(Text.translatable("text.ancestralarchetypes.spirit_mount_unsummon").formatted(Formatting.RED,Formatting.ITALIC),true);
             }
@@ -120,7 +119,7 @@ public abstract class LivingEntityMixin {
          
          remove = !player.getWorld().getRegistryKey().getValue().equals(entityWorld.getRegistryKey().getValue());
          IArchetypeProfile profile = profile(player);
-         ArchetypeAbility ability = MiscUtils.abilityFromTag(tags.getFirst());
+         ArchetypeAbility ability = AncestralArchetypes.abilityFromTag(tags.getFirst());
          if(entity.getControllingPassenger() != null && !entity.getControllingPassenger().equals(tameable.getOwner())) entity.removeAllPassengers();
          List<Entity> passengers = entity.getPassengerList();
          for(Entity passenger : passengers){
@@ -133,7 +132,7 @@ public abstract class LivingEntityMixin {
                   }else{
                      SimpleGui gui = new SimpleGui(ScreenHandlerType.HOPPER,player,false);
                      for(int i = 0; i < gui.getSize(); i++){
-                        gui.setSlot(i, GuiElementBuilder.from(GraphicalItem.with(GraphicalItem.GraphicItems.BLACK)).hideTooltip());
+                        gui.setSlot(i, GuiElementBuilder.from(GraphicalItem.with(GraphicalItem.BLACK)).hideTooltip());
                      }
                      gui.setTitle(Text.translatable("container.inventory"));
                      gui.open();
@@ -156,7 +155,7 @@ public abstract class LivingEntityMixin {
       if(remove){
          entity.discard();
       }else if(entity.age % 100 == 0){
-         entity.heal((float) ArchetypeConfig.getDouble(ArchetypeRegistry.SPIRIT_MOUNT_REGENERATION_RATE));
+         entity.heal((float) CONFIG.getDouble(ArchetypeRegistry.SPIRIT_MOUNT_REGENERATION_RATE));
       }
    }
    
@@ -189,10 +188,10 @@ public abstract class LivingEntityMixin {
       if(entity instanceof ServerPlayerEntity player){
          IArchetypeProfile profile = profile(player);
          if(profile.hasAbility(ArchetypeRegistry.INCREASED_KNOCKBACK)){
-            return strength * (float) ArchetypeConfig.getDouble(ArchetypeRegistry.KNOCKBACK_INCREASE);
+            return strength * (float) CONFIG.getDouble(ArchetypeRegistry.KNOCKBACK_INCREASE);
          }
          if(profile.hasAbility(ArchetypeRegistry.REDUCED_KNOCKBACK)){
-            return strength * (float) ArchetypeConfig.getDouble(ArchetypeRegistry.KNOCKBACK_DECREASE);
+            return strength * (float) CONFIG.getDouble(ArchetypeRegistry.KNOCKBACK_DECREASE);
          }
       }
       return strength;
@@ -237,11 +236,11 @@ public abstract class LivingEntityMixin {
          ItemStack weapon = source.getWeaponStack();
          
          if(profile.hasAbility(ArchetypeRegistry.SOFT_HITTER) && source.isDirect()){
-            newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.SOFT_HITTER_DAMAGE_REDUCTION);
+            newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.SOFT_HITTER_DAMAGE_REDUCTION);
          }
          
          if(profile.hasAbility(ArchetypeRegistry.HARD_HITTER) && source.isDirect()){
-            newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.HARD_HITTER_DAMAGE_INCREASE);
+            newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.HARD_HITTER_DAMAGE_INCREASE);
          }
          
          if(profile.hasAbility(ArchetypeRegistry.SNEAK_ATTACK)){
@@ -254,7 +253,7 @@ public abstract class LivingEntityMixin {
                double dp = eyeDiff.dotProduct(targetRot.normalize().negate());
                boolean behind = dp >= thresh;
                if(behind){
-                  newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.PLAYER_SNEAK_ATTACK_MODIFIER);
+                  newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.PLAYER_SNEAK_ATTACK_MODIFIER);
                   DustColorTransitionParticleEffect particle = new DustColorTransitionParticleEffect(0xee1c1c,0x621313,1.0f);
                   player.getWorld().spawnParticles(particle,entity.getX(), entity.getY()+entity.getHeight()/2, entity.getZ(), 25, 0.25, 0.25, 0.25, 0.5);
                }
@@ -267,7 +266,7 @@ public abstract class LivingEntityMixin {
                   }
                }
                if(!foundAttacker){
-                  newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.MOB_SNEAK_ATTACK_MODIFIER);
+                  newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.MOB_SNEAK_ATTACK_MODIFIER);
                   DustColorTransitionParticleEffect particle = new DustColorTransitionParticleEffect(0xee1c1c,0x621313,1.0f);
                   player.getWorld().spawnParticles(particle,entity.getX(), entity.getY()+entity.getHeight()/2, entity.getZ(), 25, 0.25, 0.25, 0.25, 0.5);
                }
@@ -280,31 +279,31 @@ public abstract class LivingEntityMixin {
          ItemStack weapon = source.getWeaponStack();
          
          if(profile.hasAbility(ArchetypeRegistry.IMPALE_VULNERABLE) && weapon != null){
-            int impaleLvl = EnchantmentHelper.getLevel(MiscUtils.getEnchantment(Enchantments.IMPALING), weapon);
-            newReturn += (float) ArchetypeConfig.getDouble(ArchetypeRegistry.IMPALE_VULNERABLE_MODIFIER) * impaleLvl;
+            int impaleLvl = EnchantmentHelper.getLevel(MinecraftUtils.getEnchantment(Enchantments.IMPALING), weapon);
+            newReturn += (float) CONFIG.getDouble(ArchetypeRegistry.IMPALE_VULNERABLE_MODIFIER) * impaleLvl;
          }
          if(profile.hasAbility(ArchetypeRegistry.DAMAGED_BY_COLD) && source.isIn(DamageTypeTags.IS_FREEZING)){
-            newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.COLD_DAMAGE_MODIFIER);
+            newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.COLD_DAMAGE_MODIFIER);
          }
          if(profile.hasAbility(ArchetypeRegistry.HALVED_FALL_DAMAGE) && source.isIn(DamageTypeTags.IS_FALL)){
-            newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.FALL_DAMAGE_REDUCTION);
+            newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.FALL_DAMAGE_REDUCTION);
          }
          if(profile.hasAbility(ArchetypeRegistry.PROJECTILE_RESISTANT) && source.isIn(DamageTypeTags.IS_PROJECTILE)){
-            newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.PROJECTILE_RESISTANT_REDUCTION);
+            newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.PROJECTILE_RESISTANT_REDUCTION);
          }
          if(profile.hasAbility(ArchetypeRegistry.SLIPPERY) && player.isTouchingWaterOrRain()){
             if(profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER)){
-               newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.GREAT_SWIMMER_SLIPPERY_DAMAGE_MODIFIER);
+               newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.GREAT_SWIMMER_SLIPPERY_DAMAGE_MODIFIER);
             }else{
-               newReturn *= (float) ArchetypeConfig.getDouble(ArchetypeRegistry.SLIPPERY_DAMAGE_MODIFIER);
+               newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.SLIPPERY_DAMAGE_MODIFIER);
             }
          }
          if(profile.hasAbility(ArchetypeRegistry.INSATIABLE) && source.isOf(DamageTypes.STARVE)){
-            newReturn += (float) ArchetypeConfig.getDouble(ArchetypeRegistry.ADDED_STARVE_DAMAGE);
+            newReturn += (float) CONFIG.getDouble(ArchetypeRegistry.ADDED_STARVE_DAMAGE);
          }
          
-         if(profile.hasAbility(ArchetypeRegistry.STUNNED_BY_DAMAGE) && amount > ArchetypeConfig.getDouble(ArchetypeRegistry.STARTLE_MIN_DAMAGE) && !source.isIn(ArchetypeRegistry.NO_STARTLE)){
-            StatusEffectInstance slowness = new StatusEffectInstance(StatusEffects.SLOWNESS, ArchetypeConfig.getInt(ArchetypeRegistry.DAMAGE_STUN_DURATION), 9, false, false, true);
+         if(profile.hasAbility(ArchetypeRegistry.STUNNED_BY_DAMAGE) && amount > CONFIG.getDouble(ArchetypeRegistry.STARTLE_MIN_DAMAGE) && !source.isIn(ArchetypeRegistry.NO_STARTLE)){
+            StatusEffectInstance slowness = new StatusEffectInstance(StatusEffects.SLOWNESS, CONFIG.getInt(ArchetypeRegistry.DAMAGE_STUN_DURATION), 9, false, false, true);
             player.addStatusEffect(slowness);
          }
       }

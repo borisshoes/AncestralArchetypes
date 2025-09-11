@@ -3,7 +3,6 @@ package net.borisshoes.ancestralarchetypes.mixins;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
-import net.borisshoes.ancestralarchetypes.ArchetypeConfig;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.minecraft.entity.Entity;
@@ -21,8 +20,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin {
@@ -62,7 +60,7 @@ public abstract class PlayerEntityMixin {
       PlayerEntity player = (PlayerEntity) (Object) this;
       IArchetypeProfile profile = profile(player);
       double newValue = original;
-      if(profile.hasAbility(ArchetypeRegistry.HASTY)) newValue *= ArchetypeConfig.getDouble(ArchetypeRegistry.HASTY_MINING_MODIFIER);
+      if(profile.hasAbility(ArchetypeRegistry.HASTY)) newValue *= CONFIG.getDouble(ArchetypeRegistry.HASTY_MINING_MODIFIER);
       return (float) newValue;
    }
    
@@ -72,8 +70,8 @@ public abstract class PlayerEntityMixin {
       if(entity instanceof ServerPlayerEntity player && source.getAttacker() instanceof LivingEntity attacker){
          IArchetypeProfile profile = profile(player);
          if(profile.hasAbility(ArchetypeRegistry.THORNY) && attacker.isAlive() && !source.isIn(DamageTypeTags.AVOIDS_GUARDIAN_THORNS) && !source.isOf(DamageTypes.THORNS)){
-            double cap = ArchetypeConfig.getDouble(ArchetypeRegistry.THORNY_REFLECTION_CAP);
-            float damage = (float) Math.min(cap < 0 ? Float.MAX_VALUE : cap, amount * ArchetypeConfig.getDouble(ArchetypeRegistry.THORNY_REFLECTION_MODIFIER));
+            double cap = CONFIG.getDouble(ArchetypeRegistry.THORNY_REFLECTION_CAP);
+            float damage = (float) Math.min(cap < 0 ? Float.MAX_VALUE : cap, amount * CONFIG.getDouble(ArchetypeRegistry.THORNY_REFLECTION_MODIFIER));
             attacker.damage(player.getWorld(), player.getDamageSources().thorns(player), damage);
          }
       }

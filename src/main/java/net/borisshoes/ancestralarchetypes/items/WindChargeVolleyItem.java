@@ -1,14 +1,10 @@
 package net.borisshoes.ancestralarchetypes.items;
 
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
-import net.borisshoes.ancestralarchetypes.ArchetypeConfig;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
-import net.borisshoes.ancestralarchetypes.utils.SoundUtils;
-import net.minecraft.entity.effect.StatusEffects;
+import net.borisshoes.borislib.utils.SoundUtils;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.entity.projectile.SmallFireballEntity;
 import net.minecraft.entity.projectile.WindChargeEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -26,6 +22,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import xyz.nucleoid.packettweaker.PacketContext;
 
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.WIND_CHARGE_VOLLEY;
 
@@ -59,7 +56,7 @@ public class WindChargeVolleyItem extends AbilityItem{
       shootWindCharge(player,7.0f,0.75f);
       shootWindCharge(player,7.0f,0.75f);
       shootWindCharge(player,7.0f,0.75f);
-      profile(player).setAbilityCooldown(this.ability, ArchetypeConfig.getInt(ArchetypeRegistry.WIND_CHARGE_COOLDOWN));
+      profile(player).setAbilityCooldown(this.ability, CONFIG.getInt(ArchetypeRegistry.WIND_CHARGE_COOLDOWN));
       SoundUtils.playSound(player.getWorld(),player.getBlockPos(),SoundEvents.ENTITY_BREEZE_SHOOT, SoundCategory.PLAYERS,1f, 0.4f / (world.getRandom().nextFloat() * 0.4f + 0.8f));
       player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, player.getStackInHand(hand)));
       return ActionResult.SUCCESS;

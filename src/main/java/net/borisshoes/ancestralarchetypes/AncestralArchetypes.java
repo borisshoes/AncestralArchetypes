@@ -4,9 +4,11 @@ import com.mojang.authlib.GameProfile;
 import net.borisshoes.ancestralarchetypes.callbacks.*;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.misc.SpyglassRevealEvent;
-import net.borisshoes.ancestralarchetypes.utils.ConfigUtils;
-import net.borisshoes.ancestralarchetypes.utils.MiscUtils;
-import net.borisshoes.ancestralarchetypes.utils.PlayerMovementEntry;
+import net.borisshoes.borislib.BorisLib;
+import net.borisshoes.borislib.config.ConfigManager;
+import net.borisshoes.borislib.tracker.PlayerMovementEntry;
+import net.borisshoes.borislib.utils.ItemModDataHandler;
+import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -16,23 +18,20 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
-import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
+import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.CONFIG_SETTINGS;
 import static net.borisshoes.ancestralarchetypes.cca.PlayerComponentInitializer.PLAYER_DATA;
 
 public class AncestralArchetypes implements ModInitializer, ClientModInitializer {
@@ -41,23 +40,21 @@ public class AncestralArchetypes implements ModInitializer, ClientModInitializer
    private static final String CONFIG_NAME = "AncestralArchetypes.properties";
    public static final String MOD_ID = "ancestralarchetypes";
    
-   public static ConfigUtils CONFIG;
-   public static final HashMap<ServerPlayerEntity, PlayerMovementEntry> PLAYER_MOVEMENT_TRACKER = new HashMap<>();
+   public static ConfigManager CONFIG;
    public static final ArrayList<SpyglassRevealEvent> SPYGLASS_REVEAL_EVENTS = new ArrayList<>();
-   public static MinecraftServer SERVER = null;
    public static boolean hasArcana = false;
    
    public static final boolean DEV_MODE = false;
    
+   public static final ItemModDataHandler ARCHETYPES_ITEM_DATA = new ItemModDataHandler(MOD_ID);
+   
    @Override
    public void onInitialize(){
-      CONFIG = new ConfigUtils(FabricLoader.getInstance().getConfigDir().resolve(CONFIG_NAME).toFile(), LOGGER, ArchetypeRegistry.CONFIG_SETTINGS.stream().map(ArchetypeConfig.ConfigSetting::makeConfigValue).collect(Collectors.toList()));
-      
+      CONFIG = new ConfigManager(MOD_ID,"Ancestral Archetypes",CONFIG_NAME,CONFIG_SETTINGS);
+
       hasArcana = FabricLoader.getInstance().isModLoaded("arcananovum");
       
-      ServerTickEvents.END_WORLD_TICK.register(WorldTickCallback::onWorldTick);
       ServerTickEvents.END_SERVER_TICK.register(TickCallback::onTick);
-      ServerLifecycleEvents.SERVER_STARTING.register(ServerStartingCallback::serverStarting);
       CommandRegistrationCallback.EVENT.register(CommandRegisterCallback::registerCommands);
       ServerEntityEvents.ENTITY_UNLOAD.register(EntityLoadCallbacks::unloadEntity);
       UseEntityCallback.EVENT.register(EntityUseCallback::useEntity);
@@ -76,6 +73,13 @@ public class AncestralArchetypes implements ModInitializer, ClientModInitializer
       LOGGER.info("Evolving Ancestral Archetypes Into Your Client!");
    }
    
+   public static ArchetypeAbility abilityFromTag(String tag){
+      int lastDotIndex = tag.lastIndexOf(".");
+      if (lastDotIndex == -1) {
+         return null;
+      }
+      return ArchetypeRegistry.ABILITIES.get(Identifier.of(MOD_ID,tag.substring(lastDotIndex + 1)));
+   }
    
    public static IArchetypeProfile profile(PlayerEntity player){
       if(player == null){
@@ -91,14 +95,14 @@ public class AncestralArchetypes implements ModInitializer, ClientModInitializer
    }
    
    public static IArchetypeProfile getPlayerOrOffline(UUID playerId){
-      MinecraftServer server = AncestralArchetypes.SERVER;
+      MinecraftServer server = BorisLib.SERVER;
       ServerPlayerEntity player = server.getPlayerManager().getPlayer(playerId);
       if(player != null){
          return PLAYER_DATA.get(player);
       }else{
          GameProfile profile = server.getUserCache().getByUuid(playerId).orElse(null);
          if(profile == null) return null;
-         player = MiscUtils.getRequestedPlayer(server,profile);
+         player = MinecraftUtils.getRequestedPlayer(server,profile);
          return PLAYER_DATA.get(player);
       }
    }

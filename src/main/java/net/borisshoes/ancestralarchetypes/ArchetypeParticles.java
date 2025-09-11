@@ -1,28 +1,16 @@
-package net.borisshoes.ancestralarchetypes.utils;
+package net.borisshoes.ancestralarchetypes;
 
-import net.borisshoes.ancestralarchetypes.ArchetypeConfig;
-import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
-import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
+import net.borisshoes.borislib.utils.ParticleEffectUtils;
 import net.minecraft.particle.DustParticleEffect;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 
-public class ParticleEffectUtils {
-   
+public class ArchetypeParticles extends ParticleEffectUtils {
    public static void guardianRay(ServerWorld world, Vec3d p1, Vec3d p2, int tick){
-      int windup = ArchetypeConfig.getInt(ArchetypeRegistry.GUARDIAN_RAY_WINDUP);
+      int windup = CONFIG.getInt(ArchetypeRegistry.GUARDIAN_RAY_WINDUP);
       double length = p2.subtract(p1).length();
       Vec3d basisP1 = Vec3d.ZERO;
       Vec3d basisP2 = new Vec3d(0,length,0);
@@ -76,13 +64,6 @@ public class ParticleEffectUtils {
                spawnLongParticle(world,dust2,helixPosAdjust2.x,helixPosAdjust2.y,helixPosAdjust2.z,0,0,0,0,1);
             }
          }
-      }
-   }
-   
-   public static void spawnLongParticle(ServerWorld world, ParticleEffect type, double x, double y, double z, double dx, double dy, double dz, double speed, int count){
-      List<ServerPlayerEntity> players = world.getPlayers(player -> player.squaredDistanceTo(new Vec3d(x,y,z)) < 512*512);
-      for(ServerPlayerEntity player : players){
-         player.networkHandler.sendPacket(new ParticleS2CPacket(type,true,true,x,y,z,(float)dx,(float)dy,(float)dz,(float)speed,count));
       }
    }
 }

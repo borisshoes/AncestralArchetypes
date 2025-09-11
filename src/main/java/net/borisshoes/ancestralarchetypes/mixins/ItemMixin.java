@@ -1,7 +1,6 @@
 package net.borisshoes.ancestralarchetypes.mixins;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import net.borisshoes.ancestralarchetypes.ArchetypeConfig;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.minecraft.component.type.ConsumableComponent;
@@ -25,6 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.HashMap;
 
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
 @Mixin(Item.class)
@@ -40,7 +40,7 @@ public class ItemMixin {
          if(ArchetypeRegistry.TUFF_FOODS.containsKey(stack.getItem())){
             if(profile.hasAbility(ArchetypeRegistry.TUFF_EATER)){
                map = ArchetypeRegistry.TUFF_FOODS;
-               healthMod = (float) ArchetypeConfig.getDouble(ArchetypeRegistry.TUFF_FOOD_HEALTH_MODIFIER);
+               healthMod = (float) CONFIG.getDouble(ArchetypeRegistry.TUFF_FOOD_HEALTH_MODIFIER);
             }else{
                cir.cancel();
                return;
@@ -49,7 +49,7 @@ public class ItemMixin {
          if(ArchetypeRegistry.COPPER_FOODS.containsKey(stack.getItem())){
             if(profile.hasAbility(ArchetypeRegistry.COPPER_EATER)){
                map = ArchetypeRegistry.COPPER_FOODS;
-               healthMod = (float) ArchetypeConfig.getDouble(ArchetypeRegistry.COPPER_FOOD_HEALTH_MODIFIER);
+               healthMod = (float) CONFIG.getDouble(ArchetypeRegistry.COPPER_FOOD_HEALTH_MODIFIER);
             }else{
                cir.cancel();
                return;
@@ -58,7 +58,7 @@ public class ItemMixin {
          if(ArchetypeRegistry.IRON_FOODS.containsKey(stack.getItem())){
             if(profile.hasAbility(ArchetypeRegistry.IRON_EATER)){
                map = ArchetypeRegistry.IRON_FOODS;
-               healthMod = (float) ArchetypeConfig.getDouble(ArchetypeRegistry.IRON_FOOD_HEALTH_MODIFIER);
+               healthMod = (float) CONFIG.getDouble(ArchetypeRegistry.IRON_FOOD_HEALTH_MODIFIER);
             }else{
                cir.cancel();
                return;

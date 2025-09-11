@@ -2,13 +2,13 @@ package net.borisshoes.ancestralarchetypes.callbacks;
 
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
-import net.borisshoes.ancestralarchetypes.utils.PlayerMovementEntry;
+import net.borisshoes.borislib.tracker.PlayerMovementEntry;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.PLAYER_MOVEMENT_TRACKER;
+import static net.borisshoes.borislib.BorisLib.PLAYER_MOVEMENT_TRACKER;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
 public class PlayerConnectionCallback {

@@ -1,6 +1,5 @@
 package net.borisshoes.ancestralarchetypes.mixins;
 
-import net.borisshoes.ancestralarchetypes.ArchetypeConfig;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.minecraft.entity.Entity;
@@ -12,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
 @Mixin(SnowballEntity.class)
@@ -24,7 +24,7 @@ public class SnowballEntityMixin {
       if(entity instanceof ServerPlayerEntity player){
          IArchetypeProfile profile = profile(player);
          if(profile.hasAbility(ArchetypeRegistry.DAMAGED_BY_COLD)){
-            entity.damage(player.getWorld(), snowball.getDamageSources().thrown(snowball, snowball.getOwner()), (float) ArchetypeConfig.getDouble(ArchetypeRegistry.SNOWBALL_DAMAGE));
+            entity.damage(player.getWorld(), snowball.getDamageSources().thrown(snowball, snowball.getOwner()), (float) CONFIG.getDouble(ArchetypeRegistry.SNOWBALL_DAMAGE));
          }
       }
    }

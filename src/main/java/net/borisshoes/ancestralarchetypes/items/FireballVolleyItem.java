@@ -1,13 +1,10 @@
 package net.borisshoes.ancestralarchetypes.items;
 
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
-import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
-import net.borisshoes.ancestralarchetypes.ArchetypeConfig;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
-import net.borisshoes.ancestralarchetypes.utils.SoundUtils;
+import net.borisshoes.borislib.utils.SoundUtils;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.BlazeEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.SmallFireballEntity;
 import net.minecraft.item.Item;
@@ -22,14 +19,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.packettweaker.PacketContext;
 
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.FIREBALL_VOLLEY;
 
 public class FireballVolleyItem extends AbilityItem{
@@ -73,7 +67,7 @@ public class FireballVolleyItem extends AbilityItem{
    @Override
    public boolean onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
       if(!(user instanceof ServerPlayerEntity player)) return false;
-      int cooldown = ArchetypeConfig.getInt(ArchetypeRegistry.FIREBALL_COOLDOWN);
+      int cooldown = CONFIG.getInt(ArchetypeRegistry.FIREBALL_COOLDOWN);
       profile(player).setAbilityCooldown(this.ability, (int) Math.max(0.25*cooldown,cooldown*(1 - ((double)remainingUseTicks/getMaxUseTime(stack,user)))));
       return false;
    }
@@ -84,7 +78,7 @@ public class FireballVolleyItem extends AbilityItem{
       shootFireball(player,5.0f);
       shootFireball(player,5.0f);
       shootFireball(player,5.0f);
-      profile(player).setAbilityCooldown(this.ability,ArchetypeConfig.getInt(ArchetypeRegistry.FIREBALL_COOLDOWN));
+      profile(player).setAbilityCooldown(this.ability,CONFIG.getInt(ArchetypeRegistry.FIREBALL_COOLDOWN));
       player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, stack));
       return stack;
    }

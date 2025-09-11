@@ -6,8 +6,12 @@ import eu.pb4.polymer.core.api.item.PolymerItemUtils;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.items.*;
-import net.borisshoes.ancestralarchetypes.utils.ConfigUtils;
-import net.borisshoes.ancestralarchetypes.utils.MiscUtils;
+import net.borisshoes.borislib.config.ConfigSetting;
+import net.borisshoes.borislib.config.IConfigSetting;
+import net.borisshoes.borislib.config.values.BooleanConfigValue;
+import net.borisshoes.borislib.config.values.DoubleConfigValue;
+import net.borisshoes.borislib.config.values.IntConfigValue;
+import net.borisshoes.borislib.utils.TextUtils;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.*;
 import net.minecraft.entity.EquipmentSlot;
@@ -31,15 +35,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
+import static net.borisshoes.borislib.BorisLib.registerGraphicItem;
 
 public class ArchetypeRegistry {
    public static final Registry<ArchetypeAbility> ABILITIES = new SimpleRegistry<>(RegistryKey.ofRegistry(Identifier.of(MOD_ID,"ability")), Lifecycle.stable());
    public static final Registry<Archetype> ARCHETYPES = new SimpleRegistry<>(RegistryKey.ofRegistry(Identifier.of(MOD_ID,"archetype")), Lifecycle.stable());
    public static final Registry<SubArchetype> SUBARCHETYPES = new SimpleRegistry<>(RegistryKey.ofRegistry(Identifier.of(MOD_ID,"subarchetype")), Lifecycle.stable());
    public static final Registry<Item> ITEMS = new SimpleRegistry<>(RegistryKey.ofRegistry(Identifier.of(MOD_ID,"item")), Lifecycle.stable());
-   public static final Registry<ArchetypeConfig.ConfigSetting<?>> CONFIG_SETTINGS = new SimpleRegistry<>(RegistryKey.ofRegistry(Identifier.of(MOD_ID,"config_settings")), Lifecycle.stable());
+   public static final Registry<IConfigSetting<?>> CONFIG_SETTINGS = new SimpleRegistry<>(RegistryKey.ofRegistry(Identifier.of(MOD_ID,"config_settings")), Lifecycle.stable());
    public static final HashMap<Item, Pair<Float,Integer>> TUFF_FOODS = new HashMap<>();
    public static final HashMap<Item, Pair<Float,Integer>> COPPER_FOODS = new HashMap<>();
    public static final HashMap<Item, Pair<Float,Integer>> IRON_FOODS = new HashMap<>();
@@ -53,194 +58,198 @@ public class ArchetypeRegistry {
    public static final TagKey<Biome> DRY_OUT_INCLUDE_BIOMES = TagKey.of(RegistryKeys.BIOME, Identifier.of(MOD_ID,"dry_out_include_biomes"));
    public static final TagKey<DamageType> NO_STARTLE = TagKey.of(RegistryKeys.DAMAGE_TYPE, Identifier.of(MOD_ID,"no_startle"));
    
-   public static final ArchetypeConfig.ConfigSetting<?> SPYGLASS_REVEALS_ARCHETYPE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.BooleanConfigValue("spyglassRevealsArchetype", true)));
+   public static final net.borisshoes.borislib.gui.GraphicalItem.GraphicElement LOCKED_POTION = registerGraphicItem(new net.borisshoes.borislib.gui.GraphicalItem.GraphicElement(Identifier.of(MOD_ID, "locked_potion"), Items.POTION, false));
+   public static final net.borisshoes.borislib.gui.GraphicalItem.GraphicElement LOCKED_SPLASH_POTION = registerGraphicItem(new net.borisshoes.borislib.gui.GraphicalItem.GraphicElement(Identifier.of(MOD_ID, "locked_splash_potion"), Items.SPLASH_POTION, false));
+   public static final net.borisshoes.borislib.gui.GraphicalItem.GraphicElement LOCKED_LINGERING_POTION = registerGraphicItem(new net.borisshoes.borislib.gui.GraphicalItem.GraphicElement(Identifier.of(MOD_ID, "locked_lingering_potion"), Items.LINGERING_POTION, false));
    
-   public static final ArchetypeConfig.ConfigSetting<?> SPYGLASS_REVEAL_ALERTS_PLAYER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.BooleanConfigValue("spyglassRevealAlertsPlayer", false)));
+   public static final IConfigSetting<?> SPYGLASS_REVEALS_ARCHETYPE = registerConfigSetting(new ConfigSetting<>(
+         new BooleanConfigValue("spyglassRevealsArchetype", true)));
    
-   public static final ArchetypeConfig.ConfigSetting<?> CAN_ALWAYS_CHANGE_ARCHETYPE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.BooleanConfigValue("canAlwaysChangeArchetype", false)));
+   public static final IConfigSetting<?> SPYGLASS_REVEAL_ALERTS_PLAYER = registerConfigSetting(new ConfigSetting<>(
+         new BooleanConfigValue("spyglassRevealAlertsPlayer", false)));
    
-   public static final ArchetypeConfig.ConfigSetting<?> REMINDERS_ON_BY_DEFAULT = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.BooleanConfigValue("remindersOnByDefault", true)));
+   public static final IConfigSetting<?> CAN_ALWAYS_CHANGE_ARCHETYPE = registerConfigSetting(new ConfigSetting<>(
+         new BooleanConfigValue("canAlwaysChangeArchetype", false)));
    
-   public static final ArchetypeConfig.ConfigSetting<?> SPYGLASS_INVESTIGATE_DURATION = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.IntegerConfigValue("spyglassInvestigateDuration", 150, new ConfigUtils.IntegerConfigValue.IntLimits(1))));
+   public static final IConfigSetting<?> REMINDERS_ON_BY_DEFAULT = registerConfigSetting(new ConfigSetting<>(
+         new BooleanConfigValue("remindersOnByDefault", true)));
    
-   public static final ArchetypeConfig.ConfigSetting<?> CHANGES_PER_CHANGE_ITEM = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.IntegerConfigValue("changesPerChangeItem", 1, new ConfigUtils.IntegerConfigValue.IntLimits(0,1000))));
+   public static final IConfigSetting<?> SPYGLASS_INVESTIGATE_DURATION = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("spyglassInvestigateDuration", 150, new IntConfigValue.IntLimits(1))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> STARTING_ARCHETYPE_CHANGES = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.IntegerConfigValue("startingArchetypeChanges", 1, new ConfigUtils.IntegerConfigValue.IntLimits(0,1000))));
+   public static final IConfigSetting<?> CHANGES_PER_CHANGE_ITEM = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("changesPerChangeItem", 1, new IntConfigValue.IntLimits(0,1000))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> FIREBALL_COOLDOWN = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.IntegerConfigValue("fireballCooldown", 600, new ConfigUtils.IntegerConfigValue.IntLimits(1))));
+   public static final IConfigSetting<?> STARTING_ARCHETYPE_CHANGES = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("startingArchetypeChanges", 1, new IntConfigValue.IntLimits(0,1000))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> WIND_CHARGE_COOLDOWN = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.IntegerConfigValue("windChargeCooldown", 200, new ConfigUtils.IntegerConfigValue.IntLimits(1))));
+   public static final IConfigSetting<?> FIREBALL_COOLDOWN = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("fireballCooldown", 600, new IntConfigValue.IntLimits(1))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> GLIDER_DURATION = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.IntegerConfigValue("gliderDuration", 600, new ConfigUtils.IntegerConfigValue.IntLimits(1))));
+   public static final IConfigSetting<?> WIND_CHARGE_COOLDOWN = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("windChargeCooldown", 200, new IntConfigValue.IntLimits(1))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> GLIDER_COOLDOWN = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.IntegerConfigValue("gliderCooldown", 100, new ConfigUtils.IntegerConfigValue.IntLimits(1))));
+   public static final IConfigSetting<?> GLIDER_DURATION = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("gliderDuration", 600, new IntConfigValue.IntLimits(1))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> SPIRIT_MOUNT_KILL_COOLDOWN = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.IntegerConfigValue("spiritMountKillCooldown", 8000, new ConfigUtils.IntegerConfigValue.IntLimits(1))));
+   public static final IConfigSetting<?> GLIDER_COOLDOWN = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("gliderCooldown", 100, new IntConfigValue.IntLimits(1))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> DAMAGE_STUN_DURATION = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.IntegerConfigValue("damageStunDuration", 15, new ConfigUtils.IntegerConfigValue.IntLimits(1))));
+   public static final IConfigSetting<?> SPIRIT_MOUNT_KILL_COOLDOWN = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("spiritMountKillCooldown", 8000, new IntConfigValue.IntLimits(1))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> CAULDRON_INSTANT_EFFECT_COOLDOWN = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.IntegerConfigValue("cauldronInstantEffectCooldown", 900, new ConfigUtils.IntegerConfigValue.IntLimits(1))));
+   public static final IConfigSetting<?> DAMAGE_STUN_DURATION = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("damageStunDuration", 15, new IntConfigValue.IntLimits(1))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> GELATIAN_GROW_ITEM_EAT_DURATION = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.IntegerConfigValue("gelatianGrowItemEatDuration", 500, new ConfigUtils.IntegerConfigValue.IntLimits(1))));
+   public static final IConfigSetting<?> CAULDRON_INSTANT_EFFECT_COOLDOWN = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("cauldronInstantEffectCooldown", 900, new IntConfigValue.IntLimits(1))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> WITHERING_EFFECT_DURATION = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.IntegerConfigValue("witheringEffectDuration", 150, new ConfigUtils.IntegerConfigValue.IntLimits(1))));
+   public static final IConfigSetting<?> GELATIAN_GROW_ITEM_EAT_DURATION = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("gelatianGrowItemEatDuration", 500, new IntConfigValue.IntLimits(1))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> GUARDIAN_RAY_WINDUP = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.IntegerConfigValue("guardianRayWindup", 30, new ConfigUtils.IntegerConfigValue.IntLimits(1))));
+   public static final IConfigSetting<?> WITHERING_EFFECT_DURATION = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("witheringEffectDuration", 150, new IntConfigValue.IntLimits(1))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> GUARDIAN_RAY_COOLDOWN = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.IntegerConfigValue("guardianRayCooldown", 600, new ConfigUtils.IntegerConfigValue.IntLimits(1))));
+   public static final IConfigSetting<?> GUARDIAN_RAY_WINDUP = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("guardianRayWindup", 30, new IntConfigValue.IntLimits(1))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> GUARDIAN_RAY_DURATION = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.IntegerConfigValue("guardianRayDuration", 85, new ConfigUtils.IntegerConfigValue.IntLimits(1))));
+   public static final IConfigSetting<?> GUARDIAN_RAY_COOLDOWN = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("guardianRayCooldown", 600, new IntConfigValue.IntLimits(1))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> CAULDRON_DRINKABLE_COOLDOWN_MODIFIER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("cauldronDrinkableCooldownModifier", 0.9, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> GUARDIAN_RAY_DURATION = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("guardianRayDuration", 85, new IntConfigValue.IntLimits(1))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> CAULDRON_THROWABLE_COOLDOWN_MODIFIER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("cauldronThrowableCooldownModifier", 1.5, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> CAULDRON_DRINKABLE_COOLDOWN_MODIFIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("cauldronDrinkableCooldownModifier", 0.9, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> SPIRIT_MOUNT_REGENERATION_RATE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("spiritMountRegenerationRate", 1.0, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> CAULDRON_THROWABLE_COOLDOWN_MODIFIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("cauldronThrowableCooldownModifier", 1.5, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> SNOWBALL_DAMAGE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("snowballDamage", 3.0, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> SPIRIT_MOUNT_REGENERATION_RATE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("spiritMountRegenerationRate", 1.0, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> REGENERATION_RATE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("regenerationRate", 0.05, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> SNOWBALL_DAMAGE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("snowballDamage", 3.0, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> INSATIATBLE_HUNGER_RATE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("insatiableHungerRate", 0.25, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> REGENERATION_RATE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("regenerationRate", 0.05, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> PROJECTILE_RESISTANT_REDUCTION = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("projectileResistantReduction", 0.5, new ConfigUtils.DoubleConfigValue.DoubleLimits(0,1))));
+   public static final IConfigSetting<?> INSATIATBLE_HUNGER_RATE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("insatiableHungerRate", 0.25, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> SOFT_HITTER_DAMAGE_REDUCTION = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("softhitterDamageReduction", 0.85, new ConfigUtils.DoubleConfigValue.DoubleLimits(0,1))));
+   public static final IConfigSetting<?> PROJECTILE_RESISTANT_REDUCTION = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("projectileResistantReduction", 0.5, new DoubleConfigValue.DoubleLimits(0,1))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> HARD_HITTER_DAMAGE_INCREASE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("hardhitterDamageModifier", 1.15, new ConfigUtils.DoubleConfigValue.DoubleLimits(0,1))));
+   public static final IConfigSetting<?> SOFT_HITTER_DAMAGE_REDUCTION = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("softhitterDamageReduction", 0.85, new DoubleConfigValue.DoubleLimits(0,1))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> HARD_HITTER_KNOCKBACK_INCREASE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("hardhitterKnockbackIncrease", 0.5, new ConfigUtils.DoubleConfigValue.DoubleLimits(0,1))));
+   public static final IConfigSetting<?> HARD_HITTER_DAMAGE_INCREASE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("hardhitterDamageModifier", 1.15, new DoubleConfigValue.DoubleLimits(0,1))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> HEALTH_SPRINT_CUTOFF = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("healthSprintCutoff", 0.33, new ConfigUtils.DoubleConfigValue.DoubleLimits(0,1))));
+   public static final IConfigSetting<?> HARD_HITTER_KNOCKBACK_INCREASE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("hardhitterKnockbackIncrease", 0.5, new DoubleConfigValue.DoubleLimits(0,1))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> KNOCKBACK_DECREASE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("knockbackReduction", 0.5, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> HEALTH_SPRINT_CUTOFF = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("healthSprintCutoff", 0.33, new DoubleConfigValue.DoubleLimits(0,1))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> KNOCKBACK_INCREASE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("knockbackIncrease", 2.0, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> KNOCKBACK_DECREASE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("knockbackReduction", 0.5, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> MOB_SNEAK_ATTACK_MODIFIER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("mobSneakAttackModifier", 2.0, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> KNOCKBACK_INCREASE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("knockbackIncrease", 2.0, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> PLAYER_SNEAK_ATTACK_MODIFIER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("playerSneakAttackModifier", 1.15, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> MOB_SNEAK_ATTACK_MODIFIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("mobSneakAttackModifier", 2.0, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> BIOME_DAMAGE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("biomeDamage", 2.5, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> PLAYER_SNEAK_ATTACK_MODIFIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("playerSneakAttackModifier", 1.15, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> FALL_DAMAGE_REDUCTION = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("fallDamageReduction", 0.5, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> BIOME_DAMAGE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("biomeDamage", 2.5, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> COLD_DAMAGE_MODIFIER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("coldDamageModifier", 2.0, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> FALL_DAMAGE_REDUCTION = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("fallDamageReduction", 0.5, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> ADDED_STARVE_DAMAGE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("addedStarveDamage", 3.0, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> COLD_DAMAGE_MODIFIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("coldDamageModifier", 2.0, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> IMPALE_VULNERABLE_MODIFIER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("impaleVulnerableModifier", 2.5, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> ADDED_STARVE_DAMAGE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("addedStarveDamage", 3.0, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> SLOW_FALLER_TRIGGER_SPEED = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("slowFallerTriggerSpeed", 0.3, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> IMPALE_VULNERABLE_MODIFIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("impaleVulnerableModifier", 2.5, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> STARTLE_MIN_DAMAGE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("startleMinDamage", 1.1, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> SLOW_FALLER_TRIGGER_SPEED = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("slowFallerTriggerSpeed", 0.3, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> TUFF_FOOD_HEALTH_MODIFIER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("tuffFoodHealthModifier", 1.0, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> STARTLE_MIN_DAMAGE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("startleMinDamage", 1.1, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> TUFF_FOOD_DURATION_MODIFIER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("tuffFoodDurationModifier", 1.0, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> TUFF_FOOD_HEALTH_MODIFIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("tuffFoodHealthModifier", 1.0, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> IRON_FOOD_HEALTH_MODIFIER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("ironFoodHealthModifier", 1.0, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> TUFF_FOOD_DURATION_MODIFIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("tuffFoodDurationModifier", 1.0, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> IRON_FOOD_DURATION_MODIFIER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("ironFoodDurationModifier", 1.0, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> IRON_FOOD_HEALTH_MODIFIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("ironFoodHealthModifier", 1.0, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> COPPER_FOOD_HEALTH_MODIFIER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("copperFoodHealthModifier", 1.0, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> IRON_FOOD_DURATION_MODIFIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("ironFoodDurationModifier", 1.0, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> COPPER_FOOD_DURATION_MODIFIER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("copperFoodDurationModifier", 1.0, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> COPPER_FOOD_HEALTH_MODIFIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("copperFoodHealthModifier", 1.0, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> LONG_ARMS_RANGE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("longArmsRange", 0.5, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> COPPER_FOOD_DURATION_MODIFIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("copperFoodDurationModifier", 1.0, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> MOUNTED_RANGE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("mountedRange", 1.5, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> LONG_ARMS_RANGE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("longArmsRange", 0.5, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> MOONLIT_SLIME_HEALTH_PER_PHASE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("moonlitSlimeHealthPerPhase", 0.25, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> MOUNTED_RANGE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("mountedRange", 1.5, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> MOONLIT_SLIME_SIZE_PER_PHASE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("moonlitSlimeSizePerPhase", 0.125, new ConfigUtils.DoubleConfigValue.DoubleLimits(-1))));
+   public static final IConfigSetting<?> MOONLIT_SLIME_HEALTH_PER_PHASE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("moonlitSlimeHealthPerPhase", 0.25, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> SPEEDY_SPEED_BOOST = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("speedySpeedBoost", 0.25, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> MOONLIT_SLIME_SIZE_PER_PHASE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("moonlitSlimeSizePerPhase", 0.125, new DoubleConfigValue.DoubleLimits(-1))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> SNEAKY_SPEED_BOOST = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("sneakySpeedBoost", 0.5, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> SPEEDY_SPEED_BOOST = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("speedySpeedBoost", 0.25, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> THORNY_REFLECTION_MODIFIER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("thornyReflectionModifier", 0.33, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> SNEAKY_SPEED_BOOST = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("sneakySpeedBoost", 0.5, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> THORNY_REFLECTION_CAP = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("thornyReflectionCap", 20.0, new ConfigUtils.DoubleConfigValue.DoubleLimits())));
+   public static final IConfigSetting<?> THORNY_REFLECTION_MODIFIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("thornyReflectionModifier", 0.33, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> GUARDIAN_RAY_DAMAGE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("guardianRayDamage", 5.0, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> THORNY_REFLECTION_CAP = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("thornyReflectionCap", 20.0, new DoubleConfigValue.DoubleLimits())));
    
-   public static final ArchetypeConfig.ConfigSetting<?> GREAT_SWIMMER_MOVE_SPEED_MODIFIER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("greatSwimmerMoveSpeedModifier", 0.25, new ConfigUtils.DoubleConfigValue.DoubleLimits(-100,100))));
+   public static final IConfigSetting<?> GUARDIAN_RAY_DAMAGE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("guardianRayDamage", 5.0, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> GREAT_SWIMMER_SLIPPERY_DAMAGE_MODIFIER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("greatSwimmerSlipperyDamageModifier", 0.8, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> GREAT_SWIMMER_MOVE_SPEED_MODIFIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("greatSwimmerMoveSpeedModifier", 0.25, new DoubleConfigValue.DoubleLimits(-100,100))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> SLIPPERY_DAMAGE_MODIFIER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("slipperyDamageModifier", 0.9, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> GREAT_SWIMMER_SLIPPERY_DAMAGE_MODIFIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("greatSwimmerSlipperyDamageModifier", 0.8, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> GLIDER_RECOVERY_TIME = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("gliderRecoveryTime", 0.1, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> SLIPPERY_DAMAGE_MODIFIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("slipperyDamageModifier", 0.9, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> HASTY_MINING_MODIFIER = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("hastyMiningModifier", 1.9, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> GLIDER_RECOVERY_TIME = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("gliderRecoveryTime", 0.1, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> HASTY_ATTACK_SPEED_INCREASE = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("hastyAttackSpeedIncrease", 0.2, new ConfigUtils.DoubleConfigValue.DoubleLimits(0))));
+   public static final IConfigSetting<?> HASTY_MINING_MODIFIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("hastyMiningModifier", 1.9, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final ArchetypeConfig.ConfigSetting<?> JUMPY_JUMP_BOOST = registerConfigSetting(new ArchetypeConfig.NormalConfigSetting<>(
-         new ConfigUtils.DoubleConfigValue("jumpyJumpBoost", 0.35, new ConfigUtils.DoubleConfigValue.DoubleLimits(-100,100))));
+   public static final IConfigSetting<?> HASTY_ATTACK_SPEED_INCREASE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("hastyAttackSpeedIncrease", 0.2, new DoubleConfigValue.DoubleLimits(0))));
+   
+   public static final IConfigSetting<?> JUMPY_JUMP_BOOST = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("jumpyJumpBoost", 0.35, new DoubleConfigValue.DoubleLimits(-100,100))));
    
    public static final ArchetypeAbility GOOD_SWIMMER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("good_swimmer").setDisplayStack(new ItemStack(Items.COD)).build());
    public static final ArchetypeAbility GREAT_SWIMMER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("great_swimmer").setReliantConfigs(GREAT_SWIMMER_MOVE_SPEED_MODIFIER,GREAT_SWIMMER_SLIPPERY_DAMAGE_MODIFIER).setDisplayStack(new ItemStack(Items.TROPICAL_FISH)).build());
@@ -320,7 +329,6 @@ public class ArchetypeRegistry {
    
    public static final RegistryKey<? extends Registry<EquipmentAsset>> EQUIPMENT_ASSET_REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.ofVanilla("equipment_asset"));
    
-   public static final Item GRAPHICAL_ITEM = registerItem("graphical_item", new GraphicalItem(new Item.Settings().maxCount(64)));
    public static final Item CHANGE_ITEM = registerItem("change_item", new ChangeItem(
          new Item.Settings().maxCount(16).rarity(Rarity.EPIC)
                .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.change_item_description"))))
@@ -482,7 +490,7 @@ public class ArchetypeRegistry {
       return item;
    }
    
-   private static ArchetypeConfig.ConfigSetting<?> registerConfigSetting(ArchetypeConfig.ConfigSetting<?> setting){
+   private static IConfigSetting<?> registerConfigSetting(IConfigSetting<?> setting){
       Registry.register(CONFIG_SETTINGS,Identifier.of(MOD_ID,setting.getId()),setting);
       return setting;
    }
@@ -509,18 +517,18 @@ public class ArchetypeRegistry {
                
                if(profile.hasAbility(TUFF_EATER) && TUFF_FOODS.containsKey(original.getItem())){
                   map = TUFF_FOODS;
-                  healthMod = (float) ArchetypeConfig.getDouble(ArchetypeRegistry.TUFF_FOOD_HEALTH_MODIFIER);
-                  durationMod = (float) ArchetypeConfig.getDouble(ArchetypeRegistry.TUFF_FOOD_DURATION_MODIFIER);
+                  healthMod = (float) CONFIG.getDouble(ArchetypeRegistry.TUFF_FOOD_HEALTH_MODIFIER);
+                  durationMod = (float) CONFIG.getDouble(ArchetypeRegistry.TUFF_FOOD_DURATION_MODIFIER);
                }
                if(profile.hasAbility(COPPER_EATER) && COPPER_FOODS.containsKey(original.getItem())){
                   map = COPPER_FOODS;
-                  healthMod = (float) ArchetypeConfig.getDouble(ArchetypeRegistry.COPPER_FOOD_HEALTH_MODIFIER);
-                  durationMod = (float) ArchetypeConfig.getDouble(ArchetypeRegistry.COPPER_FOOD_DURATION_MODIFIER);
+                  healthMod = (float) CONFIG.getDouble(ArchetypeRegistry.COPPER_FOOD_HEALTH_MODIFIER);
+                  durationMod = (float) CONFIG.getDouble(ArchetypeRegistry.COPPER_FOOD_DURATION_MODIFIER);
                }
                if(profile.hasAbility(IRON_EATER) && IRON_FOODS.containsKey(original.getItem())){
                   map = IRON_FOODS;
-                  healthMod = (float) ArchetypeConfig.getDouble(ArchetypeRegistry.IRON_FOOD_HEALTH_MODIFIER);
-                  durationMod = (float) ArchetypeConfig.getDouble(ArchetypeRegistry.IRON_FOOD_DURATION_MODIFIER);
+                  healthMod = (float) CONFIG.getDouble(ArchetypeRegistry.IRON_FOOD_HEALTH_MODIFIER);
+                  durationMod = (float) CONFIG.getDouble(ArchetypeRegistry.IRON_FOOD_DURATION_MODIFIER);
                }
                
                if(map != null){
@@ -564,7 +572,7 @@ public class ArchetypeRegistry {
    
    private static Text getFoodLoreLine(Pair<Float,Integer> pair){
       DecimalFormat df = new DecimalFormat("0.###");
-      return MiscUtils.removeItalics(Text.literal("").formatted(Formatting.DARK_PURPLE)
+      return TextUtils.removeItalics(Text.literal("").formatted(Formatting.DARK_PURPLE)
             .append(Text.translatable("text.ancestralarchetypes.consume_1"))
             .append(Text.literal(df.format(pair.getRight()/20.0)+" ").formatted(Formatting.GOLD))
             .append(Text.translatable("text.ancestralarchetypes.seconds").formatted(Formatting.GOLD))
@@ -576,8 +584,8 @@ public class ArchetypeRegistry {
    
    private static Text getGrowItemLoreLine(){
       DecimalFormat df = new DecimalFormat("0.###");
-      int eatTime = ArchetypeConfig.getInt(ArchetypeRegistry.GELATIAN_GROW_ITEM_EAT_DURATION);
-      return MiscUtils.removeItalics(Text.literal("").formatted(Formatting.DARK_PURPLE)
+      int eatTime = CONFIG.getInt(ArchetypeRegistry.GELATIAN_GROW_ITEM_EAT_DURATION);
+      return TextUtils.removeItalics(Text.literal("").formatted(Formatting.DARK_PURPLE)
             .append(Text.translatable("text.ancestralarchetypes.consume_1"))
             .append(Text.literal(df.format(eatTime/20.0)+" ").formatted(Formatting.GOLD))
             .append(Text.translatable("text.ancestralarchetypes.seconds").formatted(Formatting.GOLD))

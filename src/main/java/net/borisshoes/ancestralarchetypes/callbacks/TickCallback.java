@@ -4,9 +4,10 @@ import net.borisshoes.ancestralarchetypes.*;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
 import net.borisshoes.ancestralarchetypes.misc.SpyglassRevealEvent;
-import net.borisshoes.ancestralarchetypes.utils.MiscUtils;
-import net.borisshoes.ancestralarchetypes.utils.PlayerMovementEntry;
-import net.borisshoes.ancestralarchetypes.utils.SoundUtils;
+import net.borisshoes.borislib.tracker.PlayerMovementEntry;
+import net.borisshoes.borislib.utils.MinecraftUtils;
+import net.borisshoes.borislib.utils.SoundUtils;
+import net.borisshoes.borislib.utils.TextUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ConsumableComponent;
@@ -16,7 +17,6 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.passive.AbstractHorseEntity;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
@@ -25,7 +25,6 @@ import net.minecraft.item.Items;
 import net.minecraft.item.consume.UseAction;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -37,9 +36,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeKeys;
 
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +44,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.ITEMS;
+import static net.borisshoes.borislib.BorisLib.PLAYER_MOVEMENT_TRACKER;
 
 
 public class TickCallback {
@@ -58,10 +56,10 @@ public class TickCallback {
          
          if(profile.getHealthUpdate() != 0){
             double scale = -(1 - Math.pow(0.5,profile.getDeathReductionSizeLevel()));
-            MiscUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH,scale, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
-            MiscUtils.attributeEffect(player, EntityAttributes.SCALE,scale, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
-            MiscUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH,scale, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),false);
-            MiscUtils.attributeEffect(player, EntityAttributes.SCALE,scale, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),false);
+            MinecraftUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH,scale, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
+            MinecraftUtils.attributeEffect(player, EntityAttributes.SCALE,scale, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
+            MinecraftUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH,scale, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),false);
+            MinecraftUtils.attributeEffect(player, EntityAttributes.SCALE,scale, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),false);
             if(player.getMaxHealth() >= profile.getHealthUpdate()){
                player.setHealth(profile.getHealthUpdate());
                profile.setHealthUpdate(0);
@@ -83,15 +81,15 @@ public class TickCallback {
             
             if(profile.hasAbility(ArchetypeRegistry.TUFF_EATER) && ArchetypeRegistry.TUFF_FOODS.containsKey(stack.getItem())){
                map = ArchetypeRegistry.TUFF_FOODS;
-               durationMod = (float) ArchetypeConfig.getDouble(ArchetypeRegistry.TUFF_FOOD_DURATION_MODIFIER);
+               durationMod = (float) CONFIG.getDouble(ArchetypeRegistry.TUFF_FOOD_DURATION_MODIFIER);
             }
             if(profile.hasAbility(ArchetypeRegistry.COPPER_EATER) && ArchetypeRegistry.COPPER_FOODS.containsKey(stack.getItem())){
                map = ArchetypeRegistry.COPPER_FOODS;
-               durationMod = (float) ArchetypeConfig.getDouble(ArchetypeRegistry.COPPER_FOOD_DURATION_MODIFIER);
+               durationMod = (float) CONFIG.getDouble(ArchetypeRegistry.COPPER_FOOD_DURATION_MODIFIER);
             }
             if(profile.hasAbility(ArchetypeRegistry.IRON_EATER) && ArchetypeRegistry.IRON_FOODS.containsKey(stack.getItem())){
                map = ArchetypeRegistry.IRON_FOODS;
-               durationMod = (float) ArchetypeConfig.getDouble(ArchetypeRegistry.IRON_FOOD_DURATION_MODIFIER);
+               durationMod = (float) CONFIG.getDouble(ArchetypeRegistry.IRON_FOOD_DURATION_MODIFIER);
             }
             
             boolean inHand = stack.equals(mainhand) || stack.equals(offhand);
@@ -107,7 +105,7 @@ public class TickCallback {
                }
             }else if(shouldHaveGelatianEatComponent){
                if(!stack.contains(DataComponentTypes.CONSUMABLE)){
-                  ConsumableComponent comp = ConsumableComponent.builder().sound(SoundEvents.ENTITY_GENERIC_EAT).useAction(UseAction.EAT).consumeSeconds(ArchetypeConfig.getInt(ArchetypeRegistry.GELATIAN_GROW_ITEM_EAT_DURATION)/20.0f).consumeParticles(true).build();
+                  ConsumableComponent comp = ConsumableComponent.builder().sound(SoundEvents.ENTITY_GENERIC_EAT).useAction(UseAction.EAT).consumeSeconds(CONFIG.getInt(ArchetypeRegistry.GELATIAN_GROW_ITEM_EAT_DURATION)/20.0f).consumeParticles(true).build();
                   stack.set(DataComponentTypes.CONSUMABLE,comp);
                }
             }else if(unusualFood && stack.contains(DataComponentTypes.CONSUMABLE)){ // Remove component
@@ -141,51 +139,51 @@ public class TickCallback {
                   StatusEffectInstance conduitPower = new StatusEffectInstance(StatusEffects.CONDUIT_POWER, 110, 0, false, false, true);
                   player.addStatusEffect(conduitPower);
                }
-               MiscUtils.attributeEffect(player, EntityAttributes.WATER_MOVEMENT_EFFICIENCY, 1f, EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"swim_buff"),false);
+               MinecraftUtils.attributeEffect(player, EntityAttributes.WATER_MOVEMENT_EFFICIENCY, 1f, EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"swim_buff"),false);
             }else{
-               MiscUtils.attributeEffect(player, EntityAttributes.WATER_MOVEMENT_EFFICIENCY, 1f, EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"swim_buff"),true);
+               MinecraftUtils.attributeEffect(player, EntityAttributes.WATER_MOVEMENT_EFFICIENCY, 1f, EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"swim_buff"),true);
             }
             
             if(profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER) && player.isTouchingWaterOrRain()){
-               MiscUtils.attributeEffect(player, EntityAttributes.MOVEMENT_SPEED, ArchetypeConfig.getDouble(ArchetypeRegistry.GREAT_SWIMMER_MOVE_SPEED_MODIFIER), EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"great_swimmer"),false);
+               MinecraftUtils.attributeEffect(player, EntityAttributes.MOVEMENT_SPEED, CONFIG.getDouble(ArchetypeRegistry.GREAT_SWIMMER_MOVE_SPEED_MODIFIER), EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"great_swimmer"),false);
             }else{
-               MiscUtils.attributeEffect(player, EntityAttributes.MOVEMENT_SPEED, ArchetypeConfig.getDouble(ArchetypeRegistry.GREAT_SWIMMER_MOVE_SPEED_MODIFIER), EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"great_swimmer"),true);
+               MinecraftUtils.attributeEffect(player, EntityAttributes.MOVEMENT_SPEED, CONFIG.getDouble(ArchetypeRegistry.GREAT_SWIMMER_MOVE_SPEED_MODIFIER), EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"great_swimmer"),true);
             }
             
-            MiscUtils.attributeEffect(player, EntityAttributes.SCALE, -0.5, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"half_sized"),!profile.hasAbility(ArchetypeRegistry.HALF_SIZED));
-            MiscUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH, -0.5, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"half_sized"),!profile.hasAbility(ArchetypeRegistry.HALF_SIZED));
+            MinecraftUtils.attributeEffect(player, EntityAttributes.SCALE, -0.5, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"half_sized"),!profile.hasAbility(ArchetypeRegistry.HALF_SIZED));
+            MinecraftUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH, -0.5, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"half_sized"),!profile.hasAbility(ArchetypeRegistry.HALF_SIZED));
             
-            MiscUtils.attributeEffect(player, EntityAttributes.SCALE, 0.25, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"tall_sized"),!profile.hasAbility(ArchetypeRegistry.TALL_SIZED));
+            MinecraftUtils.attributeEffect(player, EntityAttributes.SCALE, 0.25, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"tall_sized"),!profile.hasAbility(ArchetypeRegistry.TALL_SIZED));
             
-            MiscUtils.attributeEffect(player, EntityAttributes.SCALE, 0.5, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"giant_sized"),!profile.hasAbility(ArchetypeRegistry.GIANT_SIZED));
-            MiscUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH, 1, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"giant_sized"),!profile.hasAbility(ArchetypeRegistry.GIANT_SIZED));
+            MinecraftUtils.attributeEffect(player, EntityAttributes.SCALE, 0.5, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"giant_sized"),!profile.hasAbility(ArchetypeRegistry.GIANT_SIZED));
+            MinecraftUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH, 1, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"giant_sized"),!profile.hasAbility(ArchetypeRegistry.GIANT_SIZED));
             
-            MiscUtils.attributeEffect(player, EntityAttributes.ENTITY_INTERACTION_RANGE, ArchetypeConfig.getDouble(ArchetypeRegistry.LONG_ARMS_RANGE), EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"long_arms"),!profile.hasAbility(ArchetypeRegistry.LONG_ARMS));
-            MiscUtils.attributeEffect(player, EntityAttributes.BLOCK_INTERACTION_RANGE, ArchetypeConfig.getDouble(ArchetypeRegistry.LONG_ARMS_RANGE), EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"long_arms"),!profile.hasAbility(ArchetypeRegistry.LONG_ARMS));
+            MinecraftUtils.attributeEffect(player, EntityAttributes.ENTITY_INTERACTION_RANGE, CONFIG.getDouble(ArchetypeRegistry.LONG_ARMS_RANGE), EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"long_arms"),!profile.hasAbility(ArchetypeRegistry.LONG_ARMS));
+            MinecraftUtils.attributeEffect(player, EntityAttributes.BLOCK_INTERACTION_RANGE, CONFIG.getDouble(ArchetypeRegistry.LONG_ARMS_RANGE), EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"long_arms"),!profile.hasAbility(ArchetypeRegistry.LONG_ARMS));
             
-            MiscUtils.attributeEffect(player, EntityAttributes.MOVEMENT_SPEED, ArchetypeConfig.getDouble(ArchetypeRegistry.SPEEDY_SPEED_BOOST), EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"speedy"),!profile.hasAbility(ArchetypeRegistry.SPEEDY));
+            MinecraftUtils.attributeEffect(player, EntityAttributes.MOVEMENT_SPEED, CONFIG.getDouble(ArchetypeRegistry.SPEEDY_SPEED_BOOST), EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"speedy"),!profile.hasAbility(ArchetypeRegistry.SPEEDY));
             
-            MiscUtils.attributeEffect(player, EntityAttributes.SNEAKING_SPEED, ArchetypeConfig.getDouble(ArchetypeRegistry.SNEAKY_SPEED_BOOST), EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"sneaky"),!profile.hasAbility(ArchetypeRegistry.SNEAKY));
+            MinecraftUtils.attributeEffect(player, EntityAttributes.SNEAKING_SPEED, CONFIG.getDouble(ArchetypeRegistry.SNEAKY_SPEED_BOOST), EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, Identifier.of(MOD_ID,"sneaky"),!profile.hasAbility(ArchetypeRegistry.SNEAKY));
             
-            MiscUtils.attributeEffect(player, EntityAttributes.JUMP_STRENGTH, ArchetypeConfig.getDouble(ArchetypeRegistry.JUMPY_JUMP_BOOST), EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"jumpy"),!profile.hasAbility(ArchetypeRegistry.JUMPY));
-            MiscUtils.attributeEffect(player, EntityAttributes.SAFE_FALL_DISTANCE, ArchetypeConfig.getDouble(ArchetypeRegistry.JUMPY_JUMP_BOOST)*10, EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"jumpy"),!profile.hasAbility(ArchetypeRegistry.JUMPY));
+            MinecraftUtils.attributeEffect(player, EntityAttributes.JUMP_STRENGTH, CONFIG.getDouble(ArchetypeRegistry.JUMPY_JUMP_BOOST), EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"jumpy"),!profile.hasAbility(ArchetypeRegistry.JUMPY));
+            MinecraftUtils.attributeEffect(player, EntityAttributes.SAFE_FALL_DISTANCE, CONFIG.getDouble(ArchetypeRegistry.JUMPY_JUMP_BOOST)*10, EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"jumpy"),!profile.hasAbility(ArchetypeRegistry.JUMPY));
             
-            MiscUtils.attributeEffect(player, EntityAttributes.ATTACK_KNOCKBACK, ArchetypeConfig.getDouble(ArchetypeRegistry.HARD_HITTER_KNOCKBACK_INCREASE), EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"hard_hitter"),!profile.hasAbility(ArchetypeRegistry.HARD_HITTER));
+            MinecraftUtils.attributeEffect(player, EntityAttributes.ATTACK_KNOCKBACK, CONFIG.getDouble(ArchetypeRegistry.HARD_HITTER_KNOCKBACK_INCREASE), EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"hard_hitter"),!profile.hasAbility(ArchetypeRegistry.HARD_HITTER));
             
-            MiscUtils.attributeEffect(player, EntityAttributes.ATTACK_SPEED, ArchetypeConfig.getDouble(ArchetypeRegistry.HASTY_ATTACK_SPEED_INCREASE), EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"hasty"),!profile.hasAbility(ArchetypeRegistry.HASTY));
+            MinecraftUtils.attributeEffect(player, EntityAttributes.ATTACK_SPEED, CONFIG.getDouble(ArchetypeRegistry.HASTY_ATTACK_SPEED_INCREASE), EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"hasty"),!profile.hasAbility(ArchetypeRegistry.HASTY));
             
             Entity vehicle = player.getVehicle();
             boolean gaveReach = false;
             if(vehicle != null){
                if(!vehicle.getCommandTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList().isEmpty()){
-                  MiscUtils.attributeEffect(player, EntityAttributes.BLOCK_INTERACTION_RANGE, ArchetypeConfig.getDouble(ArchetypeRegistry.MOUNTED_RANGE), EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"mounted_reach"),false);
-                  MiscUtils.attributeEffect(player, EntityAttributes.ENTITY_INTERACTION_RANGE, ArchetypeConfig.getDouble(ArchetypeRegistry.MOUNTED_RANGE), EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"mounted_reach"),false);
+                  MinecraftUtils.attributeEffect(player, EntityAttributes.BLOCK_INTERACTION_RANGE, CONFIG.getDouble(ArchetypeRegistry.MOUNTED_RANGE), EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"mounted_reach"),false);
+                  MinecraftUtils.attributeEffect(player, EntityAttributes.ENTITY_INTERACTION_RANGE, CONFIG.getDouble(ArchetypeRegistry.MOUNTED_RANGE), EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"mounted_reach"),false);
                   gaveReach = true;
                }
             }
             if(!gaveReach){
-               MiscUtils.attributeEffect(player, EntityAttributes.BLOCK_INTERACTION_RANGE, ArchetypeConfig.getDouble(ArchetypeRegistry.MOUNTED_RANGE), EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"mounted_reach"),true);
-               MiscUtils.attributeEffect(player, EntityAttributes.ENTITY_INTERACTION_RANGE, ArchetypeConfig.getDouble(ArchetypeRegistry.MOUNTED_RANGE), EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"mounted_reach"),true);
+               MinecraftUtils.attributeEffect(player, EntityAttributes.BLOCK_INTERACTION_RANGE, CONFIG.getDouble(ArchetypeRegistry.MOUNTED_RANGE), EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"mounted_reach"),true);
+               MinecraftUtils.attributeEffect(player, EntityAttributes.ENTITY_INTERACTION_RANGE, CONFIG.getDouble(ArchetypeRegistry.MOUNTED_RANGE), EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"mounted_reach"),true);
             }
             
             long timeOfDay = world.getTimeOfDay();
@@ -195,11 +193,11 @@ public class TickCallback {
             for(int i = 0; i <= 4; i++){
                Identifier id = Identifier.of(MOD_ID,"slime_moonlit_"+i);
                if(moonLevel == i && profile.hasAbility(ArchetypeRegistry.MOONLIT) && profile.hasAbility(ArchetypeRegistry.SLIME_TOTEM)){
-                  MiscUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH, ArchetypeConfig.getDouble(ArchetypeRegistry.MOONLIT_SLIME_HEALTH_PER_PHASE) * i, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, id,false);
-                  MiscUtils.attributeEffect(player, EntityAttributes.SCALE, ArchetypeConfig.getDouble(ArchetypeRegistry.MOONLIT_SLIME_SIZE_PER_PHASE) * i, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, id,false);
+                  MinecraftUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH, CONFIG.getDouble(ArchetypeRegistry.MOONLIT_SLIME_HEALTH_PER_PHASE) * i, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, id,false);
+                  MinecraftUtils.attributeEffect(player, EntityAttributes.SCALE, CONFIG.getDouble(ArchetypeRegistry.MOONLIT_SLIME_SIZE_PER_PHASE) * i, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, id,false);
                }else{
-                  MiscUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH, ArchetypeConfig.getDouble(ArchetypeRegistry.MOONLIT_SLIME_HEALTH_PER_PHASE) * i, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, id,true);
-                  MiscUtils.attributeEffect(player, EntityAttributes.SCALE, ArchetypeConfig.getDouble(ArchetypeRegistry.MOONLIT_SLIME_SIZE_PER_PHASE) * i, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, id,true);
+                  MinecraftUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH, CONFIG.getDouble(ArchetypeRegistry.MOONLIT_SLIME_HEALTH_PER_PHASE) * i, EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE, id,true);
+                  MinecraftUtils.attributeEffect(player, EntityAttributes.SCALE, CONFIG.getDouble(ArchetypeRegistry.MOONLIT_SLIME_SIZE_PER_PHASE) * i, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, id,true);
                }
             }
             
@@ -211,7 +209,7 @@ public class TickCallback {
             
             if(profile.hasAbility(ArchetypeRegistry.INSATIABLE)){
                HungerManager hungerManager = player.getHungerManager();
-               hungerManager.addExhaustion((float) ArchetypeConfig.getDouble(ArchetypeRegistry.INSATIATBLE_HUNGER_RATE));
+               hungerManager.addExhaustion((float) CONFIG.getDouble(ArchetypeRegistry.INSATIATBLE_HUNGER_RATE));
             }
          }
          
@@ -222,7 +220,7 @@ public class TickCallback {
             boolean shouldFreeze = (biome.isIn(ArchetypeRegistry.COLD_DAMAGE_INCLUDE_BIOMES) || (temp < 0.1 && !biome.isIn(ArchetypeRegistry.COLD_DAMAGE_EXCEPTION_BIOMES))) &&
                   profile.hasAbility(ArchetypeRegistry.DAMAGED_BY_COLD) && !player.hasStatusEffect(StatusEffects.WATER_BREATHING) && !(player.isCreative() || player.isSpectator());
             if(shouldFreeze){
-               player.damage(world, world.getDamageSources().freeze(), (float) ArchetypeConfig.getDouble(ArchetypeRegistry.BIOME_DAMAGE));
+               player.damage(world, world.getDamageSources().freeze(), (float) CONFIG.getDouble(ArchetypeRegistry.BIOME_DAMAGE));
                player.sendMessage(Text.translatable("text.ancestralarchetypes.freeze_warning").formatted(Formatting.AQUA,Formatting.ITALIC),true);
                SoundUtils.playSongToPlayer(player, SoundEvents.ENTITY_PLAYER_HURT_FREEZE,1,1f);
             }
@@ -231,7 +229,7 @@ public class TickCallback {
                   profile.hasAbility(ArchetypeRegistry.DRIES_OUT) && !player.isTouchingWater() && !player.hasStatusEffect(StatusEffects.FIRE_RESISTANCE) &&
                   !(player.isCreative() || player.isSpectator()) && !player.getEquippedStack(EquipmentSlot.HEAD).isOf(Items.TURTLE_HELMET);
             if(shouldDryOut){
-               player.damage(world, world.getDamageSources().dryOut(), (float) ArchetypeConfig.getDouble(ArchetypeRegistry.BIOME_DAMAGE));
+               player.damage(world, world.getDamageSources().dryOut(), (float) CONFIG.getDouble(ArchetypeRegistry.BIOME_DAMAGE));
                player.sendMessage(Text.translatable("text.ancestralarchetypes.dry_out_warning").formatted(Formatting.RED,Formatting.ITALIC),true);
                SoundUtils.playSongToPlayer(player, SoundEvents.ITEM_FIRECHARGE_USE,1,1f);
             }
@@ -245,12 +243,12 @@ public class TickCallback {
          }
          
          if(profile.hasAbility(ArchetypeRegistry.REGEN_WHEN_LOW) && player.getHealth() < player.getMaxHealth()/2.0 && !player.isDead()){
-            player.heal((float) ArchetypeConfig.getDouble(ArchetypeRegistry.REGENERATION_RATE));
+            player.heal((float) CONFIG.getDouble(ArchetypeRegistry.REGENERATION_RATE));
          }
          
          if(profile.hasAbility(ArchetypeRegistry.HEALTH_BASED_SPRINT)){
             HungerManager hungerManager = player.getHungerManager();
-            boolean canSprint = player.getHealth()/player.getMaxHealth() > (float) ArchetypeConfig.getDouble(ArchetypeRegistry.HEALTH_SPRINT_CUTOFF);
+            boolean canSprint = player.getHealth()/player.getMaxHealth() > (float) CONFIG.getDouble(ArchetypeRegistry.HEALTH_SPRINT_CUTOFF);
             if(canSprint){
                hungerManager.setFoodLevel(20);
             }else{
@@ -270,15 +268,15 @@ public class TickCallback {
                }
             }
             
-            double yMov = PLAYER_MOVEMENT_TRACKER.getOrDefault(player,PlayerMovementEntry.blankEntry(player)).velocity().getY();
-            boolean shouldTriggerSlowFall = (yMov < -ArchetypeConfig.getDouble(ArchetypeRegistry.SLOW_FALLER_TRIGGER_SPEED))
+            double yMov = PLAYER_MOVEMENT_TRACKER.getOrDefault(player, PlayerMovementEntry.blankEntry(player)).velocity().getY();
+            boolean shouldTriggerSlowFall = (yMov < -CONFIG.getDouble(ArchetypeRegistry.SLOW_FALLER_TRIGGER_SPEED))
                   && !player.isGliding() && !player.getAbilities().flying && predictedFallDist > player.getAttributeValue(EntityAttributes.SAFE_FALL_DISTANCE) && !player.isSwimming();
             if(shouldTriggerSlowFall){
                if(!player.isSneaking()){
                   if(!player.hasStatusEffect(StatusEffects.SLOW_FALLING)){
                      SoundUtils.playSongToPlayer(player,SoundEvents.ENTITY_ENDER_DRAGON_FLAP,0.3f,1);
                   }else{
-                     if(yMov < -1.25*ArchetypeConfig.getDouble(ArchetypeRegistry.SLOW_FALLER_TRIGGER_SPEED)){
+                     if(yMov < -1.25*CONFIG.getDouble(ArchetypeRegistry.SLOW_FALLER_TRIGGER_SPEED)){
                         player.addVelocity(0,0.2,0);
                         player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player));
                      }
@@ -331,13 +329,13 @@ public class TickCallback {
          }
          
          
-         boolean spyglass = ArchetypeConfig.getBoolean(ArchetypeRegistry.SPYGLASS_REVEALS_ARCHETYPE);
+         boolean spyglass = CONFIG.getBoolean(ArchetypeRegistry.SPYGLASS_REVEALS_ARCHETYPE);
          if(spyglass){
-            int warmup = ArchetypeConfig.getInt(ArchetypeRegistry.SPYGLASS_INVESTIGATE_DURATION);
-            boolean alert = ArchetypeConfig.getBoolean(ArchetypeRegistry.SPYGLASS_REVEAL_ALERTS_PLAYER);
+            int warmup = CONFIG.getInt(ArchetypeRegistry.SPYGLASS_INVESTIGATE_DURATION);
+            boolean alert = CONFIG.getBoolean(ArchetypeRegistry.SPYGLASS_REVEAL_ALERTS_PLAYER);
             ItemStack activeStack = player.getActiveItem();
             if(activeStack != null && activeStack.isOf(Items.SPYGLASS)){
-               MiscUtils.LasercastResult lasercast = MiscUtils.lasercast(world, player.getEyePos(), player.getRotationVecClient(), server.getPlayerManager().getViewDistance() * 16, true, player);
+               MinecraftUtils.LasercastResult lasercast = MinecraftUtils.lasercast(world, player.getEyePos(), player.getRotationVecClient(), server.getPlayerManager().getViewDistance() * 16, true, player);
                for(Entity entity : lasercast.sortedHits()){
                   if(entity instanceof ServerPlayerEntity target){
                      if(SPYGLASS_REVEAL_EVENTS.stream().anyMatch(event -> event.isReset() && event.getTarget().equals(target) && event.getInspector().equals(player))){
@@ -376,7 +374,7 @@ public class TickCallback {
                   if(subArchetype == null){
                      inspector.sendMessage(Text.translatable("text.ancestralarchetypes.inspect_no_archetype",player.getStyledDisplayName()).formatted(Formatting.AQUA),false);
                   }else{
-                     inspector.sendMessage(Text.translatable("text.ancestralarchetypes.inspect_results",player.getStyledDisplayName(),subArchetype.getName().formatted(MiscUtils.getClosestFormatting(subArchetype.getColor()))).formatted(Formatting.AQUA),false);
+                     inspector.sendMessage(Text.translatable("text.ancestralarchetypes.inspect_results",player.getStyledDisplayName(),subArchetype.getName().formatted(TextUtils.getClosestFormatting(subArchetype.getColor()))).formatted(Formatting.AQUA),false);
                   }
                   if(alert) player.sendMessage(Text.translatable("text.ancestralarchetypes.inspected").formatted(Formatting.RED));
                   

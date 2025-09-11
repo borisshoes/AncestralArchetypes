@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.PLAYER_MOVEMENT_TRACKER;
+import static net.borisshoes.borislib.BorisLib.PLAYER_MOVEMENT_TRACKER;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
 @Mixin(Entity.class)

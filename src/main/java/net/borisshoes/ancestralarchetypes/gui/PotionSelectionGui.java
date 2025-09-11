@@ -4,14 +4,11 @@ import eu.pb4.sgui.api.ClickType;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
-import net.borisshoes.ancestralarchetypes.SubArchetype;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
-import net.borisshoes.ancestralarchetypes.items.GraphicalItem;
-import net.borisshoes.ancestralarchetypes.utils.MiscUtils;
-import net.borisshoes.ancestralarchetypes.utils.SoundUtils;
+import net.borisshoes.borislib.gui.GraphicalItem;
+import net.borisshoes.borislib.gui.GuiHelper;
+import net.borisshoes.borislib.utils.SoundUtils;
 import net.minecraft.component.type.PotionContentsComponent;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.Potions;
@@ -106,7 +103,7 @@ public class PotionSelectionGui extends SimpleGui {
    public void build(){
       IArchetypeProfile profile = profile(player);
       this.map.clear();
-      MiscUtils.outlineGUI(this,0x6316c4, Text.empty());
+      GuiHelper.outlineGUI(this,0x6316c4, Text.empty());
       
       GuiElementBuilder potionTypeItem = GuiElementBuilder.from(PotionContentsComponent.createStack(splash ? Items.SPLASH_POTION : Items.POTION,Potions.HEALING)).hideDefaultTooltip();
       potionTypeItem.setName(Text.translatable(splash ? "item.minecraft.splash_potion" : "item.minecraft.potion").formatted(splash ? Formatting.AQUA : Formatting.GREEN));
@@ -133,7 +130,7 @@ public class PotionSelectionGui extends SimpleGui {
                potionItem.addLoreLineRaw(Text.translatable("text.ancestralarchetypes.potion_brewer_gui_upgrades").append(getTranslationForMoonPhase(entry.getUpgradePhase(moonLevel)).formatted(Formatting.WHITE)));
             }
          }else{
-            potionItem = GuiElementBuilder.from(GraphicalItem.with(entry.lingering() ? GraphicalItem.GraphicItems.LOCKED_LINGERING_POTION : (splash ? GraphicalItem.GraphicItems.LOCKED_SPLASH_POTION : GraphicalItem.GraphicItems.LOCKED_POTION))).hideDefaultTooltip();
+            potionItem = GuiElementBuilder.from(GraphicalItem.with(entry.lingering() ? ArchetypeRegistry.LOCKED_LINGERING_POTION : (splash ? ArchetypeRegistry.LOCKED_SPLASH_POTION : ArchetypeRegistry.LOCKED_POTION))).hideDefaultTooltip();
             potionItem.setName(PotionContentsComponent.createStack(entry.lingering() ? Items.LINGERING_POTION : (splash ? Items.SPLASH_POTION : Items.POTION),entry.getPotion(entry.getMinPhase())).getName());
             potionItem.addLoreLineRaw(Text.translatable("text.ancestralarchetypes.potion_brewer_gui_locked").append(getTranslationForMoonPhase(entry.getMinPhase()).formatted(Formatting.WHITE)));
          }

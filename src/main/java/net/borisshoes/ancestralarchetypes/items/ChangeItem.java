@@ -1,10 +1,9 @@
 package net.borisshoes.ancestralarchetypes.items;
 
 import eu.pb4.polymer.core.api.item.PolymerItem;
-import net.borisshoes.ancestralarchetypes.ArchetypeConfig;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
-import net.borisshoes.ancestralarchetypes.utils.SoundUtils;
+import net.borisshoes.borislib.utils.SoundUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -24,8 +23,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.packettweaker.PacketContext;
 
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 
 public class ChangeItem extends Item implements PolymerItem {
    
@@ -38,7 +36,7 @@ public class ChangeItem extends Item implements PolymerItem {
       if(!(user instanceof ServerPlayerEntity player)) return ActionResult.PASS;
       IArchetypeProfile profile = profile(player);
       boolean couldChange = profile.canChangeArchetype();
-      profile.increaseAllowedChanges(ArchetypeConfig.getInt(ArchetypeRegistry.CHANGES_PER_CHANGE_ITEM));
+      profile.increaseAllowedChanges(CONFIG.getInt(ArchetypeRegistry.CHANGES_PER_CHANGE_ITEM));
       if(!couldChange && profile.canChangeArchetype()){
          player.sendMessage(Text.translatable("text.ancestralarchetypes.change_reminder").styled(s ->
                s.withClickEvent(new ClickEvent.RunCommand("/archetypes changeArchetype"))

@@ -2,8 +2,8 @@ package net.borisshoes.ancestralarchetypes.cca;
 
 import net.borisshoes.ancestralarchetypes.*;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
-import net.borisshoes.ancestralarchetypes.utils.MiscUtils;
-import net.minecraft.block.entity.ChestBlockEntity;
+import net.borisshoes.borislib.utils.AlgoUtils;
+import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
@@ -12,18 +12,12 @@ import net.minecraft.entity.passive.HorseColor;
 import net.minecraft.entity.passive.HorseMarking;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventories;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.inventory.StackWithSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.potion.Potion;
-import net.minecraft.registry.RegistryOps;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
@@ -32,18 +26,19 @@ import net.minecraft.util.Pair;
 
 import java.util.*;
 
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.ITEMS;
 
 public class ArchetypeProfile implements IArchetypeProfile {
    
    private final PlayerEntity player;
-   private boolean giveReminders = ArchetypeConfig.getBoolean(ArchetypeRegistry.REMINDERS_ON_BY_DEFAULT);
+   private boolean giveReminders = CONFIG.getBoolean(ArchetypeRegistry.REMINDERS_ON_BY_DEFAULT);
    private boolean gliderActive;
    private int deathReductionSizeLevel;
    private float glideTime;
    private int gliderColor = 0xFFFFFF;
-   private int archetypeChangesAllowed = ArchetypeConfig.getInt(ArchetypeRegistry.STARTING_ARCHETYPE_CHANGES);
+   private int archetypeChangesAllowed = CONFIG.getInt(ArchetypeRegistry.STARTING_ARCHETYPE_CHANGES);
    private int giveItemsCooldown;
    private float healthUpdate;
    private ItemStack potionBrewerStack = ItemStack.EMPTY;
@@ -67,7 +62,7 @@ public class ArchetypeProfile implements IArchetypeProfile {
       this.gliderActive = view.getBoolean("gliderActive",false);
       this.archetypeChangesAllowed = view.getInt("archetypeChangesAllowed",0);
       this.gliderColor = view.getInt("gliderColor",0xffffff);
-      this.giveReminders = view.getBoolean("giveReminders",ArchetypeConfig.getBoolean(ArchetypeRegistry.REMINDERS_ON_BY_DEFAULT));
+      this.giveReminders = view.getBoolean("giveReminders",CONFIG.getBoolean(ArchetypeRegistry.REMINDERS_ON_BY_DEFAULT));
       this.subArchetype = ArchetypeRegistry.SUBARCHETYPES.get(Identifier.of(MOD_ID, view.getString("subArchetype","")));
       this.giveItemsCooldown = view.getInt("giveItemsCooldown",0);
       this.healthUpdate = view.getFloat("loginHealth",20f);
@@ -93,13 +88,17 @@ public class ArchetypeProfile implements IArchetypeProfile {
          ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.get(Identifier.of(MOD_ID, key));
          if(ability != null){
             NbtCompound entryTag = mountDataTag.getCompound(key).orElse(new NbtCompound());
-            UUID uuid = MiscUtils.getUUIDOrNull(entryTag.getString("id",""));
+            UUID uuid = AlgoUtils.getUUID(entryTag.getString("id",""));
             mountData.put(ability,new Pair<>(uuid,entryTag.getFloat("hp",1f)));
          }
       }
       
       this.mountInventory.clear();
-      MiscUtils.readData(view, "mountInventory", this.mountInventory.getHeldStacks());
+      for(StackWithSlot stackWithSlot : view.getTypedListView("mountInventory", StackWithSlot.CODEC)){
+         if(stackWithSlot.isValidSlot(this.mountInventory.getHeldStacks().size())){
+            this.mountInventory.getHeldStacks().set(stackWithSlot.slot(), stackWithSlot.stack());
+         }
+      }
    }
    
    @Override
@@ -130,7 +129,15 @@ public class ArchetypeProfile implements IArchetypeProfile {
          mountDataTag.put(ability.getId(),tagEntry);
       });
       view.put("mountData",NbtCompound.CODEC,mountDataTag);
-      MiscUtils.writeData(view, "mountInventory", this.mountInventory.getHeldStacks());
+      
+      WriteView.ListAppender<StackWithSlot> listAppender = view.getListAppender("mountInventory", StackWithSlot.CODEC);
+      for(int i = 0; i < this.mountInventory.getHeldStacks().size(); ++i) {
+         ItemStack itemStack = this.mountInventory.getHeldStacks().get(i);
+         if (!itemStack.isEmpty()) {
+            listAppender.add(new StackWithSlot(i, itemStack));
+         }
+      }
+      listAppender.isEmpty();
    }
    
    private void calculateAbilities(){
@@ -163,7 +170,7 @@ public class ArchetypeProfile implements IArchetypeProfile {
    
    @Override
    public int getMaxGlideTime(){
-      return ArchetypeConfig.getInt(ArchetypeRegistry.GLIDER_DURATION);
+      return CONFIG.getInt(ArchetypeRegistry.GLIDER_DURATION);
    }
    
    @Override
@@ -272,12 +279,12 @@ public class ArchetypeProfile implements IArchetypeProfile {
          return;
       }
       
-      MiscUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
-      MiscUtils.attributeEffect(player, EntityAttributes.SCALE,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
+      MinecraftUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
+      MinecraftUtils.attributeEffect(player, EntityAttributes.SCALE,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
       
       double scale = -(1 - Math.pow(0.5,this.deathReductionSizeLevel));
-      MiscUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH,scale, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),false);
-      MiscUtils.attributeEffect(player, EntityAttributes.SCALE,scale, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),false);
+      MinecraftUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH,scale, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),false);
+      MinecraftUtils.attributeEffect(player, EntityAttributes.SCALE,scale, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),false);
       player.setHealth(player.getMaxHealth());
    }
    
@@ -285,8 +292,8 @@ public class ArchetypeProfile implements IArchetypeProfile {
    @Override
    public void resetDeathReductionSizeLevel(){
       this.deathReductionSizeLevel = 0;
-      MiscUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
-      MiscUtils.attributeEffect(player, EntityAttributes.SCALE,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
+      MinecraftUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
+      MinecraftUtils.attributeEffect(player, EntityAttributes.SCALE,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
    }
    
    @Override
@@ -305,21 +312,21 @@ public class ArchetypeProfile implements IArchetypeProfile {
       }else{
          if(wasGliderActive){
             this.gliderActive = false;
-            setAbilityCooldown(ArchetypeRegistry.GLIDER,ArchetypeConfig.getInt(ArchetypeRegistry.GLIDER_COOLDOWN));
+            setAbilityCooldown(ArchetypeRegistry.GLIDER,CONFIG.getInt(ArchetypeRegistry.GLIDER_COOLDOWN));
          }
          if(getAbilityCooldown(ArchetypeRegistry.GLIDER) == 0){
-            this.glideTime = (float) Math.min(ArchetypeConfig.getInt(ArchetypeRegistry.GLIDER_DURATION),this.glideTime + ArchetypeConfig.getDouble(ArchetypeRegistry.GLIDER_RECOVERY_TIME));
+            this.glideTime = (float) Math.min(CONFIG.getInt(ArchetypeRegistry.GLIDER_DURATION),this.glideTime + CONFIG.getDouble(ArchetypeRegistry.GLIDER_RECOVERY_TIME));
          }
       }
       
       if(this.glideTime < 0){
          this.glideTime = 0;
-         setAbilityCooldown(ArchetypeRegistry.GLIDER,ArchetypeConfig.getInt(ArchetypeRegistry.GLIDER_COOLDOWN));
+         setAbilityCooldown(ArchetypeRegistry.GLIDER,CONFIG.getInt(ArchetypeRegistry.GLIDER_COOLDOWN));
       }
       
       if(this.giveItemsCooldown > 0) this.giveItemsCooldown--;
       
-      if(ArchetypeConfig.getBoolean(ArchetypeRegistry.CAN_ALWAYS_CHANGE_ARCHETYPE) && !this.canChangeArchetype()){
+      if(CONFIG.getBoolean(ArchetypeRegistry.CAN_ALWAYS_CHANGE_ARCHETYPE) && !this.canChangeArchetype()){
          this.archetypeChangesAllowed++;
       }
    }
@@ -327,7 +334,7 @@ public class ArchetypeProfile implements IArchetypeProfile {
    @Override
    public void resetAbilityCooldowns(){
       abilityCooldowns.forEach((ability, cooldown) -> abilityCooldowns.put(ability,0));
-      this.glideTime = ArchetypeConfig.getInt(ArchetypeRegistry.GLIDER_DURATION);
+      this.glideTime = CONFIG.getInt(ArchetypeRegistry.GLIDER_DURATION);
    }
    
    @Override
@@ -413,7 +420,7 @@ public class ArchetypeProfile implements IArchetypeProfile {
                   }
                }
                if(!found){
-                  MiscUtils.giveStacks(player, new ItemStack(item));
+                  MinecraftUtils.giveStacks(player, new ItemStack(item));
                   break;
                }
             }

@@ -1,5 +1,6 @@
 package net.borisshoes.ancestralarchetypes;
 
+import net.borisshoes.borislib.config.IConfigSetting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.MutableText;
@@ -13,9 +14,9 @@ public class ArchetypeAbility {
    private final boolean active;
    private final ArchetypeAbility[] overrides;
    private final ItemStack displayStack;
-   private final ArchetypeConfig.ConfigSetting<?>[] reliantConfigs;
+   private final IConfigSetting<?>[] reliantConfigs;
    
-   public ArchetypeAbility(String id, boolean activeAbility, ItemStack displayStack, ArchetypeConfig.ConfigSetting<?>[] reliantConfigs, ArchetypeAbility... overrides){
+   public ArchetypeAbility(String id, boolean activeAbility, ItemStack displayStack, IConfigSetting<?>[] reliantConfigs, ArchetypeAbility... overrides){
       this.id = id;
       this.active = activeAbility;
       this.displayStack = displayStack;
@@ -47,7 +48,7 @@ public class ArchetypeAbility {
       return overrides;
    }
    
-   public ArchetypeConfig.ConfigSetting<?>[] getReliantConfigs(){
+   public IConfigSetting<?>[] getReliantConfigs(){
       return reliantConfigs;
    }
    
@@ -62,13 +63,13 @@ public class ArchetypeAbility {
       private final String id;
       private boolean active = false;
       private ArchetypeAbility[] overrides;
-      private ArchetypeConfig.ConfigSetting<?>[] configs;
+      private IConfigSetting<?>[] configs;
       private ItemStack displayStack;
       
       public ArchetypeAbilityBuilder(String id){
          this.id = id;
          this.overrides = new ArchetypeAbility[]{};
-         this.configs = new ArchetypeConfig.ConfigSetting[]{};
+         this.configs = new IConfigSetting[]{};
          this.displayStack = new ItemStack(Items.BARRIER);
       }
       
@@ -91,7 +92,7 @@ public class ArchetypeAbility {
          return this;
       }
       
-      public ArchetypeAbilityBuilder setReliantConfigs(ArchetypeConfig.ConfigSetting<?>... configs){
+      public ArchetypeAbilityBuilder setReliantConfigs(IConfigSetting<?>... configs){
          this.configs = configs;
          return this;
       }

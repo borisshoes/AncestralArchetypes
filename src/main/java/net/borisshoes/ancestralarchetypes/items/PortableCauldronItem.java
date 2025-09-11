@@ -1,11 +1,10 @@
 package net.borisshoes.ancestralarchetypes.items;
 
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
-import net.borisshoes.ancestralarchetypes.ArchetypeConfig;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.gui.PotionSelectionGui;
-import net.borisshoes.ancestralarchetypes.utils.SoundUtils;
+import net.borisshoes.borislib.utils.SoundUtils;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ConsumableComponents;
 import net.minecraft.component.type.PotionContentsComponent;
@@ -15,7 +14,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.entity.projectile.thrown.LingeringPotionEntity;
-import net.minecraft.entity.projectile.thrown.PotionEntity;
 import net.minecraft.entity.projectile.thrown.SplashPotionEntity;
 import net.minecraft.item.*;
 import net.minecraft.item.consume.UseAction;
@@ -34,8 +32,7 @@ import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.log;
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 
 public class PortableCauldronItem extends AbilityItem{
    
@@ -90,7 +87,7 @@ public class PortableCauldronItem extends AbilityItem{
             potionComp.forEachEffect(effect -> {
                totalDuration.addAndGet(effect.getDuration());
             }, 1);
-            profile.setAbilityCooldown(this.ability, (int) Math.max(ArchetypeConfig.getInt(ArchetypeRegistry.CAULDRON_INSTANT_EFFECT_COOLDOWN),totalDuration.get()*ArchetypeConfig.getDouble(ArchetypeRegistry.CAULDRON_THROWABLE_COOLDOWN_MODIFIER)));
+            profile.setAbilityCooldown(this.ability, (int) Math.max(CONFIG.getInt(ArchetypeRegistry.CAULDRON_INSTANT_EFFECT_COOLDOWN),totalDuration.get()*CONFIG.getDouble(ArchetypeRegistry.CAULDRON_THROWABLE_COOLDOWN_MODIFIER)));
          }
       }
       
@@ -109,7 +106,7 @@ public class PortableCauldronItem extends AbilityItem{
             totalDuration.addAndGet(effect.getDuration());
             player.addStatusEffect(effect);
          }, 1);
-         profile.setAbilityCooldown(this.ability, (int) Math.max(ArchetypeConfig.getInt(ArchetypeRegistry.CAULDRON_INSTANT_EFFECT_COOLDOWN),totalDuration.get()*ArchetypeConfig.getDouble(ArchetypeRegistry.CAULDRON_DRINKABLE_COOLDOWN_MODIFIER)));
+         profile.setAbilityCooldown(this.ability, (int) Math.max(CONFIG.getInt(ArchetypeRegistry.CAULDRON_INSTANT_EFFECT_COOLDOWN),totalDuration.get()*CONFIG.getDouble(ArchetypeRegistry.CAULDRON_DRINKABLE_COOLDOWN_MODIFIER)));
       }
       
       player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, stack));

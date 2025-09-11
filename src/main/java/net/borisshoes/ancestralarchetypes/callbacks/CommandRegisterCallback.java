@@ -56,7 +56,7 @@ public class CommandRegisterCallback {
                         .executes(context -> ArchetypeCommands.getArchetype(context, getString(context, "target")))))
       );
       
-      dispatcher.register(AncestralArchetypes.CONFIG.generateCommand());
+      dispatcher.register(AncestralArchetypes.CONFIG.generateCommand("archetypes","config"));
       
       if(DEV_MODE){
          dispatcher.register(literal("archetypes")

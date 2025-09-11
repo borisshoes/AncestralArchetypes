@@ -1,25 +1,18 @@
 package net.borisshoes.ancestralarchetypes;
 
-import com.google.common.collect.Iterables;
 import com.mojang.authlib.GameProfile;
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.gui.ArchetypeSelectionGui;
-import net.borisshoes.ancestralarchetypes.utils.ConfigUtils;
-import net.borisshoes.ancestralarchetypes.utils.MiscUtils;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.EntitySelectorReader;
-import net.minecraft.component.type.DyedColorComponent;
+import net.borisshoes.borislib.config.ConfigValue;
+import net.borisshoes.borislib.config.IConfigSetting;
+import net.borisshoes.borislib.utils.MinecraftUtils;
+import net.borisshoes.borislib.utils.TextUtils;
 import net.minecraft.entity.passive.HorseColor;
 import net.minecraft.entity.passive.HorseMarking;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.screen.AnvilScreenHandler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -33,7 +26,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.StringHelper;
 import net.minecraft.util.UserCache;
 
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -141,17 +133,23 @@ public class ArchetypeCommands {
          MutableText feedback = Text.empty();
          if(personal){
             feedback.append(Text.translatable("command.ancestralarchetypes.abilities_get_personal",
-                  subArchetype.getName().formatted(MiscUtils.getClosestFormatting(subArchetype.getColor()),Formatting.BOLD),
-                  subArchetype.getArchetype().getName().formatted(MiscUtils.getClosestFormatting(subArchetype.getArchetype().getColor()),Formatting.BOLD)).formatted(Formatting.AQUA)).append(Text.literal("\n"));
+                  subArchetype.getName().formatted(TextUtils.getClosestFormatting(subArchetype.getColor()),Formatting.BOLD),
+                  subArchetype.getArchetype().getName().formatted(TextUtils.getClosestFormatting(subArchetype.getArchetype().getColor()),Formatting.BOLD)).formatted(Formatting.AQUA)).append(Text.literal("\n"));
          }else{
             feedback.append(Text.translatable("command.ancestralarchetypes.archetype_get",
-                  subArchetype.getName().formatted(MiscUtils.getClosestFormatting(subArchetype.getColor()),Formatting.BOLD),
-                  subArchetype.getArchetype().getName().formatted(MiscUtils.getClosestFormatting(subArchetype.getArchetype().getColor()),Formatting.BOLD)).formatted(Formatting.AQUA)).append(Text.literal("\n"));
+                  subArchetype.getName().formatted(TextUtils.getClosestFormatting(subArchetype.getColor()),Formatting.BOLD),
+                  subArchetype.getArchetype().getName().formatted(TextUtils.getClosestFormatting(subArchetype.getArchetype().getColor()),Formatting.BOLD)).formatted(Formatting.AQUA)).append(Text.literal("\n"));
          }
          for(ArchetypeAbility ability : subArchetype.getActualAbilities()){
             feedback.append(ability.getName().formatted(Formatting.DARK_AQUA)).append(Text.literal("\n"));
-            for(ArchetypeConfig.ConfigSetting<?> config : ability.getReliantConfigs()){
-               feedback.append(Text.translatable("text.ancestralarchetypes.list_item",CONFIG.getGetter(config.getName())).formatted(Formatting.DARK_GREEN)).append(Text.literal("\n"));
+            for(IConfigSetting<?> config : ability.getReliantConfigs()){
+               MutableText text = CONFIG.values.stream()
+                     .filter(confVal -> confVal.getName().equals(config.getName()))
+                     .map(confVal -> MutableText.of(
+                           new TranslatableTextContent(ConfigValue.getTranslation(confVal.getName(),MOD_ID,"getter_setter"), null, new String[] {String.valueOf(confVal.getValueString())}
+                           )))
+                     .findFirst().orElse(Text.empty());
+               feedback.append(Text.translatable("text.ancestralarchetypes.list_item",text).formatted(Formatting.DARK_GREEN)).append(Text.literal("\n"));
             }
          }
          source.sendFeedback(() -> feedback,false);
@@ -424,7 +422,7 @@ public class ArchetypeCommands {
          
          for(UserCache.Entry cacheEntry : cacheEntries){
             GameProfile reqProfile = cacheEntry.getProfile();
-            ServerPlayerEntity reqPlayer = MiscUtils.getRequestedPlayer(server,reqProfile);
+            ServerPlayerEntity reqPlayer = MinecraftUtils.getRequestedPlayer(server,reqProfile);
             allPlayers.add(reqPlayer);
          }
          
@@ -464,7 +462,7 @@ public class ArchetypeCommands {
          archetypeCounter.forEach((subArchetype, integer) -> {
             int color = subArchetype == null ? 0xFFFFFF : subArchetype.getColor();
             MutableText name = subArchetype == null ? Text.translatable("text.ancestralarchetypes.none") : subArchetype.getName();
-            Text text = Text.empty().formatted(MiscUtils.getClosestFormatting(color)).append(name).append(Text.literal(" - ").append(Text.literal(String.format("%,d",integer))));
+            Text text = Text.empty().formatted(TextUtils.getClosestFormatting(color)).append(name).append(Text.literal(" - ").append(Text.literal(String.format("%,d",integer))));
             src.sendFeedback(() -> text, false);
             masterString.append("\n").append(text.getString());
          });
@@ -554,7 +552,7 @@ public class ArchetypeCommands {
             for(UserCache.Entry cacheEntry : cacheEntries){
                GameProfile reqProfile = cacheEntry.getProfile();
                if(reqProfile.getName().equalsIgnoreCase(target)){
-                  player = MiscUtils.getRequestedPlayer(server,reqProfile);
+                  player = MinecraftUtils.getRequestedPlayer(server,reqProfile);
                   profile = AncestralArchetypes.profile(player);
                   break;
                }
@@ -571,7 +569,7 @@ public class ArchetypeCommands {
          MutableText name = archetype == null ? Text.translatable("text.ancestralarchetypes.none") : archetype.getName();
          int color = subArchetype == null ? 0xFFFFFF : subArchetype.getColor();
          ServerPlayerEntity finalPlayer = player;
-         source.sendFeedback(() -> Text.translatable("text.ancestralarchetypes.archetype_player_get", finalPlayer.getStyledDisplayName(),subName,name).formatted(MiscUtils.getClosestFormatting(color)),false);
+         source.sendFeedback(() -> Text.translatable("text.ancestralarchetypes.archetype_player_get", finalPlayer.getStyledDisplayName(),subName,name).formatted(TextUtils.getClosestFormatting(color)),false);
          
          return 1;
       }catch(Exception e){
