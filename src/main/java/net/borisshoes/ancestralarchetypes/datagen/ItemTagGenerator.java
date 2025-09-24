@@ -1,12 +1,16 @@
 package net.borisshoes.ancestralarchetypes.datagen;
 
+import net.borisshoes.ancestralarchetypes.AncestralArchetypes;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
+import net.borisshoes.ancestralarchetypes.items.AbilityItem;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
+import net.minecraft.data.tag.ProvidedTagBuilder;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.tag.ItemTags;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -36,13 +40,23 @@ public class ItemTagGenerator extends FabricTagProvider.ItemTagProvider {
             .add(Items.PUFFERFISH)
             .add(Items.ROTTEN_FLESH)
             .add(Items.SPIDER_EYE)
-            .add(Items.RABBIT_STEW)
-            ;
+            .add(Items.RABBIT_STEW);
+      
       valueLookupBuilder(ArchetypeRegistry.SLIME_GROW_ITEMS)
-            .add(Items.SLIME_BALL)
-            ;
+            .add(Items.SLIME_BALL);
+      
       valueLookupBuilder(ArchetypeRegistry.MAGMA_CUBE_GROW_ITEMS)
-            .add(Items.MAGMA_CREAM)
-      ;
+            .add(Items.MAGMA_CREAM);
+      
+      ProvidedTagBuilder<Item,Item> abilityItemBuilder = valueLookupBuilder(ArchetypeRegistry.ABILITY_ITEMS);
+      for(Item item : ArchetypeRegistry.ITEMS){
+         if(item instanceof AbilityItem){
+            abilityItemBuilder.add(item);
+         }
+      }
+      
+      valueLookupBuilder(ArchetypeRegistry.BACKPACK_DISALLOWED_ITEMS)
+            .forceAddTag(ArchetypeRegistry.ABILITY_ITEMS)
+            .forceAddTag(ItemTags.SHULKER_BOXES);
    }
 }

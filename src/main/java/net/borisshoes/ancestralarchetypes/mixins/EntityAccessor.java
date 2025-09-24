@@ -11,4 +11,12 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 public interface EntityAccessor {
    @Invoker
    void callSetWorld(World var1);
+   
+   @Invoker("isBeingRainedOn")
+   boolean rainedOn();
+   
+   @Accessor("FLAGS")
+   static TrackedData<Byte> getFLAGS(){
+      throw new AssertionError();
+   }
 }

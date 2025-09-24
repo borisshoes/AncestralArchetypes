@@ -1,0 +1,7 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "ancestralarchetypes:item/wings",
+    "layer1": "ancestralarchetypes:trims/items/wing_glider_quartz"
+  }
+}

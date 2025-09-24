@@ -13,7 +13,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 public class DonkeySpiritMountItem  extends SpiritMountItem{
    public DonkeySpiritMountItem(Settings settings){
-      super(ArchetypeRegistry.DONKEY_SPIRIT_MOUNT, settings);
+      super(ArchetypeRegistry.DONKEY_SPIRIT_MOUNT, "\uD83E\uDECF",settings);
    }
    
    @Override

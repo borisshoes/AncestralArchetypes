@@ -1,0 +1,8 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "ancestralarchetypes:item/hover_helmet_2",
+    "layer1": "ancestralarchetypes:trims/items/aviator_helmet_quartz",
+    "layer2": "ancestralarchetypes:item/hover_helmet_1"
+  }
+}

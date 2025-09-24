@@ -1,5 +1,6 @@
 package net.borisshoes.ancestralarchetypes;
 
+import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -15,9 +16,11 @@ public class SubArchetype {
    private final ArchetypeAbility[] abilities;
    private final ItemStack displayItem;
    private final int color;
+   private final EntityType<?> entityType;
    
-   public SubArchetype(String id, ItemStack displayItem, int color, Archetype parent, ArchetypeAbility... abilities){
+   public SubArchetype(String id, EntityType<?> entityType, ItemStack displayItem, int color, Archetype parent, ArchetypeAbility... abilities){
       this.id = id;
+      this.entityType = entityType;
       this.parent = parent;
       this.color = color;
       this.abilities = abilities;
@@ -50,6 +53,10 @@ public class SubArchetype {
    
    public ArchetypeAbility[] getAbilities(){
       return abilities;
+   }
+   
+   public EntityType<?> getEntityType(){
+      return entityType;
    }
    
    public ArrayList<ArchetypeAbility> getActualAbilities(){

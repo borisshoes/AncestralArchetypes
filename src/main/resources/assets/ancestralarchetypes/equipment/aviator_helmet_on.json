@@ -1,0 +1,15 @@
+{
+	"layers": {
+		"humanoid": [
+		  {
+			"dyeable": {
+			  "color_when_undyed": -6265536
+			},
+			"texture": "ancestralarchetypes:aviator_helmet"
+		  },
+		  {
+			"texture": "ancestralarchetypes:aviator_helmet_overlay"
+		  }
+		]
+	}
+}

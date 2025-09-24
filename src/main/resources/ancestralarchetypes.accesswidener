@@ -5,3 +5,4 @@ accessible method net/minecraft/entity/passive/HorseEntity setHorseVariant (Lnet
 accessible field net/minecraft/server/network/ServerPlayNetworkHandler floatingTicks I
 accessible class net/minecraft/util/UserCache$Entry
 accessible method net/minecraft/util/UserCache$Entry getProfile ()Lcom/mojang/authlib/GameProfile;
+accessible field net/minecraft/entity/Entity random Lnet/minecraft/util/math/random/Random;

@@ -11,6 +11,7 @@ import net.borisshoes.ancestralarchetypes.SubArchetype;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.borislib.gui.GraphicalItem;
 import net.borisshoes.borislib.gui.GuiHelper;
+import net.borisshoes.borislib.gui.PagedGui;
 import net.borisshoes.borislib.utils.TextUtils;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandlerType;
@@ -33,6 +34,8 @@ public class ArchetypeSelectionGui extends SimpleGui {
    private final boolean showOnly;
    private boolean menuOnClose;
    private final HashMap<Integer,SubArchetype> map;
+   private int page = 1;
+   private final int numPages = Math.max(1, (int)Math.ceil((float)ArchetypeRegistry.ARCHETYPES.size() / 7.0));
    
    public ArchetypeSelectionGui(ServerPlayerEntity player, SubArchetype subArchetype, boolean showOnly){
       super(getScreenType(subArchetype), player, false);
@@ -156,7 +159,12 @@ public class ArchetypeSelectionGui extends SimpleGui {
       }
       setSlot(4,head);
       
-      List<Archetype> archetypes = ArchetypeRegistry.ARCHETYPES.stream().toList();
+      if(numPages > 1){
+         setSlot(45,createPrevPageItem());
+         setSlot(53,createNextPageItem());
+      }
+      
+      List<Archetype> archetypes = getArchetypesForPage(page);
       int[] dynamicSlot = dynamicSlots[archetypes.size()];
       for(int i = 0; i < dynamicSlot.length; i++){
          int offset = 1 + dynamicSlot[i];
@@ -185,6 +193,42 @@ public class ArchetypeSelectionGui extends SimpleGui {
             setSlot(27+offset+(9*j), subArchetypeItem);
          }
       }
+   }
+   
+   private GuiElementBuilder createNextPageItem() {
+      GuiElementBuilder nextPage = GuiElementBuilder.from(GraphicalItem.with(GraphicalItem.RIGHT_ARROW));
+      nextPage.setName(Text.translatable("gui.borislib.next_page_title", this.page, this.numPages).withColor(Formatting.AQUA.getColorValue().intValue()));
+      nextPage.addLoreLine(Text.translatable("text.borislib.two_elements", Text.translatable("gui.borislib.click").withColor(Formatting.GREEN.getColorValue().intValue()), Text.translatable("gui.borislib.next_page_sub").withColor(Formatting.DARK_AQUA.getColorValue().intValue())));
+      nextPage.setCallback((clickType) -> {
+         if (this.page < this.numPages) {
+            ++this.page;
+            this.buildMainMenu();
+         }
+      });
+      return nextPage;
+   }
+   
+   private GuiElementBuilder createPrevPageItem() {
+      GuiElementBuilder prevPage = GuiElementBuilder.from(GraphicalItem.with(GraphicalItem.LEFT_ARROW));
+      prevPage.setName(Text.translatable("gui.borislib.prev_page_title", this.page, this.numPages).withColor(Formatting.AQUA.getColorValue().intValue()));
+      prevPage.addLoreLine(Text.translatable("text.borislib.two_elements", Text.translatable("gui.borislib.click").withColor(Formatting.GREEN.getColorValue().intValue()), Text.translatable("gui.borislib.prev_page_sub").withColor(Formatting.DARK_AQUA.getColorValue().intValue())));
+      prevPage.setCallback((clickType) -> {
+         if (this.page > 1) {
+            --this.page;
+            this.buildMainMenu();
+         }
+      });
+      return prevPage;
+   }
+   
+   private List<Archetype> getArchetypesForPage(int page){
+      int lastInd = Math.min(7*page-1,ArchetypeRegistry.ARCHETYPES.size()-1);
+      int firstInd = Math.max(lastInd-6,0);
+      List<Archetype> archetypes = new ArrayList<>();
+      for(int i = firstInd; i <= lastInd; i++){
+         archetypes.add(ArchetypeRegistry.ARCHETYPES.get(i));
+      }
+      return archetypes;
    }
    
    @Override

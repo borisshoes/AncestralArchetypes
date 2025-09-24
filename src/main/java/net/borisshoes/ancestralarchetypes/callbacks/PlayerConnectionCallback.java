@@ -21,7 +21,7 @@ public class PlayerConnectionCallback {
          }
       }
       
-      
+      if(player.hasPassengers()) player.getFirstPassenger().stopRiding();
    }
    
    public static void onPlayerJoin(ServerPlayNetworkHandler handler, PacketSender packetSender, MinecraftServer server){

@@ -3,6 +3,8 @@ package net.borisshoes.ancestralarchetypes.mixins;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
+import io.github.ladysnake.pal.VanillaAbilities;
+import net.borisshoes.ancestralarchetypes.AncestralArchetypes;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.minecraft.entity.Entity;
@@ -21,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
+import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.SLOW_HOVER_ABILITY;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin {
@@ -28,7 +31,7 @@ public abstract class PlayerEntityMixin {
    @Shadow public abstract boolean damage(ServerWorld world, DamageSource source, float amount);
    
    @ModifyReturnValue(method = "canFoodHeal", at = @At("RETURN"))
-   private boolean archetypes_canFoodHeal(boolean original){
+   private boolean archetypes$canFoodHeal(boolean original){
       if(!original) return false;
       PlayerEntity player = (PlayerEntity) (Object) this;
       IArchetypeProfile profile = profile(player);
@@ -37,7 +40,7 @@ public abstract class PlayerEntityMixin {
    }
    
    @ModifyExpressionValue(method = "getBlockBreakingSpeed", at = @At(value = "CONSTANT", args = "floatValue=5.0"))
-   private float archetypes_offGroundBlockBreakingSpeed(float constant){
+   private float archetypes$offGroundBlockBreakingSpeed(float constant){
       PlayerEntity player = (PlayerEntity) (Object) this;
       IArchetypeProfile profile = profile(player);
       boolean canBreakQuickly =  (profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER) && player.isSubmergedInWater())
@@ -46,7 +49,7 @@ public abstract class PlayerEntityMixin {
    }
    
    @ModifyExpressionValue(method = "getBlockBreakingSpeed", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/attribute/EntityAttributeInstance;getValue()D"))
-   private double archetypes_underwaterBlockBreakingSpeed(double original){
+   private double archetypes$underwaterBlockBreakingSpeed(double original){
       PlayerEntity player = (PlayerEntity) (Object) this;
       IArchetypeProfile profile = profile(player);
       double newValue = original;
@@ -56,7 +59,7 @@ public abstract class PlayerEntityMixin {
    }
    
    @ModifyReturnValue(method = "getBlockBreakingSpeed", at = @At("RETURN"))
-   private float archetypes_overallBlockBreakingSpeed(float original){
+   private float archetypes$overallBlockBreakingSpeed(float original){
       PlayerEntity player = (PlayerEntity) (Object) this;
       IArchetypeProfile profile = profile(player);
       double newValue = original;
@@ -65,7 +68,7 @@ public abstract class PlayerEntityMixin {
    }
    
    @Inject(method = "applyDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;applyArmorToDamage(Lnet/minecraft/entity/damage/DamageSource;F)F"))
-   private void archetypes_thorns(ServerWorld world, DamageSource source, float amount, CallbackInfo ci){
+   private void archetypes$thorns(ServerWorld world, DamageSource source, float amount, CallbackInfo ci){
       LivingEntity entity = (LivingEntity) (Object) this;
       if(entity instanceof ServerPlayerEntity player && source.getAttacker() instanceof LivingEntity attacker){
          IArchetypeProfile profile = profile(player);
@@ -78,7 +81,7 @@ public abstract class PlayerEntityMixin {
    }
    
    @ModifyVariable(method = "attack", at = @At(value = "STORE"), ordinal = 2)
-   private boolean archetypes_lanceCrit(boolean crit, @Local(ordinal = 0) boolean fullCharge){
+   private boolean archetypes$lanceCrit(boolean crit, @Local(ordinal = 0) boolean fullCharge){
       PlayerEntity player = (PlayerEntity) (Object) this;
       Entity vehicle = player.getVehicle();
       
@@ -87,5 +90,21 @@ public abstract class PlayerEntityMixin {
       }
       
       return crit;
+   }
+   
+   @Inject(method = "tick", at = @At("TAIL"))
+   private void archetypes$onTick(CallbackInfo callbackInfo){
+      PlayerEntity entity = (PlayerEntity) (Object) this;
+      if(!entity.getWorld().isClient && entity.hasPassengers() && entity.isSneaking() && entity.isOnGround()) entity.getFirstPassenger().stopRiding();
+   }
+   
+   @ModifyReturnValue(method = "isClimbing", at = @At("RETURN"))
+   private boolean archetypes$isClimbing(boolean original){
+      PlayerEntity player = (PlayerEntity) (Object) this;
+      if(original) return true;
+      if(player.horizontalCollision && AncestralArchetypes.profile(player).hasAbility(ArchetypeRegistry.CLIMBING)){
+         return true;
+      }
+      return original;
    }
 }

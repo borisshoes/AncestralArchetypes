@@ -46,7 +46,7 @@ public class AncestralArchetypes implements ModInitializer, ClientModInitializer
    
    public static final boolean DEV_MODE = false;
    
-   public static final ItemModDataHandler ARCHETYPES_ITEM_DATA = new ItemModDataHandler(MOD_ID);
+   public static final ItemModDataHandler archetypes$ITEM_DATA = new ItemModDataHandler(MOD_ID);
    
    @Override
    public void onInitialize(){

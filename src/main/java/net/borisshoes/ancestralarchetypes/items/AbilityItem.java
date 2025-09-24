@@ -11,6 +11,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -22,10 +23,12 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 public abstract class AbilityItem extends Item implements PolymerItem {
    
    public final ArchetypeAbility ability;
+   public final String textCharacter;
    
-   public AbilityItem(ArchetypeAbility ability, Settings settings){
+   public AbilityItem(ArchetypeAbility ability, String character, Settings settings){
       super(settings.registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of(MOD_ID,ability.getId()))));
       this.ability = ability;
+      this.textCharacter = character;
    }
    
    @Override
@@ -45,10 +48,32 @@ public abstract class AbilityItem extends Item implements PolymerItem {
             }
             
             int cooldown = profile.getAbilityCooldown(this.ability);
-            if(cooldown > 0 && !player.getItemCooldownManager().isCoolingDown(stack)){
-               player.getItemCooldownManager().set(stack,cooldown);
-            }else if(cooldown <= 0 && player.getItemCooldownManager().isCoolingDown(stack)){
-               player.getItemCooldownManager().set(stack,0);
+            if(cooldown > 0){
+               if(!player.getItemCooldownManager().isCoolingDown(stack) || player.getServer().getTicks() % 20 == 0){
+                  player.getItemCooldownManager().set(stack,100000000);
+               }
+               if((slot == EquipmentSlot.MAINHAND || slot == EquipmentSlot.OFFHAND) && player.getServer().getTicks() % 2 == 0){
+                  StringBuilder builder = new StringBuilder(textCharacter+" ");
+                  int value = (int) ((1.0-profile.getAbilityCooldownPercent(this.ability)) * 100);
+                  char[] unicodeChars = {'▁', '▂', '▃', '▅', '▆', '▇', '▌'};
+                  for (int i = 0; i < 10; i++) {
+                     int segmentValue = value - (i * 10);
+                     if (segmentValue <= 0) {
+                        builder.append(unicodeChars[0]);
+                     } else if (segmentValue >= 10) {
+                        builder.append(unicodeChars[unicodeChars.length - 1]);
+                     } else {
+                        int charIndex = (int) ((double) segmentValue / 10 * (unicodeChars.length - 1));
+                        builder.append(unicodeChars[charIndex]);
+                     }
+                  }
+                  builder.append(" ").append(textCharacter);
+                  player.sendMessage(Text.literal(builder.toString()).withColor(profile.getSubArchetype().getColor()),true);
+               }
+            }else{
+               if(player.getItemCooldownManager().isCoolingDown(stack)){
+                  player.getItemCooldownManager().set(stack,0);
+               }
             }
          }
       }

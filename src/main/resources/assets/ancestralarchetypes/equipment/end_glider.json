@@ -1,0 +1,17 @@
+{
+  "layers": {
+    "wings": [
+		{
+			"texture": "ancestralarchetypes:dragon_wings_base",
+			"use_player_texture": false
+		},
+		{
+			"dyeable": {
+			  "color_when_undyed": [166, 166, 166]
+			},
+			"texture": "ancestralarchetypes:dragon_wings_overlay",
+			"use_player_texture": false
+		}
+    ]
+  }
+}

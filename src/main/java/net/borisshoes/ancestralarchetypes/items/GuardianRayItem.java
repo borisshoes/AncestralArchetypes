@@ -28,7 +28,7 @@ import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.GUARDIAN_RAY;
 
 public class GuardianRayItem extends AbilityItem{
    public GuardianRayItem(Settings settings){
-      super(GUARDIAN_RAY, settings);
+      super(GUARDIAN_RAY, "⇏", settings);
    }
    
    @Override

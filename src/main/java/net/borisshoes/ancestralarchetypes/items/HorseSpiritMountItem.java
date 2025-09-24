@@ -28,7 +28,7 @@ import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.EQUIPMENT_ASS
 
 public class HorseSpiritMountItem extends SpiritMountItem{
    public HorseSpiritMountItem(Settings settings){
-      super(ArchetypeRegistry.HORSE_SPIRIT_MOUNT, settings);
+      super(ArchetypeRegistry.HORSE_SPIRIT_MOUNT, "\uD83D\uDC0E",settings);
    }
    
    @Override
@@ -39,7 +39,7 @@ public class HorseSpiritMountItem extends SpiritMountItem{
       horse.getAttributeInstance(EntityAttributes.MOVEMENT_SPEED).setBaseValue(0.35f);
       horse.getAttributeInstance(EntityAttributes.JUMP_STRENGTH).setBaseValue(1.25f);
       horse.getAttributeInstance(EntityAttributes.SAFE_FALL_DISTANCE).setBaseValue(10.0f);
-      horse.getAttributeInstance(EntityAttributes.STEP_HEIGHT).setBaseValue(2.0f);
+      horse.getAttributeInstance(EntityAttributes.STEP_HEIGHT).setBaseValue(2.25f);
       horse.equipStack(EquipmentSlot.SADDLE,new ItemStack(Items.SADDLE));
       ItemStack bodyArmor = new ItemStack(Items.DIAMOND_HORSE_ARMOR);
       bodyArmor.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.builder()

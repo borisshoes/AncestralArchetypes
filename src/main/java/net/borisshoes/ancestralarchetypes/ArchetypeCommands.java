@@ -13,6 +13,10 @@ import net.borisshoes.borislib.utils.TextUtils;
 import net.minecraft.entity.passive.HorseColor;
 import net.minecraft.entity.passive.HorseMarking;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.equipment.trim.ArmorTrimMaterial;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -46,6 +50,15 @@ public class ArchetypeCommands {
       Set<String> items = new HashSet<>();
       ArchetypeRegistry.SUBARCHETYPES.getKeys().forEach(key -> items.add(key.getValue().getPath().toLowerCase(Locale.ROOT)));
       items.add("none");
+      items.stream().filter(s -> s.startsWith(start)).forEach(builder::suggest);
+      return builder.buildFuture();
+   }
+   
+   public static CompletableFuture<Suggestions> getTrimSuggestions(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder){
+      String start = builder.getRemaining().toLowerCase(Locale.ROOT);
+      Set<String> items = new HashSet<>();
+      context.getSource().getServer().getRegistryManager().getOrThrow(RegistryKeys.TRIM_MATERIAL).streamEntries().forEach(entry -> items.add(entry.getIdAsString().replaceAll("^minecraft:", "").toLowerCase(Locale.ROOT)));
+      items.add("");
       items.stream().filter(s -> s.startsWith(start)).forEach(builder::suggest);
       return builder.buildFuture();
    }
@@ -133,12 +146,12 @@ public class ArchetypeCommands {
          MutableText feedback = Text.empty();
          if(personal){
             feedback.append(Text.translatable("command.ancestralarchetypes.abilities_get_personal",
-                  subArchetype.getName().formatted(TextUtils.getClosestFormatting(subArchetype.getColor()),Formatting.BOLD),
-                  subArchetype.getArchetype().getName().formatted(TextUtils.getClosestFormatting(subArchetype.getArchetype().getColor()),Formatting.BOLD)).formatted(Formatting.AQUA)).append(Text.literal("\n"));
+                  subArchetype.getName().withColor(subArchetype.getColor()).formatted(Formatting.BOLD),
+                  subArchetype.getArchetype().getName().withColor(subArchetype.getArchetype().getColor()).formatted(Formatting.BOLD)).formatted(Formatting.AQUA)).append(Text.literal("\n"));
          }else{
             feedback.append(Text.translatable("command.ancestralarchetypes.archetype_get",
-                  subArchetype.getName().formatted(TextUtils.getClosestFormatting(subArchetype.getColor()),Formatting.BOLD),
-                  subArchetype.getArchetype().getName().formatted(TextUtils.getClosestFormatting(subArchetype.getArchetype().getColor()),Formatting.BOLD)).formatted(Formatting.AQUA)).append(Text.literal("\n"));
+                  subArchetype.getName().withColor(subArchetype.getColor()).formatted(Formatting.BOLD),
+                  subArchetype.getArchetype().getName().withColor(subArchetype.getArchetype().getColor()).formatted(Formatting.BOLD)).formatted(Formatting.AQUA)).append(Text.literal("\n"));
          }
          for(ArchetypeAbility ability : subArchetype.getActualAbilities()){
             feedback.append(ability.getName().formatted(Formatting.DARK_AQUA)).append(Text.literal("\n"));
@@ -219,7 +232,7 @@ public class ArchetypeCommands {
       }
    }
    
-   public static int setGliderColor(CommandContext<ServerCommandSource> context, String color){
+   public static int setGliderColor(CommandContext<ServerCommandSource> context, String color, String trimColor){
       try{
          ServerCommandSource source = context.getSource();
          if(!source.isExecutedByPlayer() || source.getPlayer() == null){
@@ -244,11 +257,73 @@ public class ArchetypeCommands {
                parsedColor = Integer.parseInt(color);
             }
             
+            if(trimColor.isEmpty()){
+               profile.setGliderTrimMaterial(null);
+            }else{
+               Optional<RegistryEntry.Reference<ArmorTrimMaterial>> material = context.getSource().getServer().getRegistryManager().getOrThrow(RegistryKeys.TRIM_MATERIAL).getEntry(Identifier.of(trimColor));
+               if(material.isEmpty()){
+                  source.sendError(Text.translatable("command.ancestralarchetypes.trim_error"));
+                  return -1;
+               }else{
+                  profile.setGliderTrimMaterial(material.get());
+               }
+            }
+            
             profile.setGliderColor(parsedColor);
-            source.sendFeedback(()->Text.translatable("command.ancestralarchetypes.glider_success", String.format("%06X", parsedColor)), false);
+            source.sendFeedback(()->Text.translatable("command.ancestralarchetypes.glider_success", String.format("%06X", parsedColor), trimColor.isEmpty() ? "none" : trimColor), false);
             return 1;
          }catch(Exception e){
             source.sendError(Text.translatable("command.ancestralarchetypes.glider_error"));
+            return -1;
+         }
+      }catch(Exception e){
+         log(2,e.toString());
+         return -1;
+      }
+   }
+   
+   public static int setHelmetColor(CommandContext<ServerCommandSource> context, String color, String trimColor){
+      try{
+         ServerCommandSource source = context.getSource();
+         if(!source.isExecutedByPlayer() || source.getPlayer() == null){
+            source.sendError(Text.translatable("command.ancestralarchetypes.not_player_error"));
+            return -1;
+         }
+         
+         ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
+         IArchetypeProfile profile = profile(player);
+         
+         try{
+            if(color.startsWith("0x")){
+               color = color.substring(2);
+            }else if(color.startsWith("#")){
+               color = color.substring(1);
+            }
+            
+            int parsedColor;
+            if (color.matches("[0-9A-Fa-f]{6}")) {
+               parsedColor = Integer.parseInt(color, 16);
+            } else {
+               parsedColor = Integer.parseInt(color);
+            }
+            
+            if(trimColor.isEmpty()){
+               profile.setHelmetTrimMaterial(null);
+            }else{
+               Optional<RegistryEntry.Reference<ArmorTrimMaterial>> material = context.getSource().getServer().getRegistryManager().getOrThrow(RegistryKeys.TRIM_MATERIAL).getEntry(Identifier.of(trimColor));
+               if(material.isEmpty()){
+                  source.sendError(Text.translatable("command.ancestralarchetypes.trim_error"));
+                  return -1;
+               }else{
+                  profile.setHelmetTrimMaterial(material.get());
+               }
+            }
+            
+            profile.setHelmetColor(parsedColor);
+            source.sendFeedback(()->Text.translatable("command.ancestralarchetypes.helmet_success", String.format("%06X", parsedColor), trimColor.isEmpty() ? "none" : trimColor), false);
+            return 1;
+         }catch(Exception e){
+            source.sendError(Text.translatable("command.ancestralarchetypes.helmet_error"));
             return -1;
          }
       }catch(Exception e){
@@ -462,7 +537,7 @@ public class ArchetypeCommands {
          archetypeCounter.forEach((subArchetype, integer) -> {
             int color = subArchetype == null ? 0xFFFFFF : subArchetype.getColor();
             MutableText name = subArchetype == null ? Text.translatable("text.ancestralarchetypes.none") : subArchetype.getName();
-            Text text = Text.empty().formatted(TextUtils.getClosestFormatting(color)).append(name).append(Text.literal(" - ").append(Text.literal(String.format("%,d",integer))));
+            Text text = Text.empty().withColor(color).append(name).append(Text.literal(" - ").append(Text.literal(String.format("%,d",integer))));
             src.sendFeedback(() -> text, false);
             masterString.append("\n").append(text.getString());
          });
@@ -569,7 +644,7 @@ public class ArchetypeCommands {
          MutableText name = archetype == null ? Text.translatable("text.ancestralarchetypes.none") : archetype.getName();
          int color = subArchetype == null ? 0xFFFFFF : subArchetype.getColor();
          ServerPlayerEntity finalPlayer = player;
-         source.sendFeedback(() -> Text.translatable("text.ancestralarchetypes.archetype_player_get", finalPlayer.getStyledDisplayName(),subName,name).formatted(TextUtils.getClosestFormatting(color)),false);
+         source.sendFeedback(() -> Text.translatable("text.ancestralarchetypes.archetype_player_get", finalPlayer.getStyledDisplayName(),subName,name).withColor(color),false);
          
          return 1;
       }catch(Exception e){

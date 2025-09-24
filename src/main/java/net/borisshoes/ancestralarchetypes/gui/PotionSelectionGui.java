@@ -82,7 +82,7 @@ public class PotionSelectionGui extends SimpleGui {
          long timeOfDay = player.getWorld().getTimeOfDay();
          int day = (int) (timeOfDay/24000L % Integer.MAX_VALUE);
          int curPhase = day % 8;
-         int moonLevel = profile.hasAbility(ArchetypeRegistry.MOONLIT) ? Math.abs(-curPhase+4) : 4; // 0 - new moon, 4 - full moon
+         int moonLevel = profile.hasAbility(ArchetypeRegistry.MOONLIT_WITCH) ? Math.abs(-curPhase+4) : 4; // 0 - new moon, 4 - full moon
          
          PotionEntry entry = POTIONS.get(this.map.get(index));
          RegistryEntry<Potion> potion = entry.getPotion(moonLevel);
@@ -113,7 +113,7 @@ public class PotionSelectionGui extends SimpleGui {
       long timeOfDay = player.getWorld().getTimeOfDay();
       int day = (int) (timeOfDay/24000L % Integer.MAX_VALUE);
       int curPhase = day % 8;
-      int moonLevel = profile.hasAbility(ArchetypeRegistry.MOONLIT) ? Math.abs(-curPhase+4) : 4; // 0 - new moon, 4 - full moon
+      int moonLevel = profile.hasAbility(ArchetypeRegistry.MOONLIT_WITCH) ? Math.abs(-curPhase+4) : 4; // 0 - new moon, 4 - full moon
       
       for(int i = 0; i < POTIONS.size(); i++){
          int row = i / 7;
@@ -147,7 +147,7 @@ public class PotionSelectionGui extends SimpleGui {
       long timeOfDay = player.getWorld().getTimeOfDay();
       int day = (int) (timeOfDay/24000L % Integer.MAX_VALUE);
       int curPhase = day % 8;
-      int moonLevel = profile.hasAbility(ArchetypeRegistry.MOONLIT) ? Math.abs(-curPhase+4) : 4; // 0 - new moon, 4 - full moon
+      int moonLevel = profile.hasAbility(ArchetypeRegistry.MOONLIT_WITCH) ? Math.abs(-curPhase+4) : 4; // 0 - new moon, 4 - full moon
       
       for(PotionEntry entry : POTIONS){
          for(Pair<RegistryEntry<Potion>, Integer> pair : entry.potionLevels){

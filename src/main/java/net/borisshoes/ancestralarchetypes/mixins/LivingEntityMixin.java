@@ -9,8 +9,11 @@ import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.gui.MountInventoryGui;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
+import net.borisshoes.arcananovum.ArcanaRegistry;
+import net.borisshoes.arcananovum.entities.NulConstructEntity;
 import net.borisshoes.borislib.gui.GraphicalItem;
 import net.borisshoes.borislib.utils.MinecraftUtils;
+import net.borisshoes.borislib.utils.SoundUtils;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
@@ -21,12 +24,15 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.particle.DustColorTransitionParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.screen.*;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
@@ -45,21 +51,24 @@ import java.util.List;
 import java.util.UUID;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
+import static net.borisshoes.borislib.BorisLib.PLAYER_MOVEMENT_TRACKER;
 
 @Mixin(value = LivingEntity.class)
 public abstract class LivingEntityMixin {
    
    @Shadow public abstract void playSound(@Nullable SoundEvent sound);
    
+   @Shadow public abstract void remove(Entity.RemovalReason reason);
+   
    @Inject(method="onEquipStack", at=@At("HEAD"), cancellable = true)
-   private void archetypes_equipSoundSpam(EquipmentSlot slot, ItemStack oldStack, ItemStack newStack, CallbackInfo ci){
+   private void archetypes$equipSoundSpam(EquipmentSlot slot, ItemStack oldStack, ItemStack newStack, CallbackInfo ci){
       if(oldStack.getItem() instanceof AbilityItem && newStack.getItem() instanceof AbilityItem){
          ci.cancel();
       }
    }
    
    @ModifyReturnValue(method = "shouldDropExperience", at = @At("RETURN"))
-   private boolean archetypes_mountDropsXP(boolean original){
+   private boolean archetypes$mountDropsXP(boolean original){
       if(!original) return false;
       LivingEntity entity = (LivingEntity) (Object) this;
       List<String> tags = entity.getCommandTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
@@ -68,7 +77,7 @@ public abstract class LivingEntityMixin {
    }
    
    @ModifyReturnValue(method = "shouldDropLoot", at = @At("RETURN"))
-   private boolean archetypes_mountDropsLoot(boolean original){
+   private boolean archetypes$mountDropsLoot(boolean original){
       if(!original) return false;
       LivingEntity entity = (LivingEntity) (Object) this;
       List<String> tags = entity.getCommandTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
@@ -77,7 +86,7 @@ public abstract class LivingEntityMixin {
    }
    
    @Inject(method = "remove", at = @At("HEAD"))
-   private void archetypes_removeMount(Entity.RemovalReason reason, CallbackInfo ci){
+   private void archetypes$removeMount(Entity.RemovalReason reason, CallbackInfo ci){
       LivingEntity entity = (LivingEntity) (Object) this;
       List<String> tags = entity.getCommandTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
       if(tags.isEmpty()) return;
@@ -100,7 +109,7 @@ public abstract class LivingEntityMixin {
    }
    
    @Inject(method = "tick", at = @At("HEAD"))
-   private void archetypes_tickMount(CallbackInfo ci){
+   private void archetypes$tickMount(CallbackInfo ci){
       LivingEntity entity = (LivingEntity) (Object) this;
       List<String> tags = entity.getCommandTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
       if(tags.isEmpty()) return;
@@ -120,6 +129,10 @@ public abstract class LivingEntityMixin {
          remove = !player.getWorld().getRegistryKey().getValue().equals(entityWorld.getRegistryKey().getValue());
          IArchetypeProfile profile = profile(player);
          ArchetypeAbility ability = AncestralArchetypes.abilityFromTag(tags.getFirst());
+         if(!profile.hasAbility(ability)){
+            remove = true;
+            break block;
+         }
          if(entity.getControllingPassenger() != null && !entity.getControllingPassenger().equals(tameable.getOwner())) entity.removeAllPassengers();
          List<Entity> passengers = entity.getPassengerList();
          for(Entity passenger : passengers){
@@ -160,7 +173,7 @@ public abstract class LivingEntityMixin {
    }
    
    @ModifyReturnValue(method = "tryUseDeathProtector", at = @At("RETURN"))
-   private boolean archetypes_deathProtector(boolean original){
+   private boolean archetypes$deathProtector(boolean original){
       LivingEntity entity = (LivingEntity) (Object) this;
       if(original) return true;
       
@@ -182,13 +195,16 @@ public abstract class LivingEntityMixin {
    }
    
    @ModifyVariable(method = "takeKnockback", at = @At("HEAD"), ordinal = 0, argsOnly = true)
-   private double archetypes_knockback(double strength){
+   private double archetypes$knockback(double strength){
       LivingEntity entity = (LivingEntity) (Object) this;
       
       if(entity instanceof ServerPlayerEntity player){
          IArchetypeProfile profile = profile(player);
          if(profile.hasAbility(ArchetypeRegistry.INCREASED_KNOCKBACK)){
             return strength * (float) CONFIG.getDouble(ArchetypeRegistry.KNOCKBACK_INCREASE);
+         }
+         if(profile.hasAbility(ArchetypeRegistry.LIGHTWEIGHT)){
+            return strength * (float) CONFIG.getDouble(ArchetypeRegistry.LIGHTWEIGHT_INCREASED_KNOCKBACK);
          }
          if(profile.hasAbility(ArchetypeRegistry.REDUCED_KNOCKBACK)){
             return strength * (float) CONFIG.getDouble(ArchetypeRegistry.KNOCKBACK_DECREASE);
@@ -198,7 +214,7 @@ public abstract class LivingEntityMixin {
    }
    
    @Inject(method = "damage", at = @At("HEAD"), cancellable = true)
-   private void archetypes_damage(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir){
+   private void archetypes$damage(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir){
       LivingEntity entity = (LivingEntity) (Object) this;
       
       if(entity instanceof ServerPlayerEntity player){
@@ -212,7 +228,7 @@ public abstract class LivingEntityMixin {
    }
    
    @ModifyReturnValue(method = "canHaveStatusEffect", at = @At("RETURN"))
-   private boolean archetypes_effectImmunity(boolean original, StatusEffectInstance effect){
+   private boolean archetypes$effectImmunity(boolean original, StatusEffectInstance effect){
       LivingEntity entity = (LivingEntity) (Object) this;
       if(entity instanceof ServerPlayerEntity player){
          IArchetypeProfile profile = profile(player);
@@ -226,7 +242,7 @@ public abstract class LivingEntityMixin {
    }
    
    @ModifyReturnValue(method = "modifyAppliedDamage", at = @At("RETURN"))
-   private float archetypes_modifyDamage(float original, DamageSource source, float amount){
+   private float archetypes$modifyDamage(float original, DamageSource source, float amount){
       float newReturn = original;
       LivingEntity entity = (LivingEntity) (Object) this;
       Entity attacker = source.getAttacker();
@@ -291,12 +307,16 @@ public abstract class LivingEntityMixin {
          if(profile.hasAbility(ArchetypeRegistry.PROJECTILE_RESISTANT) && source.isIn(DamageTypeTags.IS_PROJECTILE)){
             newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.PROJECTILE_RESISTANT_REDUCTION);
          }
-         if(profile.hasAbility(ArchetypeRegistry.SLIPPERY) && player.isTouchingWaterOrRain()){
+         if(profile.hasAbility(ArchetypeRegistry.SLIPPERY) && player.isTouchingWaterOrRain() && !source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)){
             if(profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER)){
                newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.GREAT_SWIMMER_SLIPPERY_DAMAGE_MODIFIER);
             }else{
                newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.SLIPPERY_DAMAGE_MODIFIER);
             }
+         }
+         if(profile.hasAbility(ArchetypeRegistry.FORTIFY) && profile.isFortifyActive() && !source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)){
+            newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.FORTIFY_DAMAGE_MODIFIER);
+            SoundUtils.playSound(player.getWorld(),player.getBlockPos(),SoundEvents.BLOCK_HEAVY_CORE_STEP, SoundCategory.PLAYERS,2f,player.getRandom().nextFloat() + 0.5F);
          }
          if(profile.hasAbility(ArchetypeRegistry.INSATIABLE) && source.isOf(DamageTypes.STARVE)){
             newReturn += (float) CONFIG.getDouble(ArchetypeRegistry.ADDED_STARVE_DAMAGE);
@@ -309,5 +329,39 @@ public abstract class LivingEntityMixin {
       }
       
       return newReturn;
+   }
+   
+   
+   @ModifyReturnValue(method="getAttackDistanceScalingFactor", at=@At("RETURN"))
+   private double archetypes$attackRangeScale(double original, Entity attacker){
+      LivingEntity livingEntity = (LivingEntity) (Object) this;
+      if(!CONFIG.getBoolean(ArchetypeRegistry.IGNORED_BY_MOB_TYPE)) return original;
+      if(livingEntity instanceof ServerPlayerEntity player){
+         IArchetypeProfile profile = profile(player);
+         if(profile.getSubArchetype() != null && profile.getSubArchetype().getEntityType().equals(attacker.getType())){
+            return original * 0.01;
+         }
+      }
+      return original;
+   }
+   
+   @ModifyReturnValue(method="canTarget(Lnet/minecraft/entity/LivingEntity;)Z", at=@At("RETURN"))
+   private boolean archetypes$canTarget(boolean original, LivingEntity target){
+      LivingEntity livingEntity = (LivingEntity) (Object) this;
+      if(!CONFIG.getBoolean(ArchetypeRegistry.IGNORED_BY_MOB_TYPE)) return original;
+      if(target instanceof ServerPlayerEntity player){
+         IArchetypeProfile profile = profile(player);
+         if(profile.getSubArchetype() != null && profile.getSubArchetype().getEntityType().equals(livingEntity.getType())){
+            return false;
+         }
+      }
+      return original;
+   }
+   
+   @Inject(method = "travelInFluid", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;applyFluidMovingSpeed(DZLnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/math/Vec3d;"))
+   private void archetypes$lavaWalk(Vec3d movementInput, CallbackInfo ci){
+      LivingEntity livingEntity = (LivingEntity) (Object) this;
+      if(livingEntity instanceof ServerPlayerEntity player){
+      }
    }
 }

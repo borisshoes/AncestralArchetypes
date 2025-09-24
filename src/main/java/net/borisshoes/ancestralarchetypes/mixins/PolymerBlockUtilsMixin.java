@@ -20,7 +20,7 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 public class PolymerBlockUtilsMixin {
    
    @ModifyReturnValue(method = "shouldMineServerSide", at = @At("RETURN"))
-   private static boolean archetypes_overrideServerMining(boolean original, ServerPlayerEntity player, BlockPos pos, BlockState state){
+   private static boolean archetypes$overrideServerMining(boolean original, ServerPlayerEntity player, BlockPos pos, BlockState state){
       if(!original){
          IArchetypeProfile profile = profile(player);
          if(profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER) && player.isSubmergedInWater()){

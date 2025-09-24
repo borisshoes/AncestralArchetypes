@@ -29,7 +29,7 @@ import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.FIREBALL_VOLL
 public class FireballVolleyItem extends AbilityItem{
    
    public FireballVolleyItem(Settings settings){
-      super(FIREBALL_VOLLEY, settings);
+      super(FIREBALL_VOLLEY, "\uD83D\uDD25", settings);
    }
    
    @Override

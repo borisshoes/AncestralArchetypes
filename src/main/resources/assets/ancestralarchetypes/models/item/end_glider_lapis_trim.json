@@ -1,0 +1,8 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "ancestralarchetypes:item/end_wings_1",
+	"layer1": "ancestralarchetypes:item/end_wings_3",
+    "layer2": "ancestralarchetypes:trims/items/end_glider_lapis"
+  }
+}

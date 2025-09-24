@@ -24,6 +24,24 @@ public class EntityAttackedCallback {
          if(profile.hasAbility(ArchetypeRegistry.WITHERING) && livingEntity.isAlive()){
             livingEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, CONFIG.getInt(ArchetypeRegistry.WITHERING_EFFECT_DURATION), 0, false, true, true), player);
          }
+         if(profile.hasAbility(ArchetypeRegistry.BLAZING_STRIKE) && livingEntity.isAlive() && !livingEntity.isFireImmune()){
+            livingEntity.setOnFireForTicks(CONFIG.getInt(ArchetypeRegistry.BLAZING_STRIKE_DURATION));
+         }
+         if(profile.hasAbility(ArchetypeRegistry.VENOMOUS) && livingEntity.isAlive()){
+            int duration = CONFIG.getInt(ArchetypeRegistry.VENOMOUS_POISON_DURATION);
+            int amplifier = CONFIG.getInt(ArchetypeRegistry.VENOMOUS_POISON_STRENGTH) - 1;
+            if(profile.hasAbility(ArchetypeRegistry.MOONLIT_CAVE_SPIDER)){
+               int durPerPhase = CONFIG.getInt(ArchetypeRegistry.MOONLIT_CAVE_SPIDER_VENOM_DURATION_PER_PHASE);
+               double ampPerPhase = CONFIG.getDouble(ArchetypeRegistry.MOONLIT_CAVE_SPIDER_VENOM_STRENGTH_PER_PHASE);
+               long timeOfDay = player.getWorld().getTimeOfDay();
+               int day = (int) (timeOfDay/24000L % Integer.MAX_VALUE);
+               int curPhase = day % 8;
+               int moonLevel = profile.hasAbility(ArchetypeRegistry.MOONLIT_WITCH) ? Math.abs(-curPhase+4) : 4; // 0 - new moon, 4 - full moon
+               duration += moonLevel*durPerPhase;
+               amplifier += (int)(moonLevel*ampPerPhase);
+            }
+            livingEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, duration, amplifier, false, true, true), player);
+         }
       }
       return ActionResult.PASS;
    }

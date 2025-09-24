@@ -27,14 +27,14 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
 public abstract class SpiritMountItem extends AbilityItem{
    
-   public SpiritMountItem(ArchetypeAbility ability, Settings settings){
-      super(ability, settings);
+   public SpiritMountItem(ArchetypeAbility ability, String character, Settings settings){
+      super(ability, character, settings);
    }
    
    @Override
    public Item getPolymerItem(ItemStack itemStack, PacketContext packetContext){
       if(PolymerResourcePackUtils.hasMainPack(packetContext)){
-         return Items.ARMADILLO_SCUTE;
+         return Items.LEATHER;
       }else{
          return Items.SADDLE;
       }

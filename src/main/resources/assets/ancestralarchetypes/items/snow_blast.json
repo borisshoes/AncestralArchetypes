@@ -1,0 +1,7 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "ancestralarchetypes:item/snow_blast"
+  },
+  "hand_animation_on_swap": false
+}

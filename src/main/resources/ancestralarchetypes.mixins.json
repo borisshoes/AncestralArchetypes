@@ -9,6 +9,8 @@
     "CreeperMixin",
     "EntityAccessor",
     "EntityMixin",
+    "FallingBlockEntityAccessor",
+    "FarmlandBlockMixin",
     "FeastingCharmItemMixin",
     "ItemEntityMixin",
     "ItemMixin",
@@ -19,9 +21,12 @@
     "PhantomSwoopGoalMixin",
     "PlayerEntityMixin",
     "PolymerBlockUtilsMixin",
+    "PowderSnowBlockMixin",
     "ServerPlayerEntityMixin",
+    "ServerPlayerInteractionManagerMixin",
     "ServerPlayNetworkHandlerMixin",
-    "SnowballEntityMixin"
+    "SnowballEntityMixin",
+    "ThrownItemEntityAccessor"
   ],
   "client": [
   ],

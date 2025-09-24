@@ -29,7 +29,7 @@ import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.WIND_CHARGE_V
 public class WindChargeVolleyItem extends AbilityItem{
    
    public WindChargeVolleyItem(Settings settings){
-      super(WIND_CHARGE_VOLLEY, settings);
+      super(WIND_CHARGE_VOLLEY,"\uD83D\uDCA8", settings);
    }
    
    @Override

@@ -18,14 +18,14 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 public class AbstractHorseMixin {
    
    @Inject(method = "receiveFood", at = @At("HEAD"), cancellable = true)
-   private void archetypes_stopHorseFeed(PlayerEntity player, ItemStack item, CallbackInfoReturnable<Boolean> cir){
+   private void archetypes$stopHorseFeed(PlayerEntity player, ItemStack item, CallbackInfoReturnable<Boolean> cir){
       LivingEntity entity = (LivingEntity) (Object) this;
       List<String> tags = entity.getCommandTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
       if(!tags.isEmpty()) cir.setReturnValue(false);
    }
    
    @ModifyExpressionValue(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/random/Random;nextInt(I)I"))
-   private int archetypes_modifyHorseAnger(int original){
+   private int archetypes$modifyHorseAnger(int original){
       LivingEntity entity = (LivingEntity) (Object) this;
       List<String> tags = entity.getCommandTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
       if(!tags.isEmpty()) return entity.getRandom().nextInt(5) == 0 ? 1 : 0;

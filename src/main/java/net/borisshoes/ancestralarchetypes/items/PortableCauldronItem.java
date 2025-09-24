@@ -37,7 +37,7 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 public class PortableCauldronItem extends AbilityItem{
    
    public PortableCauldronItem(Settings settings){
-      super(ArchetypeRegistry.POTION_BREWER, settings);
+      super(ArchetypeRegistry.POTION_BREWER, "\uD83E\uDDEA", settings);
    }
    
    @Override

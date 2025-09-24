@@ -1,20 +1,30 @@
 package net.borisshoes.ancestralarchetypes;
 
 import com.mojang.serialization.Lifecycle;
+import eu.pb4.polymer.core.api.entity.PolymerEntityUtils;
 import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils;
 import eu.pb4.polymer.core.api.item.PolymerItemUtils;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
+import io.github.ladysnake.pal.AbilitySource;
+import io.github.ladysnake.pal.Pal;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
+import net.borisshoes.ancestralarchetypes.entities.LevitationBulletEntity;
+import net.borisshoes.ancestralarchetypes.entities.SnowblastEntity;
 import net.borisshoes.ancestralarchetypes.items.*;
+import net.borisshoes.arcananovum.entities.StasisPearlEntity;
 import net.borisshoes.borislib.config.ConfigSetting;
 import net.borisshoes.borislib.config.IConfigSetting;
 import net.borisshoes.borislib.config.values.BooleanConfigValue;
 import net.borisshoes.borislib.config.values.DoubleConfigValue;
 import net.borisshoes.borislib.config.values.IntConfigValue;
+import net.borisshoes.borislib.gui.GraphicalItem;
 import net.borisshoes.borislib.utils.TextUtils;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.*;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.damage.DamageType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -22,6 +32,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.consume.UseAction;
 import net.minecraft.item.equipment.EquipmentAsset;
+import net.minecraft.item.equipment.trim.ArmorTrimPattern;
 import net.minecraft.registry.*;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -52,15 +63,25 @@ public class ArchetypeRegistry {
    public static final TagKey<Item> CARNIVORE_FOODS = TagKey.of(RegistryKeys.ITEM, Identifier.of(MOD_ID,"carnivore_foods"));
    public static final TagKey<Item> SLIME_GROW_ITEMS = TagKey.of(RegistryKeys.ITEM, Identifier.of(MOD_ID,"slime_grow_items"));
    public static final TagKey<Item> MAGMA_CUBE_GROW_ITEMS = TagKey.of(RegistryKeys.ITEM, Identifier.of(MOD_ID,"magma_cube_grow_items"));
+   public static final TagKey<Item> BACKPACK_DISALLOWED_ITEMS = TagKey.of(RegistryKeys.ITEM, Identifier.of(MOD_ID,"backpack_disallowed_items"));
+   public static final TagKey<Item> ABILITY_ITEMS = TagKey.of(RegistryKeys.ITEM, Identifier.of(MOD_ID,"ability_items"));
    public static final TagKey<Biome> COLD_DAMAGE_EXCEPTION_BIOMES = TagKey.of(RegistryKeys.BIOME, Identifier.of(MOD_ID,"cold_damage_exception_biomes"));
    public static final TagKey<Biome> COLD_DAMAGE_INCLUDE_BIOMES = TagKey.of(RegistryKeys.BIOME, Identifier.of(MOD_ID,"cold_damage_include_biomes"));
    public static final TagKey<Biome> DRY_OUT_EXCEPTION_BIOMES = TagKey.of(RegistryKeys.BIOME, Identifier.of(MOD_ID,"dry_out_exception_biomes"));
    public static final TagKey<Biome> DRY_OUT_INCLUDE_BIOMES = TagKey.of(RegistryKeys.BIOME, Identifier.of(MOD_ID,"dry_out_include_biomes"));
    public static final TagKey<DamageType> NO_STARTLE = TagKey.of(RegistryKeys.DAMAGE_TYPE, Identifier.of(MOD_ID,"no_startle"));
    
-   public static final net.borisshoes.borislib.gui.GraphicalItem.GraphicElement LOCKED_POTION = registerGraphicItem(new net.borisshoes.borislib.gui.GraphicalItem.GraphicElement(Identifier.of(MOD_ID, "locked_potion"), Items.POTION, false));
-   public static final net.borisshoes.borislib.gui.GraphicalItem.GraphicElement LOCKED_SPLASH_POTION = registerGraphicItem(new net.borisshoes.borislib.gui.GraphicalItem.GraphicElement(Identifier.of(MOD_ID, "locked_splash_potion"), Items.SPLASH_POTION, false));
-   public static final net.borisshoes.borislib.gui.GraphicalItem.GraphicElement LOCKED_LINGERING_POTION = registerGraphicItem(new net.borisshoes.borislib.gui.GraphicalItem.GraphicElement(Identifier.of(MOD_ID, "locked_lingering_potion"), Items.LINGERING_POTION, false));
+   public static final GraphicalItem.GraphicElement LOCKED_POTION = registerGraphicItem(new GraphicalItem.GraphicElement(Identifier.of(MOD_ID, "locked_potion"), Items.POTION, false));
+   public static final GraphicalItem.GraphicElement LOCKED_SPLASH_POTION = registerGraphicItem(new GraphicalItem.GraphicElement(Identifier.of(MOD_ID, "locked_splash_potion"), Items.SPLASH_POTION, false));
+   public static final GraphicalItem.GraphicElement LOCKED_LINGERING_POTION = registerGraphicItem(new GraphicalItem.GraphicElement(Identifier.of(MOD_ID, "locked_lingering_potion"), Items.LINGERING_POTION, false));
+   
+   public static final EntityType<SnowblastEntity> SNOWBLAST_ENTITY = registerEntity( "snowblast",
+         EntityType.Builder.<SnowblastEntity>create(SnowblastEntity::new, SpawnGroup.MISC).dimensions(0.25f, 0.25f).dropsNothing().maxTrackingRange(4).trackingTickInterval(3)
+   );
+   
+   public static final EntityType<LevitationBulletEntity> LEVITATION_BULLET_ENTITY = registerEntity( "levitation_bullet",
+         EntityType.Builder.<LevitationBulletEntity>create(LevitationBulletEntity::new, SpawnGroup.MISC).dimensions(0.3125F, 0.3125F).dropsNothing().maxTrackingRange(4).trackingTickInterval(3)
+   );
    
    public static final IConfigSetting<?> SPYGLASS_REVEALS_ARCHETYPE = registerConfigSetting(new ConfigSetting<>(
          new BooleanConfigValue("spyglassRevealsArchetype", true)));
@@ -73,6 +94,12 @@ public class ArchetypeRegistry {
    
    public static final IConfigSetting<?> REMINDERS_ON_BY_DEFAULT = registerConfigSetting(new ConfigSetting<>(
          new BooleanConfigValue("remindersOnByDefault", true)));
+   
+   public static final IConfigSetting<?> IGNORED_BY_MOB_TYPE = registerConfigSetting(new ConfigSetting<>(
+         new BooleanConfigValue("ignoredByMobType", true)));
+   
+   public static final IConfigSetting<?> RIDEABLE_TEAM_ONLY = registerConfigSetting(new ConfigSetting<>(
+         new BooleanConfigValue("rideableTeamOnly", true)));
    
    public static final IConfigSetting<?> SPYGLASS_INVESTIGATE_DURATION = registerConfigSetting(new ConfigSetting<>(
          new IntConfigValue("spyglassInvestigateDuration", 150, new IntConfigValue.IntLimits(1))));
@@ -118,6 +145,78 @@ public class ArchetypeRegistry {
    
    public static final IConfigSetting<?> GUARDIAN_RAY_DURATION = registerConfigSetting(new ConfigSetting<>(
          new IntConfigValue("guardianRayDuration", 85, new IntConfigValue.IntLimits(1))));
+   
+   public static final IConfigSetting<?> VENOMOUS_POISON_DURATION = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("venomousPoisonDuration", 100, new IntConfigValue.IntLimits(0))));
+
+   public static final IConfigSetting<?> VENOMOUS_POISON_STRENGTH = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("venomousPoisonStrength", 1, new IntConfigValue.IntLimits(1))));
+   
+   public static final IConfigSetting<?> MOONLIT_CAVE_SPIDER_VENOM_DURATION_PER_PHASE = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("moonlitCaveSpiderVenomDurationPerPhase", 50, new IntConfigValue.IntLimits(0))));
+   
+   public static final IConfigSetting<?> WEAVING_WEB_COOLDOWN = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("weavingWebCooldown", 100, new IntConfigValue.IntLimits(0))));
+   
+   public static final IConfigSetting<?> SLOW_HOVER_FLIGHT_DURATION = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("slowHoverFlightDuration", 12000, new IntConfigValue.IntLimits(0))));
+   
+   public static final IConfigSetting<?> SLOW_HOVER_FLIGHT_COOLDOWN = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("slowHoverFlightCooldown", 100, new IntConfigValue.IntLimits(0))));
+   
+   public static final IConfigSetting<?> SNOW_BLAST_COOLDOWN = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("snowBlastCooldown", 500, new IntConfigValue.IntLimits(0))));
+   
+   public static final IConfigSetting<?> SNOW_BLAST_SLOWNESS_DURATION = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("snowBlastSlownessDuration", 100, new IntConfigValue.IntLimits(0))));
+   
+   public static final IConfigSetting<?> SNOW_BLAST_SLOWNESS_STRENGTH = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("snowBlastSlownessStrength", 3, new IntConfigValue.IntLimits(1,10))));
+   
+   public static final IConfigSetting<?> LONG_TELEPORT_COOLDOWN = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("longTeleportCooldown", 600, new IntConfigValue.IntLimits(0))));
+   
+   public static final IConfigSetting<?> RANDOM_TELEPORT_COOLDOWN = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("randomTeleportCooldown", 400, new IntConfigValue.IntLimits(0))));
+   
+   public static final IConfigSetting<?> FORTIFY_DURATION = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("fortifyDuration", 200, new IntConfigValue.IntLimits(0))));
+   
+   public static final IConfigSetting<?> FORTIFY_COOLDOWN = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("fortifyCooldown", 100, new IntConfigValue.IntLimits(0))));
+   
+   public static final IConfigSetting<?> LEVITATION_BULLET_COOLDOWN = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("levitationBulletCooldown", 300, new IntConfigValue.IntLimits(0))));
+   
+   public static final IConfigSetting<?> ENDERFLAME_FIREBALL_COOLDOWN = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("enderflameFireballCooldown", 600, new IntConfigValue.IntLimits(0))));
+   
+   public static final IConfigSetting<?> ENDERFLAME_BUFFET_DURATION = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("enderflameBuffetDuration", 100, new IntConfigValue.IntLimits(0))));
+   
+   public static final IConfigSetting<?> ENDERFLAME_BUFFET_COOLDOWN = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("enderflameBuffetCooldown", 800, new IntConfigValue.IntLimits(0))));
+   
+   public static final IConfigSetting<?> LEVITATION_BULLET_COUNT = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("levitationBulletCount", 3, new IntConfigValue.IntLimits(1,25))));
+   
+   public static final IConfigSetting<?> LEVITATION_BULLET_DURATION = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("levitationBulletDuration", 200, new IntConfigValue.IntLimits(0))));
+   
+   public static final IConfigSetting<?> LEVITATION_BULLET_LEVEL = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("levitationBulletLevel", 1, new IntConfigValue.IntLimits(1))));
+   
+   public static final IConfigSetting<?> BLAZING_STRIKE_DURATION = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("blazingStrikeDuration", 100, new IntConfigValue.IntLimits(1))));
+   
+   public static final IConfigSetting<?> FUNGUS_SPEED_BOOST_DURATION = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("fungusSpeedBoostDuration", 200, new IntConfigValue.IntLimits(0))));
+   
+   public static final IConfigSetting<?> FUNGUS_SPEED_BOOST_CONSUME_DURATION = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("fungusSpeedBoostConsumeDuration", 15, new IntConfigValue.IntLimits(1))));
+
+   public static final IConfigSetting<?> JUMPY_JUMP_BOOST = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("jumpyJumpBoost", 0.35, new DoubleConfigValue.DoubleLimits(-100,100))));
    
    public static final IConfigSetting<?> CAULDRON_DRINKABLE_COOLDOWN_MODIFIER = registerConfigSetting(new ConfigSetting<>(
          new DoubleConfigValue("cauldronDrinkableCooldownModifier", 0.9, new DoubleConfigValue.DoubleLimits(0))));
@@ -248,8 +347,63 @@ public class ArchetypeRegistry {
    public static final IConfigSetting<?> HASTY_ATTACK_SPEED_INCREASE = registerConfigSetting(new ConfigSetting<>(
          new DoubleConfigValue("hastyAttackSpeedIncrease", 0.2, new DoubleConfigValue.DoubleLimits(0))));
    
-   public static final IConfigSetting<?> JUMPY_JUMP_BOOST = registerConfigSetting(new ConfigSetting<>(
-         new DoubleConfigValue("jumpyJumpBoost", 0.35, new DoubleConfigValue.DoubleLimits(-100,100))));
+   public static final IConfigSetting<?> LIGHTWEIGHT_INCREASED_KNOCKBACK = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("lightweightIncreasedKnockback", 2.0, new DoubleConfigValue.DoubleLimits(0))));
+   
+   public static final IConfigSetting<?> RESILIENT_JOINTS_EXTRA_FALL_BLOCKS = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("resilientJointsExtraFallBlocks", 4.0, new DoubleConfigValue.DoubleLimits(0))));
+   
+   public static final IConfigSetting<?> HURT_BY_WATER_RAIN_DAMAGE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("hurtByWaterRainDamage", 1.0, new DoubleConfigValue.DoubleLimits(0))));
+   
+   public static final IConfigSetting<?> HURT_BY_WATER_SWIM_DAMAGE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("hurtByWaterSwimDamage", 4.0, new DoubleConfigValue.DoubleLimits(0))));
+   
+   public static final IConfigSetting<?> SLOW_HOVER_FLIGHT_SPEED = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("slowHoverFlightSpeed", 0.015, new DoubleConfigValue.DoubleLimits(0,10))));
+   
+   public static final IConfigSetting<?> SLOW_HOVER_FLIGHT_RECOVERY_TIME = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("slowHoverFlightRecoveryTime", 0.15, new DoubleConfigValue.DoubleLimits(0))));
+   
+   public static final IConfigSetting<?> SNOW_BLAST_DAMAGE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("snowBlastDamage", 4.0, new DoubleConfigValue.DoubleLimits(0))));
+   
+   public static final IConfigSetting<?> SHY_VIEWING_ANGLE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("shyViewingAngle", 12.5, new DoubleConfigValue.DoubleLimits(0,180))));
+   
+   public static final IConfigSetting<?> SHY_NOTICING_ANGLE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("shyNoticingAngle", 90.0, new DoubleConfigValue.DoubleLimits(0,180))));
+   
+   public static final IConfigSetting<?> LONG_TELEPORT_DISTANCE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("longTeleportDistance", 16.0, new DoubleConfigValue.DoubleLimits(1,128))));
+   
+   public static final IConfigSetting<?> RANDOM_TELEPORT_RANGE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("randomTeleportRange", 12.0, new DoubleConfigValue.DoubleLimits(1,128))));
+   
+   public static final IConfigSetting<?> FORTIFY_DAMAGE_MODIFIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("fortifyDamageModifier", 0.15, new DoubleConfigValue.DoubleLimits(0))));
+   
+   public static final IConfigSetting<?> FORTIFY_RECOVERY_TIME = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("fortifyRecoveryTime", 0.1, new DoubleConfigValue.DoubleLimits(0))));
+   
+   public static final IConfigSetting<?> ENDERFLAME_BUFFET_DAMAGE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("enderflameBuffetDamage", 1.5, new DoubleConfigValue.DoubleLimits(0))));
+   
+   public static final IConfigSetting<?> MOONLIT_CAVE_SPIDER_VENOM_STRENGTH_PER_PHASE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("moonlitCaveSpiderVenomStrengthPerPhase", 0.5, new DoubleConfigValue.DoubleLimits(0))));
+   
+   public static final IConfigSetting<?> SNOW_BLAST_RANGE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("snowBlastRange", 5.0, new DoubleConfigValue.DoubleLimits(0))));
+   
+   public static final IConfigSetting<?> LEVITATION_BULLET_DAMAGE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("levitationBulletDamage", 4.0, new DoubleConfigValue.DoubleLimits(0.0))));
+   
+   public static final IConfigSetting<?> LAVA_WALKER_SPEED_MULTIPLIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("lavaWalkerSpeedMultiplier", 2.0, new DoubleConfigValue.DoubleLimits(0.0))));
+   
+   public static final IConfigSetting<?> FUNGUS_SPEED_BOOST_MULTIPLIER = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("fungusSpeedBoostMultiplier", 0.5, new DoubleConfigValue.DoubleLimits(0.0))));
+   
    
    public static final ArchetypeAbility GOOD_SWIMMER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("good_swimmer").setDisplayStack(new ItemStack(Items.COD)).build());
    public static final ArchetypeAbility GREAT_SWIMMER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("great_swimmer").setReliantConfigs(GREAT_SWIMMER_MOVE_SPEED_MODIFIER,GREAT_SWIMMER_SLIPPERY_DAMAGE_MODIFIER).setDisplayStack(new ItemStack(Items.TROPICAL_FISH)).build());
@@ -270,7 +424,7 @@ public class ArchetypeRegistry {
    public static final ArchetypeAbility SOFT_HITTER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("soft_hitter").setReliantConfigs(SOFT_HITTER_DAMAGE_REDUCTION).setDisplayStack(new ItemStack(Items.WOODEN_SWORD)).build());
    public static final ArchetypeAbility HARD_HITTER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("hard_hitter").setReliantConfigs(HARD_HITTER_KNOCKBACK_INCREASE,HARD_HITTER_DAMAGE_INCREASE).setDisplayStack(new ItemStack(Items.IRON_SWORD)).build());
    public static final ArchetypeAbility WIND_CHARGE_VOLLEY = register(new ArchetypeAbility.ArchetypeAbilityBuilder("wind_charge_volley").setReliantConfigs(WIND_CHARGE_COOLDOWN).setDisplayStack(new ItemStack(Items.WIND_CHARGE)).setActive().build());
-   public static final ArchetypeAbility GLIDER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("glider").setReliantConfigs(GLIDER_COOLDOWN,GLIDER_DURATION,GLIDER_RECOVERY_TIME).setDisplayStack(new ItemStack(Items.ELYTRA)).setActive().build());
+   public static final ArchetypeAbility WING_GLIDER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("glider").setReliantConfigs(GLIDER_COOLDOWN,GLIDER_DURATION,GLIDER_RECOVERY_TIME).setDisplayStack(new ItemStack(Items.ELYTRA)).setActive().build());
    public static final ArchetypeAbility NO_REGEN = register(new ArchetypeAbility.ArchetypeAbilityBuilder("no_regen").setDisplayStack(new ItemStack(Items.POISONOUS_POTATO)).build());
    public static final ArchetypeAbility COPPER_EATER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("copper_eater").setReliantConfigs(COPPER_FOOD_DURATION_MODIFIER,COPPER_FOOD_HEALTH_MODIFIER).setDisplayStack(new ItemStack(Items.COPPER_INGOT)).build());
    public static final ArchetypeAbility HEALTH_BASED_SPRINT = register(new ArchetypeAbility.ArchetypeAbilityBuilder("health_based_sprint").setReliantConfigs(HEALTH_SPRINT_CUTOFF).setDisplayStack(new ItemStack(Items.DIAMOND_BOOTS)).build());
@@ -292,42 +446,84 @@ public class ArchetypeRegistry {
    public static final ArchetypeAbility STUNNED_BY_DAMAGE = register(new ArchetypeAbility.ArchetypeAbilityBuilder("stunned_by_damage").setReliantConfigs(DAMAGE_STUN_DURATION,STARTLE_MIN_DAMAGE).setDisplayStack(new ItemStack(Items.CHAINMAIL_CHESTPLATE)).build());
    public static final ArchetypeAbility HORSE_SPIRIT_MOUNT = register(new ArchetypeAbility.ArchetypeAbilityBuilder("horse_spirit_mount").setReliantConfigs(SPIRIT_MOUNT_KILL_COOLDOWN,SPIRIT_MOUNT_REGENERATION_RATE).setDisplayStack(new ItemStack(Items.GOLDEN_HORSE_ARMOR)).setActive().build());
    public static final ArchetypeAbility DONKEY_SPIRIT_MOUNT = register(new ArchetypeAbility.ArchetypeAbilityBuilder("donkey_spirit_mount").setReliantConfigs(SPIRIT_MOUNT_KILL_COOLDOWN,SPIRIT_MOUNT_REGENERATION_RATE).setDisplayStack(new ItemStack(Items.CHEST)).setActive().build());
-   public static final ArchetypeAbility MOONLIT = register(new ArchetypeAbility.ArchetypeAbilityBuilder("moonlit").setReliantConfigs(MOONLIT_SLIME_HEALTH_PER_PHASE,MOONLIT_SLIME_SIZE_PER_PHASE).setDisplayStack(new ItemStack(Items.SEA_LANTERN)).build());
-   public static final ArchetypeAbility ANTIVENOM = register(new ArchetypeAbility.ArchetypeAbilityBuilder("antivenom").setDisplayStack(new ItemStack(Items.SPIDER_EYE)).build());
+   public static final ArchetypeAbility MOONLIT_SLIME = register(new ArchetypeAbility.ArchetypeAbilityBuilder("moonlit_slime").setReliantConfigs(MOONLIT_SLIME_HEALTH_PER_PHASE,MOONLIT_SLIME_SIZE_PER_PHASE).setDisplayStack(new ItemStack(Items.SEA_LANTERN)).build());
+   public static final ArchetypeAbility MOONLIT_WITCH = register(new ArchetypeAbility.ArchetypeAbilityBuilder("moonlit_witch").setDisplayStack(new ItemStack(Items.SEA_LANTERN)).build());
+   public static final ArchetypeAbility ANTIVENOM = register(new ArchetypeAbility.ArchetypeAbilityBuilder("antivenom").setDisplayStack(new ItemStack(Items.FERMENTED_SPIDER_EYE)).build());
    public static final ArchetypeAbility SLIPPERY = register(new ArchetypeAbility.ArchetypeAbilityBuilder("slippery").setReliantConfigs(SLIPPERY_DAMAGE_MODIFIER).setDisplayStack(new ItemStack(Items.PHANTOM_MEMBRANE)).build());
    public static final ArchetypeAbility SNEAKY = register(new ArchetypeAbility.ArchetypeAbilityBuilder("sneaky").setReliantConfigs(SNEAKY_SPEED_BOOST).setDisplayStack(new ItemStack(Items.LEATHER_BOOTS)).build());
    public static final ArchetypeAbility WITHERING = register(new ArchetypeAbility.ArchetypeAbilityBuilder("withering").setReliantConfigs(WITHERING_EFFECT_DURATION).setDisplayStack(new ItemStack(Items.WITHER_ROSE)).build());
    public static final ArchetypeAbility THORNY = register(new ArchetypeAbility.ArchetypeAbilityBuilder("thorny").setReliantConfigs(THORNY_REFLECTION_CAP,THORNY_REFLECTION_MODIFIER).setDisplayStack(new ItemStack(Items.PRISMARINE_SHARD)).build());
    public static final ArchetypeAbility GUARDIAN_RAY = register(new ArchetypeAbility.ArchetypeAbilityBuilder("guardian_ray").setReliantConfigs(GUARDIAN_RAY_COOLDOWN,GUARDIAN_RAY_DAMAGE,GUARDIAN_RAY_WINDUP,GUARDIAN_RAY_DURATION).setDisplayStack(new ItemStack(Items.PRISMARINE_CRYSTALS)).setActive().build());
    public static final ArchetypeAbility MOUNTED = register(new ArchetypeAbility.ArchetypeAbilityBuilder("mounted").setReliantConfigs(MOUNTED_RANGE).setDisplayStack(new ItemStack(Items.SADDLE)).build());
+   public static final ArchetypeAbility HURT_BY_WATER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("hurt_by_water").setReliantConfigs(HURT_BY_WATER_RAIN_DAMAGE,HURT_BY_WATER_SWIM_DAMAGE).setDisplayStack(new ItemStack(Items.WATER_BUCKET)).build());
+   public static final ArchetypeAbility CAMEL_SPIRIT_MOUNT = register(new ArchetypeAbility.ArchetypeAbilityBuilder("camel_spirit_mount").setReliantConfigs(SPIRIT_MOUNT_KILL_COOLDOWN,SPIRIT_MOUNT_REGENERATION_RATE).setDisplayStack(new ItemStack(Items.OAK_BOAT)).setActive().build());
+   public static final ArchetypeAbility VENOMOUS = register(new ArchetypeAbility.ArchetypeAbilityBuilder("venomous").setReliantConfigs(VENOMOUS_POISON_DURATION,VENOMOUS_POISON_STRENGTH).setDisplayStack(new ItemStack(Items.SPIDER_EYE)).build());
+   public static final ArchetypeAbility CLIMBING = register(new ArchetypeAbility.ArchetypeAbilityBuilder("climbing").setDisplayStack(new ItemStack(Items.LADDER)).build());
+   public static final ArchetypeAbility MOONLIT_CAVE_SPIDER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("moonlit_cave_spider").setReliantConfigs(MOONLIT_CAVE_SPIDER_VENOM_STRENGTH_PER_PHASE,MOONLIT_CAVE_SPIDER_VENOM_DURATION_PER_PHASE).setDisplayStack(new ItemStack(Items.SEA_LANTERN)).build());
+   public static final ArchetypeAbility WEAVING = register(new ArchetypeAbility.ArchetypeAbilityBuilder("weaving").setReliantConfigs(WEAVING_WEB_COOLDOWN).setDisplayStack(new ItemStack(Items.STRING)).setActive().build());
+   public static final ArchetypeAbility SLOW_HOVER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("slow_hover").setReliantConfigs(SLOW_HOVER_FLIGHT_COOLDOWN,SLOW_HOVER_FLIGHT_DURATION,SLOW_HOVER_FLIGHT_SPEED,SLOW_HOVER_FLIGHT_RECOVERY_TIME).setDisplayStack(new ItemStack(Items.SNOW_BLOCK)).setActive().build());
+   public static final ArchetypeAbility RIDEABLE = register(new ArchetypeAbility.ArchetypeAbilityBuilder("rideable").setDisplayStack(new ItemStack(Items.SADDLE)).build());
+   public static final ArchetypeAbility SNOW_BLAST = register(new ArchetypeAbility.ArchetypeAbilityBuilder("snow_blast").setReliantConfigs(SNOW_BLAST_COOLDOWN,SNOW_BLAST_RANGE,SNOW_BLAST_DAMAGE,SNOW_BLAST_SLOWNESS_DURATION,SNOW_BLAST_SLOWNESS_STRENGTH).setDisplayStack(new ItemStack(Items.SNOWBALL)).setActive().build());
+   public static final ArchetypeAbility SILK_TOUCH = register(new ArchetypeAbility.ArchetypeAbilityBuilder("silk_touch").setDisplayStack(new ItemStack(Items.WHITE_WOOL)).build());
+   public static final ArchetypeAbility SHY = register(new ArchetypeAbility.ArchetypeAbilityBuilder("shy").setReliantConfigs(SHY_NOTICING_ANGLE,SHY_VIEWING_ANGLE).setDisplayStack(new ItemStack(Items.CARVED_PUMPKIN)).build());
+   public static final ArchetypeAbility LONG_TELEPORT = register(new ArchetypeAbility.ArchetypeAbilityBuilder("long_teleport").setReliantConfigs(LONG_TELEPORT_DISTANCE,LONG_TELEPORT_COOLDOWN).setDisplayStack(new ItemStack(Items.ENDER_PEARL)).setActive().build());
+   public static final ArchetypeAbility FORTIFY = register(new ArchetypeAbility.ArchetypeAbilityBuilder("fortify").setReliantConfigs(FORTIFY_COOLDOWN,FORTIFY_DURATION,FORTIFY_RECOVERY_TIME, FORTIFY_DAMAGE_MODIFIER).setDisplayStack(new ItemStack(Items.SHIELD)).setActive().build());
+   public static final ArchetypeAbility LEVITATION_BULLET = register(new ArchetypeAbility.ArchetypeAbilityBuilder("levitation_bullet").setReliantConfigs(LEVITATION_BULLET_COOLDOWN, LEVITATION_BULLET_COUNT).setDisplayStack(new ItemStack(Items.ARROW)).setActive().build());
+   public static final ArchetypeAbility BACKPACK = register(new ArchetypeAbility.ArchetypeAbilityBuilder("backpack").setDisplayStack(new ItemStack(Items.MAGENTA_BUNDLE)).setActive().build());
+   public static final ArchetypeAbility RANDOM_TELEPORT = register(new ArchetypeAbility.ArchetypeAbilityBuilder("random_teleport").setReliantConfigs(RANDOM_TELEPORT_COOLDOWN,RANDOM_TELEPORT_RANGE).setDisplayStack(new ItemStack(Items.CHORUS_FRUIT)).setActive().build());
+   public static final ArchetypeAbility ENDER_GLIDER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("ender_glider").setReliantConfigs(GLIDER_COOLDOWN,GLIDER_DURATION,GLIDER_RECOVERY_TIME).setDisplayStack(new ItemStack(Items.ELYTRA)).setActive().build());
+   public static final ArchetypeAbility ENDERFLAME = register(new ArchetypeAbility.ArchetypeAbilityBuilder("enderflame").setReliantConfigs(ENDERFLAME_BUFFET_COOLDOWN,ENDERFLAME_BUFFET_DAMAGE,ENDERFLAME_BUFFET_DURATION,ENDERFLAME_FIREBALL_COOLDOWN).setDisplayStack(new ItemStack(Items.DRAGON_BREATH)).setActive().build());
+   public static final ArchetypeAbility MASSIVE_SIZED = register(new ArchetypeAbility.ArchetypeAbilityBuilder("massive_sized").setDisplayStack(new ItemStack(Items.DIAMOND_HELMET)).setActive().build());
+   public static final ArchetypeAbility RESILIENT_JOINTS = register(new ArchetypeAbility.ArchetypeAbilityBuilder("resilient_joints").setReliantConfigs(RESILIENT_JOINTS_EXTRA_FALL_BLOCKS).setDisplayStack(new ItemStack(Items.DIAMOND_LEGGINGS)).build());
+   public static final ArchetypeAbility LIGHTWEIGHT = register(new ArchetypeAbility.ArchetypeAbilityBuilder("lightweight").setReliantConfigs(LIGHTWEIGHT_INCREASED_KNOCKBACK).setDisplayStack(new ItemStack(Items.RABBIT_FOOT)).build());
+   public static final ArchetypeAbility BLAZING_STRIKE = register(new ArchetypeAbility.ArchetypeAbilityBuilder("blazing_strike").setReliantConfigs(BLAZING_STRIKE_DURATION).setDisplayStack(new ItemStack(Items.BLAZE_POWDER)).build());
+   public static final ArchetypeAbility LAVA_WALKER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("lava_walker").setReliantConfigs(LAVA_WALKER_SPEED_MULTIPLIER).setDisplayStack(new ItemStack(Items.NETHERITE_BOOTS)).build());
+   public static final ArchetypeAbility FUNGUS_SPEED_BOOST = register(new ArchetypeAbility.ArchetypeAbilityBuilder("fungus_speed_boost").setReliantConfigs(FUNGUS_SPEED_BOOST_DURATION,FUNGUS_SPEED_BOOST_CONSUME_DURATION,FUNGUS_SPEED_BOOST_MULTIPLIER).setDisplayStack(new ItemStack(Items.WARPED_FUNGUS)).build());
    
    public static final Archetype AQUARIAN = register(new Archetype("aquarian", new ItemStack(Items.TROPICAL_FISH), 0x0f89f0, GOOD_SWIMMER, DRIES_OUT, IMPALE_VULNERABLE, SLIPPERY));
-   public static final Archetype INFERNAL = register(new Archetype("infernal", new ItemStack(Items.CRIMSON_NYLIUM), 0xe03f24, FIRE_IMMUNE, DAMAGED_BY_COLD));
-   public static final Archetype SWAMPER = register(new Archetype("swamper", new ItemStack(Items.SLIME_BLOCK), 0x4dca70, MOONLIT, ANTIVENOM));
-   public static final Archetype WINDSWEPT = register(new Archetype("windswept", new ItemStack(Items.FEATHER), 0x98c9c6, SLOW_FALLER));
-   public static final Archetype GOLEM = register(new Archetype("golem", new ItemStack(Items.CHISELED_STONE_BRICKS), 0xa0a0ab, NO_REGEN, HEALTH_BASED_SPRINT, PROJECTILE_RESISTANT));
-   public static final Archetype FELID = register(new Archetype("felid", new ItemStack(Items.STRING), 0xc6c55c, HALVED_FALL_DAMAGE, CARNIVORE, SPEEDY));
    public static final Archetype CENTAUR = register(new Archetype("centaur", new ItemStack(Items.SADDLE), 0xbd8918, STUNNED_BY_DAMAGE, MOUNTED));
+   public static final Archetype ENDERIAN = register(new Archetype("enderian", new ItemStack(Items.END_CRYSTAL), 0xc30ff0, HURT_BY_WATER));
+   public static final Archetype FELID = register(new Archetype("felid", new ItemStack(Items.STRING), 0xc6c55c, HALVED_FALL_DAMAGE, CARNIVORE, SPEEDY));
+   public static final Archetype GOLEM = register(new Archetype("golem", new ItemStack(Items.CHISELED_STONE_BRICKS), 0xa0a0ab, NO_REGEN, HEALTH_BASED_SPRINT, PROJECTILE_RESISTANT));
+   public static final Archetype INFERNAL = register(new Archetype("infernal", new ItemStack(Items.CRIMSON_NYLIUM), 0xe03f24, FIRE_IMMUNE, DAMAGED_BY_COLD));
+   public static final Archetype SWAMPER = register(new Archetype("swamper", new ItemStack(Items.SLIME_BLOCK), 0x4dca70, ANTIVENOM));
+   public static final Archetype WINDSWEPT = register(new Archetype("windswept", new ItemStack(Items.FEATHER), 0x98c9c6, SLOW_FALLER));
    
-   public static final SubArchetype AXOLOTL = register(new SubArchetype("axolotl", new ItemStack(Items.AXOLOTL_BUCKET), 0xe070ed, AQUARIAN, REGEN_WHEN_LOW));
-   public static final SubArchetype SALMON = register(new SubArchetype("salmon", new ItemStack(Items.SALMON), 0x8f1f63, AQUARIAN, GREAT_SWIMMER));
-   public static final SubArchetype BLAZE = register(new SubArchetype("blaze", new ItemStack(Items.BLAZE_POWDER), 0xe88a0f, INFERNAL, FIREBALL_VOLLEY, SLOW_FALLER));
-   public static final SubArchetype WITCH = register(new SubArchetype("witch", new ItemStack(Items.CAULDRON), 0x7a0fe8, SWAMPER, POTION_BREWER));
-   public static final SubArchetype SLIME = register(new SubArchetype("slime", new ItemStack(Items.SLIME_BLOCK), 0x05f905, SWAMPER, BOUNCY, JUMPY, SLIME_TOTEM, INSATIABLE));
-   public static final SubArchetype MAGMA_CUBE = register(new SubArchetype("magma_cube", new ItemStack(Items.MAGMA_BLOCK), 0x943019, INFERNAL, BOUNCY, JUMPY, MAGMA_TOTEM, INSATIABLE));
-   public static final SubArchetype BREEZE = register(new SubArchetype("breeze", new ItemStack(Items.WIND_CHARGE), 0x6ac1e6, WINDSWEPT, PROJECTILE_RESISTANT, SOFT_HITTER, JUMPY, WIND_CHARGE_VOLLEY));
-   public static final SubArchetype PARROT = register(new SubArchetype("parrot", new ItemStack(Items.ELYTRA), 0xb7d3df, WINDSWEPT, GLIDER));
-   public static final SubArchetype COPPER_GOLEM = register(new SubArchetype("copper_golem", new ItemStack(Items.COPPER_BLOCK), 0xbc814d, GOLEM, COPPER_EATER, HALF_SIZED, INCREASED_KNOCKBACK, SOFT_HITTER));
-   public static final SubArchetype TUFF_GOLEM = register(new SubArchetype("tuff_golem", new ItemStack(Items.CHISELED_TUFF_BRICKS), 0x648076, GOLEM, TUFF_EATER, HASTY));
-   public static final SubArchetype IRON_GOLEM = register(new SubArchetype("iron_golem", new ItemStack(Items.IRON_BLOCK), 0xbebebe, GOLEM, IRON_EATER, GIANT_SIZED, REDUCED_KNOCKBACK, LONG_ARMS, HARD_HITTER));
-   public static final SubArchetype CAT = register(new SubArchetype("cat", new ItemStack(Items.PHANTOM_MEMBRANE), 0xf1ce8a, FELID, CAT_SCARE, NO_FALL_DAMAGE, SNEAKY));
-   public static final SubArchetype OCELOT = register(new SubArchetype("ocelot", new ItemStack(Items.CHICKEN), 0xc5b900, FELID, SNEAK_ATTACK));
-   public static final SubArchetype HORSE = register(new SubArchetype("horse", new ItemStack(Items.GOLDEN_HORSE_ARMOR), 0xbda329, CENTAUR, HORSE_SPIRIT_MOUNT));
-   public static final SubArchetype DONKEY = register(new SubArchetype("donkey", new ItemStack(Items.CHEST), 0x9c6d11, CENTAUR, DONKEY_SPIRIT_MOUNT));
-   public static final SubArchetype WITHER_SKELETON = register(new SubArchetype("wither_skeleton", new ItemStack(Items.WITHER_SKELETON_SKULL), 0x423c3c, INFERNAL, WITHERING, TALL_SIZED));
-   public static final SubArchetype GUARDIAN = register(new SubArchetype("guardian", new ItemStack(Items.PRISMARINE_BRICKS), 0x449e92, AQUARIAN, GUARDIAN_RAY, THORNY));
+   public static final SubArchetype AXOLOTL = register(new SubArchetype("axolotl", EntityType.AXOLOTL, new ItemStack(Items.AXOLOTL_BUCKET), 0xe070ed, AQUARIAN, REGEN_WHEN_LOW));
+   public static final SubArchetype SALMON = register(new SubArchetype("salmon", EntityType.SALMON, new ItemStack(Items.SALMON), 0x8f1f63, AQUARIAN, GREAT_SWIMMER));
+   public static final SubArchetype BLAZE = register(new SubArchetype("blaze", EntityType.BLAZE, new ItemStack(Items.BLAZE_ROD), 0xe88a0f, INFERNAL, FIREBALL_VOLLEY, SLOW_FALLER, BLAZING_STRIKE));
+   public static final SubArchetype WITCH = register(new SubArchetype("witch", EntityType.WITCH, new ItemStack(Items.CAULDRON), 0x7a0fe8, SWAMPER, POTION_BREWER, MOONLIT_WITCH));
+   public static final SubArchetype SLIME = register(new SubArchetype("slime", EntityType.SLIME, new ItemStack(Items.SLIME_BLOCK), 0x05f905, SWAMPER, BOUNCY, JUMPY, SLIME_TOTEM, INSATIABLE, MOONLIT_SLIME));
+   //public static final SubArchetype MAGMA_CUBE = register(new SubArchetype("magma_cube", EntityType.MAGMA_CUBE, new ItemStack(Items.MAGMA_BLOCK), 0x943019, INFERNAL, BOUNCY, JUMPY, MAGMA_TOTEM, INSATIABLE));
+   public static final SubArchetype STRIDER = register(new SubArchetype("strider", EntityType.STRIDER, new ItemStack(Items.STRING), 0x943019, INFERNAL, RIDEABLE, LAVA_WALKER, FUNGUS_SPEED_BOOST));
+   public static final SubArchetype BREEZE = register(new SubArchetype("breeze", EntityType.BREEZE, new ItemStack(Items.WIND_CHARGE), 0x6ac1e6, WINDSWEPT, PROJECTILE_RESISTANT, SOFT_HITTER, JUMPY, WIND_CHARGE_VOLLEY));
+   public static final SubArchetype PARROT = register(new SubArchetype("parrot", EntityType.PARROT, new ItemStack(Items.ELYTRA), 0xb7d3df, WINDSWEPT, WING_GLIDER, LIGHTWEIGHT));
+   public static final SubArchetype COPPER_GOLEM = register(new SubArchetype("copper_golem", null, new ItemStack(Items.COPPER_BLOCK), 0xbc814d, GOLEM, COPPER_EATER, HALF_SIZED, LIGHTWEIGHT, SOFT_HITTER, RESILIENT_JOINTS));
+   public static final SubArchetype TUFF_GOLEM = register(new SubArchetype("tuff_golem", null, new ItemStack(Items.CHISELED_TUFF_BRICKS), 0x648076, GOLEM, TUFF_EATER, HASTY));
+   public static final SubArchetype IRON_GOLEM = register(new SubArchetype("iron_golem", EntityType.IRON_GOLEM, new ItemStack(Items.IRON_BLOCK), 0xbebebe, GOLEM, IRON_EATER, GIANT_SIZED, REDUCED_KNOCKBACK, LONG_ARMS, HARD_HITTER));
+   public static final SubArchetype CAT = register(new SubArchetype("cat", EntityType.CAT, new ItemStack(Items.PHANTOM_MEMBRANE), 0xf1ce8a, FELID, CAT_SCARE, NO_FALL_DAMAGE, SNEAKY));
+   public static final SubArchetype OCELOT = register(new SubArchetype("ocelot", EntityType.OCELOT, new ItemStack(Items.CHICKEN), 0xc5b900, FELID, SNEAK_ATTACK));
+   public static final SubArchetype HORSE = register(new SubArchetype("horse", EntityType.HORSE, new ItemStack(Items.GOLDEN_HORSE_ARMOR), 0xbda329, CENTAUR, HORSE_SPIRIT_MOUNT));
+   public static final SubArchetype DONKEY = register(new SubArchetype("donkey", EntityType.DONKEY, new ItemStack(Items.CHEST), 0x9c6d11, CENTAUR, DONKEY_SPIRIT_MOUNT));
+   public static final SubArchetype WITHER_SKELETON = register(new SubArchetype("wither_skeleton", EntityType.WITHER_SKELETON, new ItemStack(Items.WITHER_SKELETON_SKULL), 0x423c3c, INFERNAL, WITHERING, TALL_SIZED));
+   public static final SubArchetype GUARDIAN = register(new SubArchetype("guardian", EntityType.GUARDIAN, new ItemStack(Items.PRISMARINE_BRICKS), 0x449e92, AQUARIAN, GUARDIAN_RAY, THORNY));
+   public static final SubArchetype CAVE_SPIDER = register(new SubArchetype("cave_spider", EntityType.CAVE_SPIDER, new ItemStack(Items.COBWEB), 0x1a7264, SWAMPER, HALF_SIZED, SOFT_HITTER, CLIMBING, VENOMOUS, LIGHTWEIGHT, MOONLIT_CAVE_SPIDER, WEAVING, RESILIENT_JOINTS));
+   public static final SubArchetype CAMEL = register(new SubArchetype("camel", EntityType.CAMEL, new ItemStack(Items.SAND), 0xffc163, CENTAUR, CAMEL_SPIRIT_MOUNT));
+   public static final SubArchetype GHASTLING = register(new SubArchetype("ghastling", EntityType.HAPPY_GHAST, new ItemStack(Items.GRAY_HARNESS), 0xa9e5e7, WINDSWEPT, SLOW_HOVER, DRIES_OUT, SNOW_BLAST, RIDEABLE));
+   public static final SubArchetype ENDERMAN = register(new SubArchetype("enderman", EntityType.ENDERMAN, new ItemStack(Items.ENDER_EYE), 0xca00e2, ENDERIAN, SHY, TALL_SIZED, LONG_ARMS, SILK_TOUCH, LONG_TELEPORT, PROJECTILE_RESISTANT));
+   public static final SubArchetype SHULKER = register(new SubArchetype("shulker", EntityType.SHULKER, new ItemStack(Items.SHULKER_SHELL), 0x7e597f, ENDERIAN, FORTIFY, LEVITATION_BULLET, BACKPACK, RANDOM_TELEPORT));
+   public static final SubArchetype ENDER_DRAGON = register(new SubArchetype("ender_dragon", EntityType.ENDER_DRAGON, new ItemStack(Items.DRAGON_EGG), 0x762f9f, ENDERIAN, MASSIVE_SIZED, ENDER_GLIDER, ENDERFLAME, REDUCED_KNOCKBACK, LONG_ARMS, RIDEABLE));
    
    public static final RegistryKey<? extends Registry<EquipmentAsset>> EQUIPMENT_ASSET_REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.ofVanilla("equipment_asset"));
+   
+   public static final RegistryKey<ArmorTrimPattern> HELMET_TRIM_PATTERN = RegistryKey.of(RegistryKeys.TRIM_PATTERN,Identifier.of(MOD_ID,"aviator_helmet"));
+   public static final RegistryKey<ArmorTrimPattern> HELMET_TRIM_PATTERN_ON = RegistryKey.of(RegistryKeys.TRIM_PATTERN,Identifier.of(MOD_ID,"aviator_helmet_on"));
+   public static final RegistryKey<ArmorTrimPattern> HELMET_TRIM_PATTERN_OFF = RegistryKey.of(RegistryKeys.TRIM_PATTERN,Identifier.of(MOD_ID,"aviator_helmet_off"));
+   public static final RegistryKey<ArmorTrimPattern> WING_GLIDER_TRIM_PATTERN = RegistryKey.of(RegistryKeys.TRIM_PATTERN,Identifier.of(MOD_ID,"wing_glider"));
+   public static final RegistryKey<ArmorTrimPattern> END_GLIDER_TRIM_PATTERN = RegistryKey.of(RegistryKeys.TRIM_PATTERN,Identifier.of(MOD_ID,"end_glider"));
+   
+   // PlayerAbilityLib Identifiers
+   public static final AbilitySource SLOW_HOVER_ABILITY = Pal.getAbilitySource(Identifier.of(MOD_ID, SLOW_HOVER.getId()), AbilitySource.RENEWABLE);
    
    public static final Item CHANGE_ITEM = registerItem("change_item", new ChangeItem(
          new Item.Settings().maxCount(16).rarity(Rarity.EPIC)
@@ -363,6 +559,62 @@ public class ArchetypeRegistry {
    public static final Item DONKEY_SPIRIT_MOUNT_ITEM = registerItem(DONKEY_SPIRIT_MOUNT.getId(), new DonkeySpiritMountItem(
          new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
                .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.donkey_spirit_mount_description"))))
+   ));
+   public static final Item CAMEL_SPIRIT_MOUNT_ITEM = registerItem(CAMEL_SPIRIT_MOUNT.getId(), new CamelSpiritMountItem(
+         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
+               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.camel_spirit_mount_description"))))
+   ));
+   public static final Item WEAVING_ITEM = registerItem(WEAVING.getId(), new WeavingItem(
+         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
+               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.weaving_web_description"))))
+   ));
+   public static final Item SLOW_HOVER_ITEM = registerItem(SLOW_HOVER.getId(), new HoverItem(
+         new Item.Settings().maxCount(1).rarity(Rarity.EPIC).maxDamage(2048)
+               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.hover_helmet_description"))))
+               .component(DataComponentTypes.DYED_COLOR, new DyedColorComponent(0xA06540))
+               .component(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT.with(DataComponentTypes.DYED_COLOR,true))
+               .component(DataComponentTypes.EQUIPPABLE, EquippableComponent.builder(EquipmentSlot.HEAD).equipSound(SoundEvents.ITEM_ARMOR_EQUIP_LEATHER).model(RegistryKey.of(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.of(MOD_ID,"aviator_helmet_off"))).damageOnHurt(false).build())
+   ));
+   public static final Item SNOW_BLAST_ITEM = registerItem(SNOW_BLAST.getId(), new SnowblastItem(
+         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
+               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.snow_blast_description"))))
+   ));
+   public static final Item LONG_TELEPORT_ITEM = registerItem(LONG_TELEPORT.getId(), new LongTeleportItem(
+         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
+               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.long_teleport_description"))))
+   ));
+   public static final Item RANDOM_TELEPORT_ITEM = registerItem(RANDOM_TELEPORT.getId(), new RandomTeleportItem(
+         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
+               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.random_teleport_description"))))
+   ));
+   public static final Item FORTIFY_ITEM = registerItem(FORTIFY.getId(), new FortifyItem(
+         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
+               .component(DataComponentTypes.CONSUMABLE, ConsumableComponent.builder()
+                     .consumeSeconds(72000).useAction(UseAction.BLOCK).consumeParticles(false)
+                     .sound(Registries.SOUND_EVENT.getEntry(SoundEvents.BLOCK_AMETHYST_BLOCK_CHIME)).build())
+               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.fortify_description"))))
+   ));
+   public static final Item LEVITATION_BULLET_ITEM = registerItem(LEVITATION_BULLET.getId(), new LevitationBulletItem(
+         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
+               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.levitation_bullet_description"))))
+   ));
+   public static final Item BACKPACK_ITEM = registerItem(BACKPACK.getId(), new BackpackItem(
+         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
+               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.backpack_description"))))
+   ));
+   public static final Item END_GLIDER_ITEM = registerItem(ENDER_GLIDER.getId(), new EndGliderItem(
+         new Item.Settings().maxCount(1).rarity(Rarity.EPIC).maxDamage(2048)
+               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.end_glider_description"))))
+               .component(DataComponentTypes.GLIDER, Unit.INSTANCE)
+               .component(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT.with(DataComponentTypes.DYED_COLOR,true))
+               .component(DataComponentTypes.EQUIPPABLE, EquippableComponent.builder(EquipmentSlot.CHEST).equipSound(SoundEvents.ITEM_ARMOR_EQUIP_ELYTRA).model(RegistryKey.of(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.of(MOD_ID,"end_glider"))).damageOnHurt(false).build())
+   ));
+   public static final Item ENDERFLAME_ITEM = registerItem(ENDERFLAME.getId(), new EndflameItem(
+         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
+               .component(DataComponentTypes.CONSUMABLE, ConsumableComponent.builder()
+                     .consumeSeconds(10).useAction(UseAction.BOW).consumeParticles(false)
+                     .sound(Registries.SOUND_EVENT.getEntry(SoundEvents.BLOCK_AMETHYST_BLOCK_CHIME)).build())
+               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.endflame_buffet_description"))))
    ));
    public static final Item GUARDIAN_RAY_ITEM = registerItem(GUARDIAN_RAY.getId(), new GuardianRayItem(
          new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
@@ -495,21 +747,43 @@ public class ArchetypeRegistry {
       return setting;
    }
    
+   public static <T extends Entity> EntityType<T> registerEntity(String id, EntityType.Builder<T> builder){
+      Identifier identifier = Identifier.of(MOD_ID,id);
+      EntityType<T> entityType = builder.build(RegistryKey.of(RegistryKeys.ENTITY_TYPE, identifier));
+      Registry.register(Registries.ENTITY_TYPE, Identifier.of(MOD_ID,id), entityType);
+      PolymerEntityUtils.registerType(entityType);
+      return entityType;
+   }
+   
    public static void initialize(){
       PolymerResourcePackUtils.addModAssets(MOD_ID);
       
       PolymerItemUtils.CONTEXT_ITEM_CHECK.register(
             (itemStack, packetContext) -> {
-               boolean isGolemFood = TUFF_FOODS.containsKey(itemStack.getItem()) || IRON_FOODS.containsKey(itemStack.getItem()) || COPPER_FOODS.containsKey(itemStack.getItem());
-               boolean isGrowItem = itemStack.isIn(SLIME_GROW_ITEMS) || itemStack.isIn(MAGMA_CUBE_GROW_ITEMS);
-               return isGolemFood || isGrowItem;
+               ServerPlayerEntity player = packetContext.getPlayer();
+               if(player == null) return false;
+               IArchetypeProfile profile = profile(player);
+               if(profile.hasAbility(TUFF_EATER) && TUFF_FOODS.containsKey(itemStack.getItem())){
+                  return true;
+               }else if(profile.hasAbility(IRON_EATER) && IRON_FOODS.containsKey(itemStack.getItem())){
+                  return true;
+               }else if(profile.hasAbility(COPPER_EATER) && COPPER_FOODS.containsKey(itemStack.getItem())){
+                  return true;
+               }else if(profile.hasAbility(SLIME_TOTEM) && itemStack.isIn(SLIME_GROW_ITEMS)){
+                  return true;
+               }else if(profile.hasAbility(MAGMA_TOTEM) && itemStack.isIn(MAGMA_CUBE_GROW_ITEMS)){
+                  return true;
+               }else if(profile.hasAbility(FUNGUS_SPEED_BOOST) && itemStack.isOf(Items.WARPED_FUNGUS)){
+                  return true;
+               }
+               return false;
             }
       );
       
       PolymerItemUtils.ITEM_MODIFICATION_EVENT.register(
             (original, client, context) -> {
                ServerPlayerEntity player = context.getPlayer();
-               if(player == null) return client;
+               if(player == null) return original;
                IArchetypeProfile profile = profile(player);
                HashMap<Item, Pair<Float,Integer>> map = null;
                float healthMod = 1.0f;
@@ -553,18 +827,21 @@ public class ArchetypeRegistry {
                   client.set(DataComponentTypes.LORE,new LoreComponent(currentLore,currentLore));
                }
                
+               if(profile.hasAbility(FUNGUS_SPEED_BOOST) && original.isOf(Items.WARPED_FUNGUS)){
+                  LoreComponent lore = client.getOrDefault(DataComponentTypes.LORE,LoreComponent.DEFAULT);
+                  List<Text> currentLore = new ArrayList<>(lore.styledLines());
+                  currentLore.add(fungusLoreLine());
+                  client.set(DataComponentTypes.LORE,new LoreComponent(currentLore,currentLore));
+               }
+               
                return client;
             }
       );
       
       final ItemGroup ITEM_GROUP = PolymerItemGroupUtils.builder().displayName(Text.translatable("itemGroup.archetype_items")).icon(() -> new ItemStack(CHANGE_ITEM)).entries((displayContext, entries) -> {
-         entries.add(new ItemStack(CHANGE_ITEM));
-         entries.add(new ItemStack(GLIDER_ITEM));
-         entries.add(new ItemStack(WIND_CHARGE_VOLLEY_ITEM));
-         entries.add(new ItemStack(FIREBALL_VOLLEY_ITEM));
-         entries.add(new ItemStack(POTION_BREWER_ITEM));
-         entries.add(new ItemStack(HORSE_SPIRIT_MOUNT_ITEM));
-         entries.add(new ItemStack(DONKEY_SPIRIT_MOUNT_ITEM));
+         for(Item item : ITEMS){
+            entries.add(new ItemStack(item));
+         }
       }).build();
       
       PolymerItemGroupUtils.registerPolymerItemGroup(Identifier.of(MOD_ID,"archetype_items"), ITEM_GROUP);
@@ -591,5 +868,19 @@ public class ArchetypeRegistry {
             .append(Text.translatable("text.ancestralarchetypes.seconds").formatted(Formatting.GOLD))
             .append(Text.translatable("text.ancestralarchetypes.consume_regrow"))
       );
+   }
+   
+   private static Text fungusLoreLine(){
+      DecimalFormat df = new DecimalFormat("0.###");
+      int eatTime = CONFIG.getInt(ArchetypeRegistry.FUNGUS_SPEED_BOOST_CONSUME_DURATION);
+      double boost = CONFIG.getDouble(ArchetypeRegistry.FUNGUS_SPEED_BOOST_MULTIPLIER);
+      int boostDuration = CONFIG.getInt(ArchetypeRegistry.FUNGUS_SPEED_BOOST_DURATION);
+      return TextUtils.removeItalics(Text.translatable("text.ancestralarchetypes.fungus_consume",
+            Text.literal(df.format(eatTime/20.0)).formatted(Formatting.GOLD),
+            Text.translatable("text.ancestralarchetypes.seconds").formatted(Formatting.GOLD),
+            Text.literal(df.format(boost)).formatted(Formatting.GOLD),
+            Text.literal(df.format(boostDuration/20.0)).formatted(Formatting.GOLD),
+            Text.translatable("text.ancestralarchetypes.seconds").formatted(Formatting.GOLD)
+      ).formatted(Formatting.DARK_PURPLE));
    }
 }

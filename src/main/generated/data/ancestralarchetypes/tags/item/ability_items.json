@@ -1,0 +1,22 @@
+{
+  "values": [
+    "ancestralarchetypes:fireball_volley",
+    "ancestralarchetypes:wind_charge_volley",
+    "ancestralarchetypes:potion_brewer",
+    "ancestralarchetypes:glider",
+    "ancestralarchetypes:horse_spirit_mount",
+    "ancestralarchetypes:donkey_spirit_mount",
+    "ancestralarchetypes:camel_spirit_mount",
+    "ancestralarchetypes:weaving",
+    "ancestralarchetypes:slow_hover",
+    "ancestralarchetypes:snow_blast",
+    "ancestralarchetypes:long_teleport",
+    "ancestralarchetypes:random_teleport",
+    "ancestralarchetypes:fortify",
+    "ancestralarchetypes:levitation_bullet",
+    "ancestralarchetypes:backpack",
+    "ancestralarchetypes:ender_glider",
+    "ancestralarchetypes:enderflame",
+    "ancestralarchetypes:guardian_ray"
+  ]
+}

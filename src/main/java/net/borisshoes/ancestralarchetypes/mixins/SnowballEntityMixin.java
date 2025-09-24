@@ -18,7 +18,7 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 public class SnowballEntityMixin {
    
    @Inject(method = "onEntityHit", at = @At("TAIL"))
-   private void archetypes_snowballDamage(EntityHitResult entityHitResult, CallbackInfo ci){
+   private void archetypes$snowballDamage(EntityHitResult entityHitResult, CallbackInfo ci){
       SnowballEntity snowball = (SnowballEntity)(Object) this;
       Entity entity = entityHitResult.getEntity();
       if(entity instanceof ServerPlayerEntity player){

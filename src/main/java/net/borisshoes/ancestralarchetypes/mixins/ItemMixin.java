@@ -31,7 +31,7 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 public class ItemMixin {
    
    @Inject(method = "finishUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/component/type/ConsumableComponent;finishConsumption(Lnet/minecraft/world/World;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;"), cancellable = true)
-   private void archetypes_onFinishUsing(ItemStack stack, World world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir, @Local ConsumableComponent component){
+   private void archetypes$onFinishUsing(ItemStack stack, World world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir, @Local ConsumableComponent component){
       if (user instanceof ServerPlayerEntity playerEntity) {
          IArchetypeProfile profile = profile(playerEntity);
          HashMap<Item, Pair<Float,Integer>> map = null;
@@ -78,8 +78,12 @@ public class ItemMixin {
             playerEntity.playSound(SoundEvents.ENTITY_ZOMBIE_VILLAGER_CONVERTED);
          }
          
+         if(profile.hasAbility(ArchetypeRegistry.FUNGUS_SPEED_BOOST) && stack.isOf(Items.WARPED_FUNGUS)){
+            profile.fungusBoost();
+         }
+         
          if(profile.getSubArchetype() == ArchetypeRegistry.PARROT && stack.isOf(Items.COOKIE)){
-            playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON,100,1,true,true,true),playerEntity);
+            playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON,100,2,true,true,true),playerEntity);
          }
       }
    }

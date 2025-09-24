@@ -26,7 +26,7 @@ public abstract class PhantomSwoopGoalMixin extends Goal {
    PhantomEntity field_7333; // Outer class synthetic field
    
    @Inject(method = "shouldContinue", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;isSpectator()Z"), cancellable = true)
-   private void archetypes_shouldSwoopContinue(CallbackInfoReturnable<Boolean> cir, @Local LivingEntity livingEntity){
+   private void archetypes$shouldSwoopContinue(CallbackInfoReturnable<Boolean> cir, @Local LivingEntity livingEntity){
       if(livingEntity instanceof ServerPlayerEntity player){
          IArchetypeProfile profile = profile(player);
          if(profile.hasAbility(ArchetypeRegistry.CAT_SCARE)){

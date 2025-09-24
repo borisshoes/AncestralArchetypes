@@ -1,0 +1,7 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "ancestralarchetypes:item/webbing"
+  },
+  "hand_animation_on_swap": false
+}

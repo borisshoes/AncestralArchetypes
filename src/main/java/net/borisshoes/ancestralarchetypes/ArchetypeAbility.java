@@ -1,6 +1,8 @@
 package net.borisshoes.ancestralarchetypes;
 
 import net.borisshoes.borislib.config.IConfigSetting;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.MutableText;
@@ -22,6 +24,7 @@ public class ArchetypeAbility {
       this.displayStack = displayStack;
       this.reliantConfigs = reliantConfigs;
       this.overrides = overrides;
+      this.displayStack.set(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT.with(DataComponentTypes.BUNDLE_CONTENTS,true));
    }
    
    public MutableText getName(){

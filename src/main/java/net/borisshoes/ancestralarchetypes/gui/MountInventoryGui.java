@@ -14,7 +14,7 @@ public class MountInventoryGui extends SimpleGui {
       setTitle(Text.translatable("text.ancestralarchetypes.spirit_mount_inventory"));
       
       for(int i = 0; i < this.size; i++){
-         setSlotRedirect(i,new Slot(inv,i,i%9,i/9));
+         setSlotRedirect(i,new MountInventorySlot(inv,i,i%9,i/9));
       }
    }
 }
