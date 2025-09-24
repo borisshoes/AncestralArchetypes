@@ -1,4 +1,4 @@
-![Ancestral Archetypes](non-mod-resources/Logo_Trans_Medium.png)
+![Ancestral Archetypes](https://github.com/borisshoes/AncestralArchetypes/blob/1.21.8/non-mod-resources/Logo_Trans_Medium.png?raw=true)
 
 A server-sided Origins-style mod where players pick mob-based Archetypes to gain different abilities.
 The mod is highly configurable and balanced around a competitive environment. This mod also has full translation support.
@@ -19,7 +19,7 @@ The mod is highly configurable and balanced around a competitive environment. Th
 </a>
 
 ## Archetype Summaries
-![Archetype Summaries](non-mod-resources/Infographic Full.png)
+![Archetype Summaries](https://github.com/borisshoes/AncestralArchetypes/blob/1.21.8/non-mod-resources/Infographic%20Full.png?raw=true)
 #### Individual Summaries further down...
 
 ## Mod Spotlight /  Tutorial
@@ -115,31 +115,11 @@ The following commands can be used to adjust configurable settings in the Ancest
 * ```/archetypes config hastyAttackSpeedIncrease``` The attack speed increase given to those with Hasty.
 * ```/archetypes config jumpyJumpBoost``` The extra jump power given to those with Jumpy.
 
-
 ## Individual Archetype Summaries
-### Aquarians
-![Aquarians](non-mod-resources/Aquarian Infographic.png)
-
-### Centaurs
-![Centaurs](non-mod-resources/Centaur Infographic.png)
-
-### Enderians
-![Enderians](non-mod-resources/Enderian Infographic.png)
-
-### Felids
-![Felids](non-mod-resources/Felid Infographic.png)
-
-### Golems
-![Golems](non-mod-resources/Golem Infographic.png)
-
-### Infernals
-![Infernals](non-mod-resources/Infernal Infographic.png)
-
-### Swampers
-![Swampers](non-mod-resources/Swamper Infographic.png)
-
-### Windswepts
-![Windswepts](non-mod-resources/Windswept Infographic.png)
+|                                                                                                                                                                                                                                  |                                                                                                                                                                                                                                  |                                                                                                                                                                                                                                  |                                                                                                                                                                                                                                     |
+|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| <div align="center"><strong>Aquarian</strong></div><img width="720" alt="Aquarian Archetypes Summary" src="https://github.com/borisshoes/AncestralArchetypes/blob/1.21.8/non-mod-resources/Aquarian%20Infographic.png?raw=true"> |  <div align="center"><strong>Centaur</strong></div><img width="720" alt="Centaur Archetypes Summary" src="https://github.com/borisshoes/AncestralArchetypes/blob/1.21.8/non-mod-resources/Centaur%20Infographic.png?raw=true">   | <div align="center"><strong>Enderian</strong></div><img width="720" alt="Enderian Archetypes Summary" src="https://github.com/borisshoes/AncestralArchetypes/blob/1.21.8/non-mod-resources/Enderian%20Infographic.png?raw=true"> |       <div align="center"><strong>Felid</strong></div><img width="720" alt="Felid Archetypes Summary" src="https://github.com/borisshoes/AncestralArchetypes/blob/1.21.8/non-mod-resources/Felid%20Infographic.png?raw=true">       |
+|     <div align="center"><strong>Golem</strong></div><img width="720" alt="Golem Archetypes Summary" src="https://github.com/borisshoes/AncestralArchetypes/blob/1.21.8/non-mod-resources/Golem%20Infographic.png?raw=true">      | <div align="center"><strong>Infernal</strong></div><img width="720" alt="Infernal Archetypes Summary" src="https://github.com/borisshoes/AncestralArchetypes/blob/1.21.8/non-mod-resources/Infernal%20Infographic.png?raw=true"> |  <div align="center"><strong>Swamper</strong></div><img width="720" alt="Swamper Archetypes Summary" src="https://github.com/borisshoes/AncestralArchetypes/blob/1.21.8/non-mod-resources/Swamper%20Infographic.png?raw=true">   | <div align="center"><strong>Windswept</strong></div><img width="720" alt="Windswept Archetypes Summary" src="https://github.com/borisshoes/AncestralArchetypes/blob/1.21.8/non-mod-resources/Windswept%20Infographic.png?raw=true"> |
 
 ### LICENSE NOTICE
 By using this project in any form, you hereby give your "express assent" for the terms of the license of this project, and acknowledge that I, BorisShoes, have fulfilled my obligation under the license to "make a reasonable effort under the circumstances to obtain the express assent of recipients to the terms of this License.
