@@ -4,8 +4,6 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.borisshoes.ancestralarchetypes.AncestralArchetypes;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.borislib.utils.MinecraftUtils;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ToolComponent;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;

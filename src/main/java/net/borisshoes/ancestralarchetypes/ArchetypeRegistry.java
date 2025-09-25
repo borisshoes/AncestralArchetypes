@@ -11,7 +11,6 @@ import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.entities.LevitationBulletEntity;
 import net.borisshoes.ancestralarchetypes.entities.SnowblastEntity;
 import net.borisshoes.ancestralarchetypes.items.*;
-import net.borisshoes.arcananovum.entities.StasisPearlEntity;
 import net.borisshoes.borislib.config.ConfigSetting;
 import net.borisshoes.borislib.config.IConfigSetting;
 import net.borisshoes.borislib.config.values.BooleanConfigValue;
@@ -47,7 +46,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 import static net.borisshoes.borislib.BorisLib.registerGraphicItem;
 
 public class ArchetypeRegistry {
@@ -399,12 +397,16 @@ public class ArchetypeRegistry {
          new DoubleConfigValue("levitationBulletDamage", 4.0, new DoubleConfigValue.DoubleLimits(0.0))));
    
    public static final IConfigSetting<?> LAVA_WALKER_SPEED_MULTIPLIER = registerConfigSetting(new ConfigSetting<>(
-         new DoubleConfigValue("lavaWalkerSpeedMultiplier", 2.0, new DoubleConfigValue.DoubleLimits(0.0))));
+         new DoubleConfigValue("lavaWalkerSpeedMultiplier", 3.0, new DoubleConfigValue.DoubleLimits(0.0))));
    
    public static final IConfigSetting<?> FUNGUS_SPEED_BOOST_MULTIPLIER = registerConfigSetting(new ConfigSetting<>(
          new DoubleConfigValue("fungusSpeedBoostMultiplier", 0.5, new DoubleConfigValue.DoubleLimits(0.0))));
    
-   
+   public static final ItemStack backpackDisplay;
+   static {
+      backpackDisplay = new ItemStack(Items.MAGENTA_BUNDLE);
+      backpackDisplay.remove(DataComponentTypes.BUNDLE_CONTENTS);
+   }
    public static final ArchetypeAbility GOOD_SWIMMER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("good_swimmer").setDisplayStack(new ItemStack(Items.COD)).build());
    public static final ArchetypeAbility GREAT_SWIMMER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("great_swimmer").setReliantConfigs(GREAT_SWIMMER_MOVE_SPEED_MODIFIER,GREAT_SWIMMER_SLIPPERY_DAMAGE_MODIFIER).setDisplayStack(new ItemStack(Items.TROPICAL_FISH)).build());
    public static final ArchetypeAbility DRIES_OUT = register(new ArchetypeAbility.ArchetypeAbilityBuilder("dries_out").setReliantConfigs(BIOME_DAMAGE).setDisplayStack(new ItemStack(Items.SPONGE)).build());
@@ -469,7 +471,7 @@ public class ArchetypeRegistry {
    public static final ArchetypeAbility LONG_TELEPORT = register(new ArchetypeAbility.ArchetypeAbilityBuilder("long_teleport").setReliantConfigs(LONG_TELEPORT_DISTANCE,LONG_TELEPORT_COOLDOWN).setDisplayStack(new ItemStack(Items.ENDER_PEARL)).setActive().build());
    public static final ArchetypeAbility FORTIFY = register(new ArchetypeAbility.ArchetypeAbilityBuilder("fortify").setReliantConfigs(FORTIFY_COOLDOWN,FORTIFY_DURATION,FORTIFY_RECOVERY_TIME, FORTIFY_DAMAGE_MODIFIER).setDisplayStack(new ItemStack(Items.SHIELD)).setActive().build());
    public static final ArchetypeAbility LEVITATION_BULLET = register(new ArchetypeAbility.ArchetypeAbilityBuilder("levitation_bullet").setReliantConfigs(LEVITATION_BULLET_COOLDOWN, LEVITATION_BULLET_COUNT).setDisplayStack(new ItemStack(Items.ARROW)).setActive().build());
-   public static final ArchetypeAbility BACKPACK = register(new ArchetypeAbility.ArchetypeAbilityBuilder("backpack").setDisplayStack(new ItemStack(Items.MAGENTA_BUNDLE)).setActive().build());
+   public static final ArchetypeAbility BACKPACK = register(new ArchetypeAbility.ArchetypeAbilityBuilder("backpack").setDisplayStack(backpackDisplay).setActive().build());
    public static final ArchetypeAbility RANDOM_TELEPORT = register(new ArchetypeAbility.ArchetypeAbilityBuilder("random_teleport").setReliantConfigs(RANDOM_TELEPORT_COOLDOWN,RANDOM_TELEPORT_RANGE).setDisplayStack(new ItemStack(Items.CHORUS_FRUIT)).setActive().build());
    public static final ArchetypeAbility ENDER_GLIDER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("ender_glider").setReliantConfigs(GLIDER_COOLDOWN,GLIDER_DURATION,GLIDER_RECOVERY_TIME).setDisplayStack(new ItemStack(Items.ELYTRA)).setActive().build());
    public static final ArchetypeAbility ENDERFLAME = register(new ArchetypeAbility.ArchetypeAbilityBuilder("enderflame").setReliantConfigs(ENDERFLAME_BUFFET_COOLDOWN,ENDERFLAME_BUFFET_DAMAGE,ENDERFLAME_BUFFET_DURATION,ENDERFLAME_FIREBALL_COOLDOWN).setDisplayStack(new ItemStack(Items.DRAGON_BREATH)).setActive().build());
@@ -548,8 +550,8 @@ public class ArchetypeRegistry {
          new Item.Settings().maxCount(1).rarity(Rarity.EPIC).maxDamage(2048)
                .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.glider_description"))))
                .component(DataComponentTypes.GLIDER, Unit.INSTANCE)
-               .component(DataComponentTypes.DYED_COLOR, new DyedColorComponent(16777215))
-               .component(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT.with(DataComponentTypes.DYED_COLOR,true))
+               .component(DataComponentTypes.DYED_COLOR, new DyedColorComponent(0xeeeeee))
+               .component(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT.with(DataComponentTypes.DYED_COLOR,true).with(DataComponentTypes.TRIM,true))
                .component(DataComponentTypes.EQUIPPABLE, EquippableComponent.builder(EquipmentSlot.CHEST).equipSound(SoundEvents.ITEM_ARMOR_EQUIP_ELYTRA).model(RegistryKey.of(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.of(MOD_ID,"glider"))).damageOnHurt(false).build())
    ));
    public static final Item HORSE_SPIRIT_MOUNT_ITEM = registerItem(HORSE_SPIRIT_MOUNT.getId(), new HorseSpiritMountItem(
@@ -572,7 +574,7 @@ public class ArchetypeRegistry {
          new Item.Settings().maxCount(1).rarity(Rarity.EPIC).maxDamage(2048)
                .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.hover_helmet_description"))))
                .component(DataComponentTypes.DYED_COLOR, new DyedColorComponent(0xA06540))
-               .component(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT.with(DataComponentTypes.DYED_COLOR,true))
+               .component(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT.with(DataComponentTypes.DYED_COLOR,true).with(DataComponentTypes.TRIM,true))
                .component(DataComponentTypes.EQUIPPABLE, EquippableComponent.builder(EquipmentSlot.HEAD).equipSound(SoundEvents.ITEM_ARMOR_EQUIP_LEATHER).model(RegistryKey.of(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.of(MOD_ID,"aviator_helmet_off"))).damageOnHurt(false).build())
    ));
    public static final Item SNOW_BLAST_ITEM = registerItem(SNOW_BLAST.getId(), new SnowblastItem(
@@ -606,7 +608,8 @@ public class ArchetypeRegistry {
          new Item.Settings().maxCount(1).rarity(Rarity.EPIC).maxDamage(2048)
                .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.end_glider_description"))))
                .component(DataComponentTypes.GLIDER, Unit.INSTANCE)
-               .component(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT.with(DataComponentTypes.DYED_COLOR,true))
+               .component(DataComponentTypes.DYED_COLOR, new DyedColorComponent(0xaaaaaa))
+               .component(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT.with(DataComponentTypes.DYED_COLOR,true).with(DataComponentTypes.TRIM,true))
                .component(DataComponentTypes.EQUIPPABLE, EquippableComponent.builder(EquipmentSlot.CHEST).equipSound(SoundEvents.ITEM_ARMOR_EQUIP_ELYTRA).model(RegistryKey.of(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.of(MOD_ID,"end_glider"))).damageOnHurt(false).build())
    ));
    public static final Item ENDERFLAME_ITEM = registerItem(ENDERFLAME.getId(), new EndflameItem(

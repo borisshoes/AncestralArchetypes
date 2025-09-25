@@ -1,7 +1,6 @@
 package net.borisshoes.ancestralarchetypes.items;
 
 import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
-import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.borislib.utils.SoundUtils;
 import net.minecraft.component.DataComponentTypes;

@@ -1,6 +1,8 @@
 package net.borisshoes.ancestralarchetypes.callbacks;
 
-import net.borisshoes.ancestralarchetypes.*;
+import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
+import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
+import net.borisshoes.ancestralarchetypes.SubArchetype;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
 import net.borisshoes.ancestralarchetypes.misc.SpyglassRevealEvent;

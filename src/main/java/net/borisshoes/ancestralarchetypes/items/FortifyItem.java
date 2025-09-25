@@ -1,11 +1,8 @@
 package net.borisshoes.ancestralarchetypes.items;
 
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
-import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
-import net.borisshoes.ancestralarchetypes.ArchetypeParticles;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
-import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.borisshoes.borislib.utils.SoundUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;

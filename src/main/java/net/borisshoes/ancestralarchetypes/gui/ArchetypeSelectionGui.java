@@ -11,7 +11,6 @@ import net.borisshoes.ancestralarchetypes.SubArchetype;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.borislib.gui.GraphicalItem;
 import net.borisshoes.borislib.gui.GuiHelper;
-import net.borisshoes.borislib.gui.PagedGui;
 import net.borisshoes.borislib.utils.TextUtils;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandlerType;

@@ -2,18 +2,13 @@ package net.borisshoes.ancestralarchetypes.items;
 
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import io.github.ladysnake.pal.VanillaAbilities;
-import net.borisshoes.ancestralarchetypes.AncestralArchetypes;
-import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
-import net.borisshoes.borislib.BorisLib;
-import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.borisshoes.borislib.utils.SoundUtils;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.component.type.EquippableComponent;
 import net.minecraft.component.type.TooltipDisplayComponent;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
@@ -22,10 +17,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.equipment.trim.ArmorTrim;
 import net.minecraft.item.equipment.trim.ArmorTrimMaterial;
-import net.minecraft.item.equipment.trim.ArmorTrimMaterials;
 import net.minecraft.item.equipment.trim.ArmorTrimPattern;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -39,8 +31,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import xyz.nucleoid.packettweaker.PacketContext;
-
-import java.util.Optional;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;

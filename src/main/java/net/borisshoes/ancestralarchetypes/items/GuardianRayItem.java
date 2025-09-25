@@ -1,8 +1,8 @@
 package net.borisshoes.ancestralarchetypes.items;
 
+import net.borisshoes.ancestralarchetypes.ArchetypeParticles;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
-import net.borisshoes.ancestralarchetypes.ArchetypeParticles;
 import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.borisshoes.borislib.utils.SoundUtils;
 import net.minecraft.entity.Entity;

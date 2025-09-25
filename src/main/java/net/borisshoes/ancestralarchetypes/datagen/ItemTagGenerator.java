@@ -1,6 +1,5 @@
 package net.borisshoes.ancestralarchetypes.datagen;
 
-import net.borisshoes.ancestralarchetypes.AncestralArchetypes;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
@@ -8,7 +7,6 @@ import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.minecraft.data.tag.ProvidedTagBuilder;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.tag.ItemTags;
 

@@ -9,12 +9,11 @@ import net.minecraft.world.TeleportTarget;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static net.borisshoes.borislib.BorisLib.PLAYER_MOVEMENT_TRACKER;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
+import static net.borisshoes.borislib.BorisLib.PLAYER_MOVEMENT_TRACKER;
 
 @Mixin(ServerPlayerEntity.class)
 public class ServerPlayerEntityMixin {

@@ -3,7 +3,9 @@ package net.borisshoes.ancestralarchetypes.mixins;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ConsumableComponent;
+import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -11,6 +13,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.potion.Potions;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -84,6 +87,14 @@ public class ItemMixin {
          
          if(profile.getSubArchetype() == ArchetypeRegistry.PARROT && stack.isOf(Items.COOKIE)){
             playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON,100,2,true,true,true),playerEntity);
+         }
+         
+         if(profile.hasAbility(ArchetypeRegistry.HURT_BY_WATER) && stack.contains(DataComponentTypes.POTION_CONTENTS)){
+            PotionContentsComponent potions = stack.get(DataComponentTypes.POTION_CONTENTS);
+            if(potions.potion().isPresent() && potions.potion().get().equals(Potions.WATER)){
+               playerEntity.damage(playerEntity.getWorld(), world.getDamageSources().drown(), (float) CONFIG.getDouble(ArchetypeRegistry.HURT_BY_WATER_SWIM_DAMAGE));
+               world.playSound(null, playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), SoundEvents.ENTITY_GENERIC_BURN, playerEntity.getSoundCategory(), 0.4F, 2.0F + playerEntity.getRandom().nextFloat() * 0.4F);
+            }
          }
       }
    }

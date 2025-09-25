@@ -9,14 +9,15 @@ import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.gui.MountInventoryGui;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
-import net.borisshoes.arcananovum.ArcanaRegistry;
-import net.borisshoes.arcananovum.entities.NulConstructEntity;
 import net.borisshoes.borislib.gui.GraphicalItem;
 import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.borisshoes.borislib.utils.SoundUtils;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.*;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.Tameable;
 import net.minecraft.entity.damage.DamageRecord;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
@@ -24,12 +25,11 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.particle.DustColorTransitionParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.DamageTypeTags;
-import net.minecraft.registry.tag.FluidTags;
-import net.minecraft.screen.*;
+import net.minecraft.screen.HorseScreenHandler;
+import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -51,7 +51,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
-import static net.borisshoes.borislib.BorisLib.PLAYER_MOVEMENT_TRACKER;
 
 @Mixin(value = LivingEntity.class)
 public abstract class LivingEntityMixin {

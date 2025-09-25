@@ -23,7 +23,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import xyz.nucleoid.packettweaker.PacketContext;
 
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.FIREBALL_VOLLEY;
 
 public class FireballVolleyItem extends AbilityItem{

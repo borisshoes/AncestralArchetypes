@@ -2,8 +2,6 @@ package net.borisshoes.ancestralarchetypes.mixins;
 
 import net.borisshoes.ancestralarchetypes.AncestralArchetypes;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
-import net.borisshoes.arcananovum.ArcanaRegistry;
-import net.borisshoes.arcananovum.utils.ArcanaItemUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FarmlandBlock;
 import net.minecraft.entity.Entity;

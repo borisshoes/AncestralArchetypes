@@ -8,8 +8,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 
-import static net.borisshoes.borislib.BorisLib.PLAYER_MOVEMENT_TRACKER;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
+import static net.borisshoes.borislib.BorisLib.PLAYER_MOVEMENT_TRACKER;
 
 public class PlayerConnectionCallback {
    public static void onPlayerLeave(ServerPlayNetworkHandler handler, MinecraftServer server){

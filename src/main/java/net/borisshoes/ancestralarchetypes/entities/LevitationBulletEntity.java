@@ -1,7 +1,6 @@
 package net.borisshoes.ancestralarchetypes.entities;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Lists;
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -16,7 +15,6 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
-import net.minecraft.entity.projectile.ShulkerBulletEntity;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;

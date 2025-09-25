@@ -6,7 +6,6 @@ import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.misc.SpyglassRevealEvent;
 import net.borisshoes.borislib.BorisLib;
 import net.borisshoes.borislib.config.ConfigManager;
-import net.borisshoes.borislib.tracker.PlayerMovementEntry;
 import net.borisshoes.borislib.utils.ItemModDataHandler;
 import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.fabricmc.api.ClientModInitializer;
@@ -14,7 +13,6 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
@@ -28,7 +26,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.UUID;
 
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.CONFIG_SETTINGS;
