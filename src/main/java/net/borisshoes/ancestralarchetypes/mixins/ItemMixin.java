@@ -89,7 +89,7 @@ public class ItemMixin {
             playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON,100,2,true,true,true),playerEntity);
          }
          
-         if(profile.hasAbility(ArchetypeRegistry.HURT_BY_WATER) && stack.contains(DataComponentTypes.POTION_CONTENTS)){
+         if(profile.hasAbility(ArchetypeRegistry.HURT_BY_WATER) && stack.contains(DataComponentTypes.POTION_CONTENTS) && !playerEntity.hasStatusEffect(StatusEffects.WATER_BREATHING)){
             PotionContentsComponent potions = stack.get(DataComponentTypes.POTION_CONTENTS);
             if(potions.potion().isPresent() && potions.potion().get().equals(Potions.WATER)){
                playerEntity.damage(playerEntity.getWorld(), world.getDamageSources().drown(), (float) CONFIG.getDouble(ArchetypeRegistry.HURT_BY_WATER_SWIM_DAMAGE));

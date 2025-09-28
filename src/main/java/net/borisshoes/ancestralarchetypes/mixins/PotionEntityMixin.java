@@ -2,6 +2,7 @@ package net.borisshoes.ancestralarchetypes.mixins;
 
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.projectile.thrown.PotionEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -26,7 +27,7 @@ public class PotionEntityMixin {
          double d = entity.squaredDistanceTo(playerEntity);
          if(d < 16.0){
             IArchetypeProfile profile = profile(playerEntity);
-            if(profile.hasAbility(ArchetypeRegistry.HURT_BY_WATER)){
+            if(profile.hasAbility(ArchetypeRegistry.HURT_BY_WATER) && !playerEntity.hasStatusEffect(StatusEffects.WATER_BREATHING)){
                playerEntity.damage(playerEntity.getWorld(), world.getDamageSources().drown(), (float) CONFIG.getDouble(ArchetypeRegistry.HURT_BY_WATER_SWIM_DAMAGE));
                world.playSound(null, playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), SoundEvents.ENTITY_GENERIC_BURN, playerEntity.getSoundCategory(), 0.4F, 2.0F + playerEntity.getRandom().nextFloat() * 0.4F);
             }

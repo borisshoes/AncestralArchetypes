@@ -28,7 +28,7 @@
   "ancestralarchetypes.ability.description.hasty": "Gain a permanent haste increase.",
   "ancestralarchetypes.ability.description.health_based_sprint": "You can only sprint when above a certain health.",
   "ancestralarchetypes.ability.description.horse_spirit_mount": "You can summon an armored and nimble soulbound mount.",
-  "ancestralarchetypes.ability.description.hurt_by_water": "You are hurt by touching water.",
+  "ancestralarchetypes.ability.description.hurt_by_water": "You are hurt by touching water without Water Breathing.",
   "ancestralarchetypes.ability.description.impale_vulnerable": "Take extra damage from the Impaling enchantment.",
   "ancestralarchetypes.ability.description.increased_knockback": "You take increased knockback.",
   "ancestralarchetypes.ability.description.insatiable": "Lose hunger quickly, and take increased starving damage.",
