@@ -54,7 +54,8 @@ dependencies {
 
     include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.3.6")))
 
-    modImplementation include("com.github.borisshoes:borislib:${project.borislib_version}")
+    //modImplementation include("maven.modrinth:boris-lib:${project.borislib_version}")
+    modImplementation include("com.github.borisshoes:borislib:-SNAPSHOT")
 
     modImplementation include("eu.pb4:sgui:${project.sgui_version}")
 
@@ -71,7 +72,7 @@ dependencies {
 
     modImplementation include("io.github.ladysnake:PlayerAbilityLib:${pal_version}")
 
-    modImplementation("com.github.borisshoes:ArcanaNovum:${project.arcana_version}")
+    modImplementation("maven.modrinth:arcana-novum:${project.arcana_version}")
 }
 
 processResources {
