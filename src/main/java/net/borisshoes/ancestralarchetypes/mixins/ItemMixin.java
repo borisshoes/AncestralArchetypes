@@ -2,7 +2,13 @@ package net.borisshoes.ancestralarchetypes.mixins;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
+import net.borisshoes.ancestralarchetypes.callbacks.WaxShieldCallback;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
+import net.borisshoes.arcananovum.augments.ArcanaAugments;
+import net.borisshoes.arcananovum.callbacks.ShieldTimerCallback;
+import net.borisshoes.borislib.BorisLib;
+import net.borisshoes.borislib.utils.MinecraftUtils;
+import net.borisshoes.borislib.utils.SoundUtils;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ConsumableComponent;
 import net.minecraft.component.type.PotionContentsComponent;
@@ -17,6 +23,7 @@ import net.minecraft.potion.Potions;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -27,8 +34,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.HashMap;
 
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 
 @Mixin(Item.class)
 public class ItemMixin {
@@ -83,6 +89,17 @@ public class ItemMixin {
          
          if(profile.hasAbility(ArchetypeRegistry.FUNGUS_SPEED_BOOST) && stack.isOf(Items.WARPED_FUNGUS)){
             profile.fungusBoost();
+         }
+         
+         if(profile.hasAbility(ArchetypeRegistry.WAX_SHIELD) && stack.isOf(Items.HONEYCOMB)){
+            double maxAbs = CONFIG.getDouble(ArchetypeRegistry.WAX_SHIELD_MAX_HEALTH);
+            float curAbs = playerEntity.getAbsorptionAmount();
+            float addedAbs = (float) Math.min(maxAbs,CONFIG.getDouble(ArchetypeRegistry.WAX_SHIELD_HEALTH));
+            int duration = CONFIG.getInt(ArchetypeRegistry.WAX_SHIELD_DURATION);
+            BorisLib.addTickTimerCallback(new WaxShieldCallback(duration,playerEntity,addedAbs));
+            SoundUtils.playSongToPlayer(playerEntity, SoundEvents.ITEM_AXE_WAX_OFF, 0.5f, 1.8f);
+            MinecraftUtils.addMaxAbsorption(playerEntity, Identifier.of(MOD_ID,ArchetypeRegistry.WAX_SHIELD.getId()),addedAbs);
+            playerEntity.setAbsorptionAmount((curAbs + addedAbs));
          }
          
          if(profile.getSubArchetype() == ArchetypeRegistry.PARROT && stack.isOf(Items.COOKIE)){

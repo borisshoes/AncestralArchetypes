@@ -7,10 +7,14 @@ import eu.pb4.polymer.core.api.item.PolymerItemUtils;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import io.github.ladysnake.pal.AbilitySource;
 import io.github.ladysnake.pal.Pal;
+import net.borisshoes.ancestralarchetypes.callbacks.WaxShieldLoginCallback;
 import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.entities.LevitationBulletEntity;
 import net.borisshoes.ancestralarchetypes.entities.SnowblastEntity;
 import net.borisshoes.ancestralarchetypes.items.*;
+import net.borisshoes.arcananovum.callbacks.ShieldLoginCallback;
+import net.borisshoes.borislib.BorisLib;
+import net.borisshoes.borislib.callbacks.LoginCallback;
 import net.borisshoes.borislib.config.ConfigSetting;
 import net.borisshoes.borislib.config.IConfigSetting;
 import net.borisshoes.borislib.config.values.BooleanConfigValue;
@@ -212,6 +216,12 @@ public class ArchetypeRegistry {
    
    public static final IConfigSetting<?> FUNGUS_SPEED_BOOST_CONSUME_DURATION = registerConfigSetting(new ConfigSetting<>(
          new IntConfigValue("fungusSpeedBoostConsumeDuration", 15, new IntConfigValue.IntLimits(1))));
+   
+   public static final IConfigSetting<?> WAX_SHIELD_DURATION = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("waxShieldDuration", 300, new IntConfigValue.IntLimits(1))));
+   
+   public static final IConfigSetting<?> WAX_SHIELD_CONSUME_DURATION = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("waxShieldConsumeDuration", 20, new IntConfigValue.IntLimits(1))));
 
    public static final IConfigSetting<?> JUMPY_JUMP_BOOST = registerConfigSetting(new ConfigSetting<>(
          new DoubleConfigValue("jumpyJumpBoost", 0.35, new DoubleConfigValue.DoubleLimits(-100,100))));
@@ -402,6 +412,12 @@ public class ArchetypeRegistry {
    public static final IConfigSetting<?> FUNGUS_SPEED_BOOST_MULTIPLIER = registerConfigSetting(new ConfigSetting<>(
          new DoubleConfigValue("fungusSpeedBoostMultiplier", 0.5, new DoubleConfigValue.DoubleLimits(0.0))));
    
+   public static final IConfigSetting<?> WAX_SHIELD_HEALTH = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("waxShieldHealth", 2.0, new DoubleConfigValue.DoubleLimits(0.0))));
+   
+   public static final IConfigSetting<?> WAX_SHIELD_MAX_HEALTH = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("waxShieldMaxHealth", 20.0, new DoubleConfigValue.DoubleLimits(0.0))));
+   
    public static final ItemStack backpackDisplay;
    static {
       backpackDisplay = new ItemStack(Items.MAGENTA_BUNDLE);
@@ -481,6 +497,7 @@ public class ArchetypeRegistry {
    public static final ArchetypeAbility BLAZING_STRIKE = register(new ArchetypeAbility.ArchetypeAbilityBuilder("blazing_strike").setReliantConfigs(BLAZING_STRIKE_DURATION).setDisplayStack(new ItemStack(Items.BLAZE_POWDER)).build());
    public static final ArchetypeAbility LAVA_WALKER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("lava_walker").setReliantConfigs(LAVA_WALKER_SPEED_MULTIPLIER).setDisplayStack(new ItemStack(Items.NETHERITE_BOOTS)).build());
    public static final ArchetypeAbility FUNGUS_SPEED_BOOST = register(new ArchetypeAbility.ArchetypeAbilityBuilder("fungus_speed_boost").setReliantConfigs(FUNGUS_SPEED_BOOST_DURATION,FUNGUS_SPEED_BOOST_CONSUME_DURATION,FUNGUS_SPEED_BOOST_MULTIPLIER).setDisplayStack(new ItemStack(Items.WARPED_FUNGUS)).build());
+   public static final ArchetypeAbility WAX_SHIELD = register(new ArchetypeAbility.ArchetypeAbilityBuilder("wax_shield").setReliantConfigs(WAX_SHIELD_HEALTH,WAX_SHIELD_MAX_HEALTH,WAX_SHIELD_CONSUME_DURATION,WAX_SHIELD_DURATION).setDisplayStack(new ItemStack(Items.HONEYCOMB)).build());
    
    public static final Archetype AQUARIAN = register(new Archetype("aquarian", new ItemStack(Items.TROPICAL_FISH), 0x0f89f0, GOOD_SWIMMER, DRIES_OUT, IMPALE_VULNERABLE, SLIPPERY));
    public static final Archetype CENTAUR = register(new Archetype("centaur", new ItemStack(Items.SADDLE), 0xbd8918, STUNNED_BY_DAMAGE, MOUNTED));
@@ -502,7 +519,7 @@ public class ArchetypeRegistry {
    public static final SubArchetype ENDER_DRAGON = register(new SubArchetype("ender_dragon", EntityType.ENDER_DRAGON, new ItemStack(Items.DRAGON_EGG), 0x762f9f, ENDERIAN, MASSIVE_SIZED, ENDER_GLIDER, ENDERFLAME, REDUCED_KNOCKBACK, LONG_ARMS, RIDEABLE));
    public static final SubArchetype CAT = register(new SubArchetype("cat", EntityType.CAT, new ItemStack(Items.PHANTOM_MEMBRANE), 0xf1ce8a, FELID, CAT_SCARE, NO_FALL_DAMAGE, SNEAKY));
    public static final SubArchetype OCELOT = register(new SubArchetype("ocelot", EntityType.OCELOT, new ItemStack(Items.CHICKEN), 0xc5b900, FELID, SNEAK_ATTACK));
-   public static final SubArchetype COPPER_GOLEM = register(new SubArchetype("copper_golem", null, new ItemStack(Items.COPPER_BLOCK), 0xbc814d, GOLEM, COPPER_EATER, HALF_SIZED, LIGHTWEIGHT, SOFT_HITTER, RESILIENT_JOINTS));
+   public static final SubArchetype COPPER_GOLEM = register(new SubArchetype("copper_golem", null, new ItemStack(Items.COPPER_BLOCK), 0xbc814d, GOLEM, COPPER_EATER, HALF_SIZED, LIGHTWEIGHT, SOFT_HITTER, RESILIENT_JOINTS, WAX_SHIELD));
    public static final SubArchetype TUFF_GOLEM = register(new SubArchetype("tuff_golem", null, new ItemStack(Items.CHISELED_TUFF_BRICKS), 0x648076, GOLEM, TUFF_EATER, HASTY));
    public static final SubArchetype IRON_GOLEM = register(new SubArchetype("iron_golem", EntityType.IRON_GOLEM, new ItemStack(Items.IRON_BLOCK), 0xbebebe, GOLEM, IRON_EATER, GIANT_SIZED, REDUCED_KNOCKBACK, LONG_ARMS, HARD_HITTER));
    public static final SubArchetype BLAZE = register(new SubArchetype("blaze", EntityType.BLAZE, new ItemStack(Items.BLAZE_ROD), 0xe88a0f, INFERNAL, FIREBALL_VOLLEY, SLOW_FALLER, BLAZING_STRIKE));
@@ -523,6 +540,8 @@ public class ArchetypeRegistry {
    public static final RegistryKey<ArmorTrimPattern> HELMET_TRIM_PATTERN_OFF = RegistryKey.of(RegistryKeys.TRIM_PATTERN,Identifier.of(MOD_ID,"aviator_helmet_off"));
    public static final RegistryKey<ArmorTrimPattern> WING_GLIDER_TRIM_PATTERN = RegistryKey.of(RegistryKeys.TRIM_PATTERN,Identifier.of(MOD_ID,"wing_glider"));
    public static final RegistryKey<ArmorTrimPattern> END_GLIDER_TRIM_PATTERN = RegistryKey.of(RegistryKeys.TRIM_PATTERN,Identifier.of(MOD_ID,"end_glider"));
+   
+   public static final LoginCallback WAX_SHIELD_LOGIN = registerCallback(new WaxShieldLoginCallback());
    
    // PlayerAbilityLib Identifiers
    public static final AbilitySource SLOW_HOVER_ABILITY = Pal.getAbilitySource(Identifier.of(MOD_ID, SLOW_HOVER.getId()), AbilitySource.RENEWABLE);
@@ -758,6 +777,10 @@ public class ArchetypeRegistry {
       return entityType;
    }
    
+   private static LoginCallback registerCallback(LoginCallback callback){
+      return Registry.register(BorisLib.LOGIN_CALLBACKS,callback.getId(),callback);
+   }
+   
    public static void initialize(){
       PolymerResourcePackUtils.addModAssets(MOD_ID);
       
@@ -777,6 +800,8 @@ public class ArchetypeRegistry {
                }else if(profile.hasAbility(MAGMA_TOTEM) && itemStack.isIn(MAGMA_CUBE_GROW_ITEMS)){
                   return true;
                }else if(profile.hasAbility(FUNGUS_SPEED_BOOST) && itemStack.isOf(Items.WARPED_FUNGUS)){
+                  return true;
+               }else if(profile.hasAbility(WAX_SHIELD) && itemStack.isOf(Items.HONEYCOMB)){
                   return true;
                }
                return false;
@@ -837,6 +862,13 @@ public class ArchetypeRegistry {
                   client.set(DataComponentTypes.LORE,new LoreComponent(currentLore,currentLore));
                }
                
+               if(profile.hasAbility(WAX_SHIELD) && original.isOf(Items.HONEYCOMB)){
+                  LoreComponent lore = client.getOrDefault(DataComponentTypes.LORE,LoreComponent.DEFAULT);
+                  List<Text> currentLore = new ArrayList<>(lore.styledLines());
+                  currentLore.add(waxLoreLine());
+                  client.set(DataComponentTypes.LORE,new LoreComponent(currentLore,currentLore));
+               }
+               
                return client;
             }
       );
@@ -882,6 +914,24 @@ public class ArchetypeRegistry {
             Text.literal(df.format(eatTime/20.0)).formatted(Formatting.GOLD),
             Text.translatable("text.ancestralarchetypes.seconds").formatted(Formatting.GOLD),
             Text.literal(df.format(boost)).formatted(Formatting.GOLD),
+            Text.literal(df.format(boostDuration/20.0)).formatted(Formatting.GOLD),
+            Text.translatable("text.ancestralarchetypes.seconds").formatted(Formatting.GOLD)
+      ).formatted(Formatting.DARK_PURPLE));
+   }
+   
+   private static Text waxLoreLine(){
+      DecimalFormat df = new DecimalFormat("0.###");
+      int eatTime = CONFIG.getInt(ArchetypeRegistry.WAX_SHIELD_CONSUME_DURATION);
+      double boost = CONFIG.getDouble(ArchetypeRegistry.WAX_SHIELD_HEALTH);
+      double boostMax = CONFIG.getDouble(ArchetypeRegistry.WAX_SHIELD_MAX_HEALTH);
+      int boostDuration = CONFIG.getInt(ArchetypeRegistry.WAX_SHIELD_DURATION);
+      return TextUtils.removeItalics(Text.translatable("text.ancestralarchetypes.wax_consume",
+            Text.literal(df.format(eatTime/20.0)).formatted(Formatting.GOLD),
+            Text.translatable("text.ancestralarchetypes.seconds").formatted(Formatting.GOLD),
+            Text.literal(df.format(boost/2.0)).formatted(Formatting.RED),
+            Text.translatable("text.ancestralarchetypes.hearts").formatted(Formatting.RED),
+            Text.literal(df.format(boostMax/2.0)).formatted(Formatting.RED),
+            Text.translatable("text.ancestralarchetypes.hearts").formatted(Formatting.RED),
             Text.literal(df.format(boostDuration/20.0)).formatted(Formatting.GOLD),
             Text.translatable("text.ancestralarchetypes.seconds").formatted(Formatting.GOLD)
       ).formatted(Formatting.DARK_PURPLE));

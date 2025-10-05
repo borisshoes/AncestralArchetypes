@@ -465,7 +465,8 @@ public class TickCallback {
             || ArchetypeRegistry.IRON_FOODS.containsKey(stack.getItem())
             || stack.isIn(ArchetypeRegistry.MAGMA_CUBE_GROW_ITEMS)
             || stack.isIn(ArchetypeRegistry.SLIME_GROW_ITEMS)
-            || stack.isOf(Items.WARPED_FUNGUS);
+            || stack.isOf(Items.WARPED_FUNGUS)
+            || stack.isOf(Items.HONEYCOMB);
       float durationMod = 1.0f;
       
       if(profile.hasAbility(ArchetypeRegistry.TUFF_EATER) && ArchetypeRegistry.TUFF_FOODS.containsKey(stack.getItem())){
@@ -489,6 +490,7 @@ public class TickCallback {
             && ((profile.hasAbility(ArchetypeRegistry.SLIME_TOTEM) && stack.isIn(ArchetypeRegistry.SLIME_GROW_ITEMS))
             || (profile.hasAbility(ArchetypeRegistry.MAGMA_TOTEM) && stack.isIn(ArchetypeRegistry.MAGMA_CUBE_GROW_ITEMS)));
       boolean shouldHaveFungusEatComponent = inHand && profile.hasAbility(ArchetypeRegistry.FUNGUS_SPEED_BOOST) && stack.isOf(Items.WARPED_FUNGUS);
+      boolean shouldHaveWaxEatComponent = inHand && profile.hasAbility(ArchetypeRegistry.WAX_SHIELD) && stack.isOf(Items.HONEYCOMB) && player.getAbsorptionAmount() < CONFIG.getDouble(ArchetypeRegistry.WAX_SHIELD_MAX_HEALTH);
       if(shouldHaveGolemEatComponent){ // Add component
          if(!stack.contains(DataComponentTypes.CONSUMABLE)){
             Pair<Float,Integer> pair = map.get(stack.getItem());
@@ -503,6 +505,11 @@ public class TickCallback {
       }else if(shouldHaveFungusEatComponent){
          if(!stack.contains(DataComponentTypes.CONSUMABLE)){
             ConsumableComponent comp = ConsumableComponent.builder().sound(Registries.SOUND_EVENT.getEntry(SoundEvents.ENTITY_STRIDER_EAT)).useAction(UseAction.EAT).consumeSeconds(CONFIG.getInt(ArchetypeRegistry.FUNGUS_SPEED_BOOST_CONSUME_DURATION)/20.0f).consumeParticles(true).build();
+            stack.set(DataComponentTypes.CONSUMABLE,comp);
+         }
+      }else if(shouldHaveWaxEatComponent){
+         if(!stack.contains(DataComponentTypes.CONSUMABLE)){
+            ConsumableComponent comp = ConsumableComponent.builder().sound(Registries.SOUND_EVENT.getEntry(SoundEvents.ITEM_HONEYCOMB_WAX_ON)).useAction(UseAction.EAT).consumeSeconds(CONFIG.getInt(ArchetypeRegistry.WAX_SHIELD_CONSUME_DURATION)/20.0f).consumeParticles(true).build();
             stack.set(DataComponentTypes.CONSUMABLE,comp);
          }
       }else if(unusualFood && stack.contains(DataComponentTypes.CONSUMABLE)){ // Remove component

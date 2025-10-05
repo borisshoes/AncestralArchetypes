@@ -160,6 +160,10 @@ The following commands can be used to adjust configurable settings in the Ancest
 * `/archetypes config tuffFoodHealthModifier` The modifier applied to the health regained by Tuff Eater.
 * `/archetypes config venomousPoisonDuration` The duration of poison applied by Venomous, in ticks.
 * `/archetypes config venomousPoisonStrength` The effect level of poison applied by Venomous.
+* `/archetypes config waxShieldConsumeDuration` The duration of consumption for a Wax Shield Honeycomb in ticks.
+* `/archetypes config waxShieldDuration` The duration of each Wax Shield in ticks.
+* `/archetypes config waxShieldHealth` The amount of absorption HP granted from eating a Honeycomb with Wax Shield.
+* `/archetypes config waxShieldMaxHealth` The maximum amount of absorption HP granted from eating a Honeycomb with Wax Shield.
 * `/archetypes config weavingWebCooldown` The cooldown between uses of Weaving's Webbing, in ticks.
 * `/archetypes config weavingWebSpeedBoost` The speed multiplier for those with Weaving in a cobweb.
 * `/archetypes config windChargeCooldown` The cooldown duration of the Breeze's volley ability.

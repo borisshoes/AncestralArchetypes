@@ -337,7 +337,7 @@ public abstract class LivingEntityMixin {
       if(!CONFIG.getBoolean(ArchetypeRegistry.IGNORED_BY_MOB_TYPE)) return original;
       if(livingEntity instanceof ServerPlayerEntity player){
          IArchetypeProfile profile = profile(player);
-         if(profile.getSubArchetype() != null && profile.getSubArchetype().getEntityType().equals(attacker.getType())){
+         if(profile.getSubArchetype() != null && profile.getSubArchetype().getEntityType() != null && profile.getSubArchetype().getEntityType().equals(attacker.getType())){
             return original * 0.01;
          }
       }
@@ -350,7 +350,7 @@ public abstract class LivingEntityMixin {
       if(!CONFIG.getBoolean(ArchetypeRegistry.IGNORED_BY_MOB_TYPE)) return original;
       if(target instanceof ServerPlayerEntity player){
          IArchetypeProfile profile = profile(player);
-         if(profile.getSubArchetype() != null && profile.getSubArchetype().getEntityType().equals(livingEntity.getType())){
+         if(profile.getSubArchetype() != null && profile.getSubArchetype().getEntityType() != null && profile.getSubArchetype().getEntityType().equals(livingEntity.getType())){
             return false;
          }
       }
