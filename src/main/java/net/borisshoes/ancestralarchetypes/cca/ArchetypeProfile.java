@@ -431,7 +431,7 @@ public class ArchetypeProfile implements IArchetypeProfile {
       
       if(this.fungusBoostTime > 0){
          this.fungusBoostTime--;
-         ((ServerWorld)player.getWorld()).spawnParticles(new DustParticleEffect(0x20c7b1,0.75f),player.getPos().getX(),player.getPos().getY()+player.getHeight()/2.0,player.getPos().getZ(),1,player.getWidth()*0.65,player.getHeight()/2.0,player.getWidth()*0.65,1);
+         ((ServerWorld)player.getEntityWorld()).spawnParticles(new DustParticleEffect(0x20c7b1,0.75f),player.getEntityPos().getX(),player.getEntityPos().getY()+player.getHeight()/2.0,player.getEntityPos().getZ(),1,player.getWidth()*0.65,player.getHeight()/2.0,player.getWidth()*0.65,1);
       }
       if(this.giveItemsCooldown > 0) this.giveItemsCooldown--;
       
@@ -447,7 +447,7 @@ public class ArchetypeProfile implements IArchetypeProfile {
          this.fortifyTime--;
          if((int)this.fortifyTime % 2 == 0){
             double height = player.getHeight()/2*(Math.sin(Math.PI*2.0/60.0*fortifyTime)+1);
-            ParticleEffectUtils.circle((ServerWorld) player.getWorld(),null,player.getPos().add(0,height,0),ParticleTypes.END_ROD,player.getWidth(),(int)(player.getWidth()*12),1,0,0);
+            ParticleEffectUtils.circle((ServerWorld) player.getEntityWorld(),null,player.getEntityPos().add(0,height,0),ParticleTypes.END_ROD,player.getWidth(),(int)(player.getWidth()*12),1,0,0);
          }
       }
    }
@@ -490,20 +490,20 @@ public class ArchetypeProfile implements IArchetypeProfile {
       if(hovering){
          if(!wasHovering){
             this.hoverActive = true;
-            SoundUtils.playSound(player.getWorld(),player.getBlockPos(), SoundEvents.ENTITY_ENDER_DRAGON_FLAP, SoundCategory.PLAYERS,0.5f,1.25f);
-            SoundUtils.playSound(player.getWorld(),player.getBlockPos(), SoundEvents.ENTITY_HAPPY_GHAST_HARNESS_GOGGLES_DOWN, SoundCategory.PLAYERS,0.5f,0.8f);
+            SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(), SoundEvents.ENTITY_ENDER_DRAGON_FLAP, SoundCategory.PLAYERS,0.5f,1.25f);
+            SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(), SoundEvents.ENTITY_HAPPY_GHAST_HARNESS_GOGGLES_DOWN, SoundCategory.PLAYERS,0.5f,0.8f);
             this.savedFlySpeed = player.getAbilities().getFlySpeed();
             player.getAbilities().setFlySpeed((float) (CONFIG.getDouble(ArchetypeRegistry.SLOW_HOVER_FLIGHT_SPEED)));
             ((ServerPlayerEntity)player).networkHandler.sendPacket(new PlayerAbilitiesS2CPacket(player.getAbilities()));
          }
          this.hoverTime--;
-         if(player.getRandom().nextDouble() < 0.4) ((ServerPlayerEntity)player).getWorld().spawnParticles(ParticleTypes.POOF,player.getX(),player.getY()-0.5,player.getZ(),1,0.2,0.2,0.2,0.01);
+         if(player.getRandom().nextDouble() < 0.4) ((ServerPlayerEntity)player).getEntityWorld().spawnParticles(ParticleTypes.POOF,player.getX(),player.getY()-0.5,player.getZ(),1,0.2,0.2,0.2,0.01);
       }else{
          if(wasHovering){
             this.hoverActive = false;
             setAbilityCooldown(ArchetypeRegistry.SLOW_HOVER,CONFIG.getInt(ArchetypeRegistry.SLOW_HOVER_FLIGHT_COOLDOWN));
-            SoundUtils.playSound(player.getWorld(),player.getBlockPos(), SoundEvents.ENTITY_ENDER_DRAGON_FLAP, SoundCategory.PLAYERS,0.5f,0.85f);
-            SoundUtils.playSound(player.getWorld(),player.getBlockPos(), SoundEvents.ENTITY_HAPPY_GHAST_HARNESS_GOGGLES_UP, SoundCategory.PLAYERS,0.5f,0.8f);
+            SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(), SoundEvents.ENTITY_ENDER_DRAGON_FLAP, SoundCategory.PLAYERS,0.5f,0.85f);
+            SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(), SoundEvents.ENTITY_HAPPY_GHAST_HARNESS_GOGGLES_UP, SoundCategory.PLAYERS,0.5f,0.8f);
             player.getAbilities().setFlySpeed(this.savedFlySpeed);
             ((ServerPlayerEntity)player).networkHandler.sendPacket(new PlayerAbilitiesS2CPacket(player.getAbilities()));
          }

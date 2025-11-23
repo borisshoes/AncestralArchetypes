@@ -91,19 +91,6 @@ public class AncestralArchetypes implements ModInitializer, ClientModInitializer
       return null;
    }
    
-   public static IArchetypeProfile getPlayerOrOffline(UUID playerId){
-      MinecraftServer server = BorisLib.SERVER;
-      ServerPlayerEntity player = server.getPlayerManager().getPlayer(playerId);
-      if(player != null){
-         return PLAYER_DATA.get(player);
-      }else{
-         GameProfile profile = server.getUserCache().getByUuid(playerId).orElse(null);
-         if(profile == null) return null;
-         player = MinecraftUtils.getRequestedPlayer(server,profile);
-         return PLAYER_DATA.get(player);
-      }
-   }
-   
    /**
     * Uses built in logger to log a message
     * @param level 0 - Info | 1 - Warn | 2 - Error | 3 - Fatal | Else - Debug

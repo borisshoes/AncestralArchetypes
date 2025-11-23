@@ -13,19 +13,17 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 
-import static net.borisshoes.arcananovum.ArcanaNovum.MOD_ID;
-
 public class WaxShieldLoginCallback extends LoginCallback {
    
    private float hearts;
    
    public WaxShieldLoginCallback(){
-      super(Identifier.of(MOD_ID, ArchetypeRegistry.WAX_SHIELD.getId()));
+      super(Identifier.of(AncestralArchetypes.MOD_ID, ArchetypeRegistry.WAX_SHIELD.getId()));
    }
    
    public WaxShieldLoginCallback(ServerPlayerEntity player, float hearts){
       this();
-      this.world = player.getServer().getWorld(ServerWorld.OVERWORLD);
+      this.world = player.getEntityWorld().getServer().getWorld(ServerWorld.OVERWORLD);
       this.playerUUID = player.getUuidAsString();
       this.hearts = hearts;
    }

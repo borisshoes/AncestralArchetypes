@@ -23,11 +23,11 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 public class LeveledCauldronBlockMixin {
    
    @Inject(method = "onEntityCollision", at = @At("HEAD"))
-   private void archetypes$cauldronWaterDamage(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler, CallbackInfo ci){
-      if(entity instanceof ServerPlayerEntity playerEntity && playerEntity.getServer().getTicks() % 20 == 0){
+   private void archetypes$cauldronWaterDamage(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler, boolean bl, CallbackInfo ci){
+      if(entity instanceof ServerPlayerEntity playerEntity && playerEntity.getEntityWorld().getServer().getTicks() % 20 == 0){
          IArchetypeProfile profile = profile(playerEntity);
          if(profile.hasAbility(ArchetypeRegistry.HURT_BY_WATER) && !playerEntity.hasStatusEffect(StatusEffects.WATER_BREATHING)){
-            playerEntity.damage(playerEntity.getWorld(), world.getDamageSources().drown(), (float) CONFIG.getDouble(ArchetypeRegistry.HURT_BY_WATER_SWIM_DAMAGE));
+            playerEntity.damage(playerEntity.getEntityWorld(), world.getDamageSources().drown(), (float) CONFIG.getDouble(ArchetypeRegistry.HURT_BY_WATER_SWIM_DAMAGE));
             world.playSound(null, playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), SoundEvents.ENTITY_GENERIC_BURN, playerEntity.getSoundCategory(), 0.4F, 2.0F + playerEntity.getRandom().nextFloat() * 0.4F);
          }
       }

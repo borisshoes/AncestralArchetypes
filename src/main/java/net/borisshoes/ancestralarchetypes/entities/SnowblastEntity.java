@@ -63,14 +63,14 @@ public class SnowblastEntity extends SnowballEntity implements PolymerEntity {
       int lvl = CONFIG.getInt(ArchetypeRegistry.SNOW_BLAST_SLOWNESS_STRENGTH);
       Box box = this.getBoundingBox().expand(range*2);
       
-      List<LivingEntity> living = getWorld().getNonSpectatingEntities(LivingEntity.class,box)
+      List<LivingEntity> living = getEntityWorld().getNonSpectatingEntities(LivingEntity.class,box)
             .stream().filter(e -> e.distanceTo(this) <= range).toList();
       
-      SoundUtils.playSound(getWorld(), BlockPos.ofFloored(hitResult.getPos()), SoundEvents.ENTITY_PLAYER_HURT_FREEZE, SoundCategory.PLAYERS,2.0f,0.5f);
-      SoundUtils.playSound(getWorld(), BlockPos.ofFloored(hitResult.getPos()), SoundEvents.ENTITY_ZOMBIE_VILLAGER_CURE, SoundCategory.PLAYERS,0.5f,0.5f);
+      SoundUtils.playSound(getEntityWorld(), BlockPos.ofFloored(hitResult.getPos()), SoundEvents.ENTITY_PLAYER_HURT_FREEZE, SoundCategory.PLAYERS,2.0f,0.5f);
+      SoundUtils.playSound(getEntityWorld(), BlockPos.ofFloored(hitResult.getPos()), SoundEvents.ENTITY_ZOMBIE_VILLAGER_CURE, SoundCategory.PLAYERS,0.5f,0.5f);
       
       
-      if(getWorld() instanceof ServerWorld world){
+      if(getEntityWorld() instanceof ServerWorld world){
          for(BlockPos blockPos : BlockPos.iterateOutwards(BlockPos.ofFloored(hitResult.getPos()), (int)range + 1, (int)range + 1, (int)range + 1)){
             if(!blockPos.isWithinDistance(hitResult.getPos(),range)) continue;
             if(world.getBlockState(blockPos).isOf(Blocks.WATER)){

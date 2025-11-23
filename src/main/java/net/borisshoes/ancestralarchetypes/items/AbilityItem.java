@@ -48,10 +48,10 @@ public abstract class AbilityItem extends Item implements PolymerItem {
             
             int cooldown = profile.getAbilityCooldown(this.ability);
             if(cooldown > 0){
-               if(!player.getItemCooldownManager().isCoolingDown(stack) || player.getServer().getTicks() % 20 == 0){
+               if(!player.getItemCooldownManager().isCoolingDown(stack) || player.getEntityWorld().getServer().getTicks() % 20 == 0){
                   player.getItemCooldownManager().set(stack,100000000);
                }
-               if((slot == EquipmentSlot.MAINHAND || slot == EquipmentSlot.OFFHAND) && player.getServer().getTicks() % 2 == 0){
+               if((slot == EquipmentSlot.MAINHAND || slot == EquipmentSlot.OFFHAND) && player.getEntityWorld().getServer().getTicks() % 2 == 0){
                   StringBuilder builder = new StringBuilder(textCharacter+" ");
                   int value = (int) ((1.0-profile.getAbilityCooldownPercent(this.ability)) * 100);
                   char[] unicodeChars = {'▁', '▂', '▃', '▅', '▆', '▇', '▌'};

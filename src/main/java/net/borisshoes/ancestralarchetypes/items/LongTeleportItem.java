@@ -69,7 +69,7 @@ public class LongTeleportItem extends AbilityItem{
          return ActionResult.PASS;
       }
       
-      if(teleport(player.getWorld(),player)){
+      if(teleport(player.getEntityWorld(),player)){
          profile(player).setAbilityCooldown(this.ability, CONFIG.getInt(ArchetypeRegistry.RANDOM_TELEPORT_COOLDOWN));
          player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, player.getStackInHand(hand)));
          return ActionResult.SUCCESS;
@@ -93,7 +93,7 @@ public class LongTeleportItem extends AbilityItem{
       Vec3d direction = user.getRotationVector().normalize();
       double maxRange = CONFIG.getDouble(ArchetypeRegistry.LONG_TELEPORT_DISTANCE);
       double leniencyRange = 1.5;
-      Vec3d origin = user.getPos();
+      Vec3d origin = user.getEntityPos();
       double distStep = 0.5;
       double radialStep = 0.5;
       double dropStep = 0.25;
@@ -132,7 +132,7 @@ public class LongTeleportItem extends AbilityItem{
    }
    
    private boolean hasGroundSupport(World world, Entity entity, Vec3d targetPos){
-      Vec3d delta = targetPos.subtract(entity.getPos());
+      Vec3d delta = targetPos.subtract(entity.getEntityPos());
       Box targetBox = entity.getBoundingBox().offset(delta);
       double eps = 1.0 / 16.0;
       Box floorProbe = new Box(targetBox.minX, targetBox.minY - eps, targetBox.minZ, targetBox.maxX, targetBox.minY, targetBox.maxZ);
@@ -140,7 +140,7 @@ public class LongTeleportItem extends AbilityItem{
    }
    
    private boolean isSpaceClearFor(Entity entity, World world, Vec3d targetPos) {
-      Vec3d delta = targetPos.subtract(entity.getPos());
+      Vec3d delta = targetPos.subtract(entity.getEntityPos());
       Box targetBox = entity.getBoundingBox().offset(delta);
       return world.isSpaceEmpty(entity, targetBox, true);
    }

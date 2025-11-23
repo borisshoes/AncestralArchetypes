@@ -57,7 +57,7 @@ public class WindChargeVolleyItem extends AbilityItem{
       shootWindCharge(player,7.0f,0.75f);
       shootWindCharge(player,7.0f,0.75f);
       profile(player).setAbilityCooldown(this.ability, CONFIG.getInt(ArchetypeRegistry.WIND_CHARGE_COOLDOWN));
-      SoundUtils.playSound(player.getWorld(),player.getBlockPos(),SoundEvents.ENTITY_BREEZE_SHOOT, SoundCategory.PLAYERS,1f, 0.4f / (world.getRandom().nextFloat() * 0.4f + 0.8f));
+      SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(),SoundEvents.ENTITY_BREEZE_SHOOT, SoundCategory.PLAYERS,1f, 0.4f / (world.getRandom().nextFloat() * 0.4f + 0.8f));
       player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, player.getStackInHand(hand)));
       return ActionResult.SUCCESS;
    }
@@ -79,9 +79,9 @@ public class WindChargeVolleyItem extends AbilityItem{
             .add(randomOrthogonal.crossProduct(player.getRotationVector()).multiply(Math.sin(randomTheta) * Math.sin(randomAngle)))
             .normalize();
       
-      ServerWorld world = player.getWorld();
-      WindChargeEntity windCharge = new WindChargeEntity(player, world, player.getPos().getX(), player.getEyePos().getY(), player.getPos().getZ());
+      ServerWorld world = player.getEntityWorld();
+      WindChargeEntity windCharge = new WindChargeEntity(player, world, player.getEntityPos().getX(), player.getEyePos().getY(), player.getEntityPos().getZ());
       windCharge.setVelocity(rotatedVector.multiply(power));
-      player.getWorld().spawnEntity(windCharge);
+      player.getEntityWorld().spawnEntity(windCharge);
    }
 }

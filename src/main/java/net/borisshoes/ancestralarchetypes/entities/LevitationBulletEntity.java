@@ -61,7 +61,7 @@ public class LevitationBulletEntity extends ProjectileEntity implements PolymerE
       this.setOwner(owner);
       Vec3d vec3d = owner.getBoundingBox().getCenter();
       this.refreshPositionAndAngles(vec3d.x, vec3d.y, vec3d.z, this.getYaw(), this.getPitch());
-      this.target = new LazyEntityReference<>(target);
+      this.target = LazyEntityReference.of(target);
       this.direction = Direction.UP;
       this.changeTargetDirection(axis, target);
       this.maxSpeed = this.getRandom().nextDouble()*0.25 + 0.5;
@@ -121,7 +121,7 @@ public class LevitationBulletEntity extends ProjectileEntity implements PolymerE
    
    @Override
    public void checkDespawn() {
-      if (this.getWorld().getDifficulty() == Difficulty.PEACEFUL) {
+      if (this.getEntityWorld().getDifficulty() == Difficulty.PEACEFUL) {
          this.discard();
       }
    }
@@ -134,9 +134,9 @@ public class LevitationBulletEntity extends ProjectileEntity implements PolymerE
    @Override
    public void tick(){
       super.tick();
-      Entity entity = !this.getWorld().isClient() ? LazyEntityReference.resolve(this.target, this.getWorld(), Entity.class) : null;
+      Entity entity = !this.getEntityWorld().isClient() ? LazyEntityReference.resolve(this.target, this.getEntityWorld(), Entity.class) : null;
       HitResult hitResult = null;
-      if(!this.getWorld().isClient){
+      if(!this.getEntityWorld().isClient()){
          if(entity == null){
             this.target = null;
             explode();
@@ -147,7 +147,7 @@ public class LevitationBulletEntity extends ProjectileEntity implements PolymerE
          }else{
             double farFull = 32.0;
             double burstRange = 12.0;
-            Vec3d myPos = this.getPos();
+            Vec3d myPos = this.getEntityPos();
             Vec3d tgtPos = new Vec3d(entity.getX(), entity.getY() + entity.getHeight() * 0.5, entity.getZ());
             double dist = myPos.distanceTo(tgtPos);
             double t = MathHelper.clamp(dist / farFull, 0.0, 1.0);
@@ -169,7 +169,7 @@ public class LevitationBulletEntity extends ProjectileEntity implements PolymerE
                Vec3d v = this.getVelocity();
                this.setVelocity(v.add(desired.subtract(v).multiply(0.35)));
                Vec3d ahead = myPos.add(this.getVelocity().multiply(2.0));
-               BlockHitResult pre = this.getWorld().raycast(new RaycastContext(myPos, ahead, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, this));
+               BlockHitResult pre = this.getEntityWorld().raycast(new RaycastContext(myPos, ahead, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, this));
                if(pre.getType() == HitResult.Type.BLOCK){
                   Direction side = pre.getSide();
                   Vec3d n = new Vec3d(side.getOffsetX(), side.getOffsetY(), side.getOffsetZ());
@@ -186,13 +186,13 @@ public class LevitationBulletEntity extends ProjectileEntity implements PolymerE
          hitResult = ProjectileUtil.getCollision(this, this::canHit);
       }
       Vec3d vec3d = this.getVelocity();
-      this.setPosition(this.getPos().add(vec3d));
+      this.setPosition(this.getEntityPos().add(vec3d));
       this.tickBlockCollision();
       if(this.portalManager != null && this.portalManager.isInPortal()) this.tickPortalTeleportation();
       if(hitResult != null && this.isAlive() && hitResult.getType() != HitResult.Type.MISS) this.hitOrDeflect(hitResult);
       ProjectileUtil.setRotationFromVelocity(this, 0.5F);
-      if(this.getWorld().isClient){
-         this.getWorld().addParticleClient(ParticleTypes.END_ROD, this.getX() - vec3d.x, this.getY() - vec3d.y + 0.15, this.getZ() - vec3d.z, 0.0, 0.0, 0.0);
+      if(this.getEntityWorld().isClient()){
+         this.getEntityWorld().addParticleClient(ParticleTypes.END_ROD, this.getX() - vec3d.x, this.getY() - vec3d.y + 0.15, this.getZ() - vec3d.z, 0.0, 0.0, 0.0);
       }else if(entity != null){
          if(this.stepCount > 0){
             this.stepCount--;
@@ -201,7 +201,7 @@ public class LevitationBulletEntity extends ProjectileEntity implements PolymerE
          if(this.direction != null){
             BlockPos blockPos = this.getBlockPos();
             Direction.Axis axis = this.direction.getAxis();
-            if(this.getWorld().isTopSolid(blockPos.offset(this.direction), this)){
+            if(this.getEntityWorld().isTopSolid(blockPos.offset(this.direction), this)){
                this.changeTargetDirection(axis, entity);
             }else{
                BlockPos blockPos2 = entity.getBlockPos();
@@ -227,7 +227,7 @@ public class LevitationBulletEntity extends ProjectileEntity implements PolymerE
       double g = blockPos.getZ() + 0.5;
       Direction pick = null;
       Vec3d goal = new Vec3d(e, f, g);
-      if(!blockPos.isWithinDistance(this.getPos(), 2.0)){
+      if(!blockPos.isWithinDistance(this.getEntityPos(), 2.0)){
          BlockPos here = this.getBlockPos();
          java.util.List<Direction> cand = new java.util.ArrayList<>(6);
          if(axis != Direction.Axis.X){
@@ -249,8 +249,8 @@ public class LevitationBulletEntity extends ProjectileEntity implements PolymerE
             double ny = this.getY() + dir.getOffsetY();
             double nz = this.getZ() + dir.getOffsetZ();
             Box nb = this.getBoundingBox().offset(nx - this.getX(), ny - this.getY(), nz - this.getZ());
-            if(!this.getWorld().isSpaceEmpty(this, nb)) continue;
-            BlockHitResult line = this.getWorld().raycast(new RaycastContext(new Vec3d(nx, ny, nz), goal, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, this));
+            if(!this.getEntityWorld().isSpaceEmpty(this, nb)) continue;
+            BlockHitResult line = this.getEntityWorld().raycast(new RaycastContext(new Vec3d(nx, ny, nz), goal, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, this));
             double distScore = new Vec3d(nx, ny, nz).squaredDistanceTo(goal);
             double blockPenalty = line.getType() == HitResult.Type.MISS ? 0.0 : 4.0;
             double continueBonus = this.direction != null && this.direction == dir ? -0.25 : 0.0;
@@ -262,7 +262,7 @@ public class LevitationBulletEntity extends ProjectileEntity implements PolymerE
          }
          if(bestDir == null){
             Direction dir = Direction.random(this.random);
-            for(int i = 8; i > 0 && !this.getWorld().isSpaceEmpty(this, this.getBoundingBox().offset(dir.getOffsetX(), dir.getOffsetY(), dir.getOffsetZ())); i--) dir = Direction.random(this.random);
+            for(int i = 8; i > 0 && !this.getEntityWorld().isSpaceEmpty(this, this.getBoundingBox().offset(dir.getOffsetX(), dir.getOffsetY(), dir.getOffsetZ())); i--) dir = Direction.random(this.random);
             bestDir = dir;
          }
          pick = bestDir;
@@ -326,7 +326,7 @@ public class LevitationBulletEntity extends ProjectileEntity implements PolymerE
       DamageSource damageSource = this.getDamageSources().mobProjectile(this, livingEntity);
       boolean bl = entity.sidedDamage(damageSource, (float) CONFIG.getDouble(ArchetypeRegistry.LEVITATION_BULLET_DAMAGE));
       if (bl) {
-         if (this.getWorld() instanceof ServerWorld serverWorld) {
+         if (this.getEntityWorld() instanceof ServerWorld serverWorld) {
             EnchantmentHelper.onTargetDamaged(serverWorld, entity, damageSource);
          }
          
@@ -338,10 +338,10 @@ public class LevitationBulletEntity extends ProjectileEntity implements PolymerE
    
    private void explode(){
       if(this.isRemoved()) return;
-      ((ServerWorld)this.getWorld()).spawnParticles(ParticleTypes.EXPLOSION, this.getX(), this.getY(), this.getZ(), 2, 0.2, 0.2, 0.2, 0.0);
+      ((ServerWorld)this.getEntityWorld()).spawnParticles(ParticleTypes.EXPLOSION, this.getX(), this.getY(), this.getZ(), 2, 0.2, 0.2, 0.2, 0.0);
       this.playSound(SoundEvents.ENTITY_SHULKER_BULLET_HIT, 1.0F, 1.0F);
       double range = 1.5;
-      List<LivingEntity> living = getWorld().getNonSpectatingEntities(LivingEntity.class,this.getBoundingBox().expand(range*2)).stream().filter(e -> e.distanceTo(this) <= range).toList();
+      List<LivingEntity> living = getEntityWorld().getNonSpectatingEntities(LivingEntity.class,this.getBoundingBox().expand(range*2)).stream().filter(e -> e.distanceTo(this) <= range).toList();
       for(LivingEntity livingEntity : living){
          livingEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION,CONFIG.getInt(ArchetypeRegistry.LEVITATION_BULLET_DURATION), CONFIG.getInt(ArchetypeRegistry.LEVITATION_BULLET_LEVEL)-1),MoreObjects.firstNonNull(this.getOwner(), this));
       }
@@ -356,7 +356,7 @@ public class LevitationBulletEntity extends ProjectileEntity implements PolymerE
    
    private void destroy() {
       this.discard();
-      this.getWorld().emitGameEvent(GameEvent.ENTITY_DAMAGE, this.getPos(), GameEvent.Emitter.of(this));
+      this.getEntityWorld().emitGameEvent(GameEvent.ENTITY_DAMAGE, this.getEntityPos(), GameEvent.Emitter.of(this));
    }
    
    @Override
@@ -391,10 +391,7 @@ public class LevitationBulletEntity extends ProjectileEntity implements PolymerE
    @Override
    public void onSpawnPacket(EntitySpawnS2CPacket packet) {
       super.onSpawnPacket(packet);
-      double d = packet.getVelocityX();
-      double e = packet.getVelocityY();
-      double f = packet.getVelocityZ();
-      this.setVelocity(d, e, f);
+      this.setVelocity(packet.getVelocity());
    }
    
    @Override

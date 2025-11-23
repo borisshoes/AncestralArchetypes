@@ -682,7 +682,7 @@ public class ArchetypeRegistry {
       IRON_FOODS.put(Items.IRON_BARS,new Pair<>(2f,10));
       IRON_FOODS.put(Items.IRON_DOOR,new Pair<>(6f,30));
       IRON_FOODS.put(Items.IRON_TRAPDOOR,new Pair<>(10f,50));
-      IRON_FOODS.put(Items.CHAIN,new Pair<>(5f,20));
+      IRON_FOODS.put(Items.IRON_CHAIN,new Pair<>(5f,20));
       IRON_FOODS.put(Items.LANTERN,new Pair<>(3.75f,15));
       IRON_FOODS.put(Items.SOUL_LANTERN,new Pair<>(4f,16));
       IRON_FOODS.put(Items.HEAVY_WEIGHTED_PRESSURE_PLATE,new Pair<>(5f,25));
@@ -700,6 +700,7 @@ public class ArchetypeRegistry {
       IRON_FOODS.put(Items.HOPPER_MINECART,new Pair<>(50.0f,95));
       
       COPPER_FOODS.put(Items.RAW_COPPER,new Pair<>(1f,20));
+      COPPER_FOODS.put(Items.COPPER_NUGGET,new Pair<>(0.1f,1));
       COPPER_FOODS.put(Items.COPPER_INGOT,new Pair<>(1.0f,9));
       COPPER_FOODS.put(Items.COPPER_ORE,new Pair<>(1.5f,20));
       COPPER_FOODS.put(Items.DEEPSLATE_COPPER_ORE,new Pair<>(1.5f,15));
@@ -713,6 +714,12 @@ public class ArchetypeRegistry {
       COPPER_FOODS.put(Items.COPPER_DOOR,new Pair<>(1.25f,10));
       COPPER_FOODS.put(Items.COPPER_TRAPDOOR,new Pair<>(1.75f,14));
       COPPER_FOODS.put(Items.COPPER_BULB,new Pair<>(4f,29));
+      COPPER_FOODS.put(Items.COPPER_BARS.unaffected(),new Pair<>(0.5f,4));
+      COPPER_FOODS.put(Items.COPPER_LANTERNS.unaffected(),new Pair<>(0.9f,8));
+      COPPER_FOODS.put(Items.COPPER_CHAINS.unaffected(),new Pair<>(1.2f,9));
+      COPPER_FOODS.put(Items.COPPER_CHEST,new Pair<>(3.25f,23));
+      COPPER_FOODS.put(Items.COPPER_GOLEM_STATUE,new Pair<>(4f,27));
+      COPPER_FOODS.put(Items.LIGHTNING_ROD,new Pair<>(1.5f,12));
       COPPER_FOODS.put(Items.EXPOSED_COPPER,new Pair<>(4f,27));
       COPPER_FOODS.put(Items.EXPOSED_CHISELED_COPPER,new Pair<>(5.25f,32));
       COPPER_FOODS.put(Items.EXPOSED_COPPER_GRATE,new Pair<>(5f,31));
@@ -722,6 +729,12 @@ public class ArchetypeRegistry {
       COPPER_FOODS.put(Items.EXPOSED_COPPER_DOOR,new Pair<>(2.75f,19));
       COPPER_FOODS.put(Items.EXPOSED_COPPER_TRAPDOOR,new Pair<>(3.25f,22));
       COPPER_FOODS.put(Items.EXPOSED_COPPER_BULB,new Pair<>(6.0f,37));
+      COPPER_FOODS.put(Items.COPPER_BARS.exposed(),new Pair<>(1f,7));
+      COPPER_FOODS.put(Items.COPPER_LANTERNS.exposed(),new Pair<>(1.8f,12));
+      COPPER_FOODS.put(Items.COPPER_CHAINS.exposed(),new Pair<>(2.4f,16));
+      COPPER_FOODS.put(Items.EXPOSED_COPPER_CHEST,new Pair<>(5.25f,32));
+      COPPER_FOODS.put(Items.EXPOSED_COPPER_GOLEM_STATUE,new Pair<>(6f,35));
+      COPPER_FOODS.put(Items.EXPOSED_LIGHTNING_ROD,new Pair<>(3f,21));
       COPPER_FOODS.put(Items.WEATHERED_COPPER,new Pair<>(6f,34));
       COPPER_FOODS.put(Items.WEATHERED_CHISELED_COPPER,new Pair<>(7.25f,38));
       COPPER_FOODS.put(Items.WEATHERED_COPPER_GRATE,new Pair<>(7f,37));
@@ -731,6 +744,12 @@ public class ArchetypeRegistry {
       COPPER_FOODS.put(Items.WEATHERED_COPPER_DOOR,new Pair<>(4.25f,24));
       COPPER_FOODS.put(Items.WEATHERED_COPPER_TRAPDOOR,new Pair<>(4.75f,27));
       COPPER_FOODS.put(Items.WEATHERED_COPPER_BULB,new Pair<>(9f,48));
+      COPPER_FOODS.put(Items.COPPER_BARS.weathered(),new Pair<>(1.5f,9));
+      COPPER_FOODS.put(Items.COPPER_LANTERNS.weathered(),new Pair<>(2.7f,15));
+      COPPER_FOODS.put(Items.COPPER_CHAINS.weathered(),new Pair<>(3.6f,20));
+      COPPER_FOODS.put(Items.WEATHERED_COPPER_CHEST,new Pair<>(7.25f,28));
+      COPPER_FOODS.put(Items.WEATHERED_COPPER_GOLEM_STATUE,new Pair<>(8f,41));
+      COPPER_FOODS.put(Items.WEATHERED_LIGHTNING_ROD,new Pair<>(3.5f,26));
       COPPER_FOODS.put(Items.OXIDIZED_COPPER,new Pair<>(8f,40));
       COPPER_FOODS.put(Items.OXIDIZED_CHISELED_COPPER,new Pair<>(9.25f,44));
       COPPER_FOODS.put(Items.OXIDIZED_COPPER_GRATE,new Pair<>(9f,43));
@@ -740,7 +759,22 @@ public class ArchetypeRegistry {
       COPPER_FOODS.put(Items.OXIDIZED_COPPER_DOOR,new Pair<>(5.75f,29));
       COPPER_FOODS.put(Items.OXIDIZED_COPPER_TRAPDOOR,new Pair<>(6.25f,31));
       COPPER_FOODS.put(Items.OXIDIZED_COPPER_BULB,new Pair<>(10.0f,48));
-      COPPER_FOODS.put(Items.LIGHTNING_ROD,new Pair<>(1.5f,12));
+      COPPER_FOODS.put(Items.COPPER_BARS.oxidized(),new Pair<>(2f,10));
+      COPPER_FOODS.put(Items.COPPER_LANTERNS.oxidized(),new Pair<>(3.6f,18));
+      COPPER_FOODS.put(Items.COPPER_CHAINS.oxidized(),new Pair<>(4.8f,24));
+      COPPER_FOODS.put(Items.OXIDIZED_COPPER_CHEST,new Pair<>(9.25f,44));
+      COPPER_FOODS.put(Items.OXIDIZED_COPPER_GOLEM_STATUE,new Pair<>(10f,47));
+      COPPER_FOODS.put(Items.OXIDIZED_LIGHTNING_ROD,new Pair<>(6f,30));
+      COPPER_FOODS.put(Items.COPPER_SHOVEL,new Pair<>(3f,15));
+      COPPER_FOODS.put(Items.COPPER_HOE,new Pair<>(6f,20));
+      COPPER_FOODS.put(Items.COPPER_SWORD,new Pair<>(6f,20));
+      COPPER_FOODS.put(Items.COPPER_PICKAXE,new Pair<>(9f,25));
+      COPPER_FOODS.put(Items.COPPER_AXE,new Pair<>(9f,25));
+      COPPER_FOODS.put(Items.COPPER_BOOTS,new Pair<>(12f,30));
+      COPPER_FOODS.put(Items.COPPER_HELMET,new Pair<>(15f,35));
+      COPPER_FOODS.put(Items.COPPER_LEGGINGS,new Pair<>(21f,40));
+      COPPER_FOODS.put(Items.COPPER_HORSE_ARMOR,new Pair<>(21f,40));
+      COPPER_FOODS.put(Items.COPPER_CHESTPLATE,new Pair<>(24f,45));
    }
    
    private static ArchetypeAbility register(ArchetypeAbility ability){

@@ -71,7 +71,7 @@ public class LevitationBulletItem extends AbilityItem {
       IArchetypeProfile profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) <= 0 && (slot == EquipmentSlot.MAINHAND || slot == EquipmentSlot.OFFHAND)){
          LivingEntity target = getTarget(world,player);
-         if(target != null && player.getServer().getTicks() % 4 == 0){
+         if(target != null && player.getEntityWorld().getServer().getTicks() % 4 == 0){
             boolean shouldGlow = Event.getEventsOfType(BulletTargetEvent.class).stream().noneMatch(e -> e.player.getId() == player.getId() && e.target.getId() == target.getId());
             if(shouldGlow){
                addGlow(player,target,Formatting.LIGHT_PURPLE);
@@ -92,14 +92,14 @@ public class LevitationBulletItem extends AbilityItem {
          return ActionResult.PASS;
       }
       
-      LivingEntity target = getTarget(player.getWorld(),player);
+      LivingEntity target = getTarget(player.getEntityWorld(),player);
       if(target != null){
          for(int i = 0; i < CONFIG.getInt(ArchetypeRegistry.LEVITATION_BULLET_COUNT); i++){
-            LevitationBulletEntity bullet = new LevitationBulletEntity(player.getWorld(), player, target, Direction.Axis.pickRandomAxis(player.getRandom()));
+            LevitationBulletEntity bullet = new LevitationBulletEntity(player.getEntityWorld(), player, target, Direction.Axis.pickRandomAxis(player.getRandom()));
             bullet.setPosition(MathUtils.randomSpherePoint(player.getEyePos().add(0,0.5,0),1));
-            player.getWorld().spawnEntity(bullet);
+            player.getEntityWorld().spawnEntity(bullet);
          }
-         SoundUtils.playSound(player.getWorld(),player.getBlockPos(),SoundEvents.ENTITY_SHULKER_SHOOT, SoundCategory.PLAYERS, 2.0F, (player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.2F + 1.0F);
+         SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(),SoundEvents.ENTITY_SHULKER_SHOOT, SoundCategory.PLAYERS, 2.0F, (player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.2F + 1.0F);
          profile(player).setAbilityCooldown(this.ability, CONFIG.getInt(ArchetypeRegistry.LEVITATION_BULLET_COOLDOWN));
          player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, player.getStackInHand(hand)));
          return ActionResult.SUCCESS;
@@ -115,7 +115,7 @@ public class LevitationBulletItem extends AbilityItem {
       int viewChunks = world.getServer().getPlayerManager().getViewDistance();
       double maxRange = viewChunks * 16.0;
       Optional<LivingEntity> entity = MinecraftUtils.lasercast(world,eye,look,maxRange,false,user)
-            .sortedHits().stream().filter(e -> e instanceof LivingEntity && eye.squaredDistanceTo(e.getPos()) <= maxRange * maxRange)
+            .sortedHits().stream().filter(e -> e instanceof LivingEntity && eye.squaredDistanceTo(e.getEntityPos()) <= maxRange * maxRange)
             .map(e -> (LivingEntity)e).findFirst();
       if(entity.isPresent()){
          return entity.get();

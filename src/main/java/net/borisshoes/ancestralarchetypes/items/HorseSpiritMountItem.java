@@ -34,7 +34,7 @@ public class HorseSpiritMountItem extends SpiritMountItem{
    @Override
    protected LivingEntity getMountEntity(ServerPlayerEntity player){
       IArchetypeProfile profile = profile(player);
-      HorseEntity horse = EntityType.HORSE.create(player.getWorld(), SpawnReason.MOB_SUMMONED);
+      HorseEntity horse = EntityType.HORSE.create(player.getEntityWorld(), SpawnReason.MOB_SUMMONED);
       horse.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(60.0f);
       horse.getAttributeInstance(EntityAttributes.MOVEMENT_SPEED).setBaseValue(0.35f);
       horse.getAttributeInstance(EntityAttributes.JUMP_STRENGTH).setBaseValue(1.25f);

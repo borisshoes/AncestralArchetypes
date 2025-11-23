@@ -79,7 +79,7 @@ public class PotionSelectionGui extends SimpleGui {
    public boolean onAnyClick(int index, ClickType type, SlotActionType action){
       if(this.map.containsKey(index)){
          IArchetypeProfile profile = profile(player);
-         long timeOfDay = player.getWorld().getTimeOfDay();
+         long timeOfDay = player.getEntityWorld().getTimeOfDay();
          int day = (int) (timeOfDay/24000L % Integer.MAX_VALUE);
          int curPhase = day % 8;
          int moonLevel = profile.hasAbility(ArchetypeRegistry.MOONLIT_WITCH) ? Math.abs(-curPhase+4) : 4; // 0 - new moon, 4 - full moon
@@ -110,7 +110,7 @@ public class PotionSelectionGui extends SimpleGui {
       potionTypeItem.addLoreLineRaw(Text.translatable("text.ancestralarchetypes.potion_brewer_gui_toggle"));
       setSlot(8,potionTypeItem);
       
-      long timeOfDay = player.getWorld().getTimeOfDay();
+      long timeOfDay = player.getEntityWorld().getTimeOfDay();
       int day = (int) (timeOfDay/24000L % Integer.MAX_VALUE);
       int curPhase = day % 8;
       int moonLevel = profile.hasAbility(ArchetypeRegistry.MOONLIT_WITCH) ? Math.abs(-curPhase+4) : 4; // 0 - new moon, 4 - full moon
@@ -144,7 +144,7 @@ public class PotionSelectionGui extends SimpleGui {
    public static boolean isUnlocked(ServerPlayerEntity player, RegistryEntry<Potion> potion){
       if(potion == null) return false;
       IArchetypeProfile profile = profile(player);
-      long timeOfDay = player.getWorld().getTimeOfDay();
+      long timeOfDay = player.getEntityWorld().getTimeOfDay();
       int day = (int) (timeOfDay/24000L % Integer.MAX_VALUE);
       int curPhase = day % 8;
       int moonLevel = profile.hasAbility(ArchetypeRegistry.MOONLIT_WITCH) ? Math.abs(-curPhase+4) : 4; // 0 - new moon, 4 - full moon

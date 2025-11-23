@@ -10,6 +10,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.s2c.play.PlayerRotationS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
@@ -53,7 +54,7 @@ public abstract class SpiritMountItem extends AbilityItem{
       UUID mountId = profile.getMountEntity(this.ability);
       if(player.isSneaking()){
          if(mountId != null){
-            Entity entity = player.getWorld().getEntity(mountId);
+            Entity entity = player.getEntityWorld().getEntity(mountId);
             if(entity != null && entity.isAlive()){
                profile.setMountHealth(this.ability, ((LivingEntity)entity).getHealth());
                entity.discard();
@@ -63,7 +64,7 @@ public abstract class SpiritMountItem extends AbilityItem{
          }
       }else{
          if(mountId != null){
-            Entity entity = player.getWorld().getEntity(mountId);
+            Entity entity = player.getEntityWorld().getEntity(mountId);
             if(entity != null && entity.isAlive()){
                profile.setMountHealth(this.ability, ((LivingEntity)entity).getHealth());
                entity.discard();
@@ -94,13 +95,18 @@ public abstract class SpiritMountItem extends AbilityItem{
          newMount.setCustomName(Text.literal(customName));
          newMount.setCustomNameVisible(true);
       }
+      float p = player.getPitch();
+      float y = player.getYaw();
       newMount.setPosition(summonPos);
       newMount.refreshPositionAndAngles(summonPos.x, summonPos.y, summonPos.z, player.getYaw(), player.getPitch());
-      player.getWorld().spawnNewEntityAndPassengers(newMount);
+      player.getEntityWorld().spawnNewEntityAndPassengers(newMount);
       if(profile.getMountHealth(this.ability) != 0) newMount.setHealth(profile.getMountHealth(this.ability));
       newMount.addCommandTag(getSpiritMountTag());
+      newMount.setYaw(player.getYaw());
+      newMount.setPitch(player.getPitch());
       profile.setMountEntity(this.ability,newMount.getUuid());
-      player.startRiding(newMount,true);
+      player.startRiding(newMount,true,true);
+      player.networkHandler.sendPacket(new PlayerRotationS2CPacket(y,false,p,false));
       SoundUtils.playSongToPlayer(player,SoundEvents.ENTITY_HORSE_GALLOP,0.3f,1);
    }
    

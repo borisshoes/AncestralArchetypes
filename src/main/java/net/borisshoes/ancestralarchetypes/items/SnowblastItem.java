@@ -48,7 +48,7 @@ public class SnowblastItem extends AbilityItem{
          return ActionResult.PASS;
       }
       
-      ProjectileEntity.spawnWithVelocity(SnowblastEntity::new, player.getWorld(), user.getStackInHand(hand), user, 0.0F, 1.5f, 1.0F);
+      ProjectileEntity.spawnWithVelocity(SnowblastEntity::new, player.getEntityWorld(), user.getStackInHand(hand), user, 0.0F, 1.5f, 1.0F);
       profile(player).setAbilityCooldown(this.ability, CONFIG.getInt(ArchetypeRegistry.SNOW_BLAST_COOLDOWN));
       world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_SNOWBALL_THROW, SoundCategory.NEUTRAL, 0.8F, 0.3F / (world.getRandom().nextFloat() * 0.3F + 0.6F));
       player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, player.getStackInHand(hand)));

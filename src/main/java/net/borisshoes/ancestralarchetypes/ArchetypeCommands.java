@@ -23,10 +23,7 @@ import net.minecraft.text.ClickEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.StringHelper;
-import net.minecraft.util.UserCache;
+import net.minecraft.util.*;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -489,14 +486,20 @@ public class ArchetypeCommands {
    private static HashMap<ServerPlayerEntity,IArchetypeProfile> getAllPlayerData(MinecraftServer server){
       HashMap<ServerPlayerEntity,IArchetypeProfile> data = new HashMap<>();
       try{
-         UserCache userCache = server.getUserCache();
+         NameToIdCache baseCache = server.getApiServices().nameToIdCache();
          List<ServerPlayerEntity> allPlayers = new ArrayList<>();
-         List<UserCache.Entry> cacheEntries = userCache.load();
-         
-         for(UserCache.Entry cacheEntry : cacheEntries){
-            GameProfile reqProfile = cacheEntry.getProfile();
-            ServerPlayerEntity reqPlayer = MinecraftUtils.getRequestedPlayer(server,reqProfile);
-            allPlayers.add(reqPlayer);
+         if(baseCache instanceof UserCache userCache){
+            List<UserCache.Entry> cacheEntries = userCache.load();
+            
+            for(UserCache.Entry cacheEntry : cacheEntries){
+               Optional<GameProfile> opt = server.getApiServices().profileResolver().getProfileById(cacheEntry.getPlayer().id());;
+               if(opt.isEmpty()) continue;
+               GameProfile reqProfile = opt.get();
+               ServerPlayerEntity reqPlayer = MinecraftUtils.getRequestedPlayer(server, reqProfile);
+               allPlayers.add(reqPlayer);
+            }
+         }else{
+            log(2,"Was unable to pull player data");
          }
          
          for(ServerPlayerEntity player : allPlayers){
@@ -619,16 +622,22 @@ public class ArchetypeCommands {
          if(player != null){
             profile = AncestralArchetypes.profile(player);
          }else{
-            UserCache userCache = server.getUserCache();
-            List<UserCache.Entry> cacheEntries = userCache.load();
-            
-            for(UserCache.Entry cacheEntry : cacheEntries){
-               GameProfile reqProfile = cacheEntry.getProfile();
-               if(reqProfile.getName().equalsIgnoreCase(target)){
-                  player = MinecraftUtils.getRequestedPlayer(server,reqProfile);
-                  profile = AncestralArchetypes.profile(player);
-                  break;
+            NameToIdCache baseCache = server.getApiServices().nameToIdCache();
+            if(baseCache instanceof UserCache userCache){
+               List<UserCache.Entry> cacheEntries = userCache.load();
+               
+               for(UserCache.Entry cacheEntry : cacheEntries){
+                  Optional<GameProfile> opt = server.getApiServices().profileResolver().getProfileById(cacheEntry.getPlayer().id());;
+                  if(opt.isEmpty()) continue;
+                  GameProfile reqProfile = opt.get();
+                  if(reqProfile.name().equalsIgnoreCase(target)){
+                     player = MinecraftUtils.getRequestedPlayer(server, reqProfile);
+                     profile = AncestralArchetypes.profile(player);
+                     break;
+                  }
                }
+            }else{
+               log(2,"Was unable to pull player data");
             }
             if(profile == null){
                source.sendError(Text.translatable("text.ancestralarchetypes.no_player_found"));

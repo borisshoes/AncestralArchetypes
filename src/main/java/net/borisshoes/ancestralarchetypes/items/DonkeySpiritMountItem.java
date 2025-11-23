@@ -18,7 +18,7 @@ public class DonkeySpiritMountItem  extends SpiritMountItem{
    
    @Override
    protected LivingEntity getMountEntity(ServerPlayerEntity player){
-      DonkeyEntity donkey = EntityType.DONKEY.create(player.getWorld(), SpawnReason.MOB_SUMMONED);
+      DonkeyEntity donkey = EntityType.DONKEY.create(player.getEntityWorld(), SpawnReason.MOB_SUMMONED);
       donkey.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(60.0f);
       donkey.getAttributeInstance(EntityAttributes.MOVEMENT_SPEED).setBaseValue(0.25f);
       donkey.getAttributeInstance(EntityAttributes.JUMP_STRENGTH).setBaseValue(0.85f);

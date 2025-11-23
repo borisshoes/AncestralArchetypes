@@ -51,7 +51,7 @@ public class WeavingItem extends AbilityItem{
          return ActionResult.PASS;
       }
       
-      spawnCobwebBlock(player.getWorld(),player);
+      spawnCobwebBlock(player.getEntityWorld(),player);
       
       profile(player).setAbilityCooldown(this.ability, CONFIG.getInt(ArchetypeRegistry.WEAVING_WEB_COOLDOWN));
       player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, player.getStackInHand(hand)));

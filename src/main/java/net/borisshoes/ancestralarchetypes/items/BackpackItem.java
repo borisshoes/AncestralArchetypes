@@ -142,7 +142,7 @@ public class BackpackItem extends AbilityItem{
                }else{
                   insertStack.setCount(0);
                }
-               SoundUtils.playSongToPlayer(player,SoundEvents.ITEM_BUNDLE_INSERT, 0.8F, 0.8F + player.getWorld().getRandom().nextFloat() * 0.4F);
+               SoundUtils.playSongToPlayer(player,SoundEvents.ITEM_BUNDLE_INSERT, 0.8F, 0.8F + player.getEntityWorld().getRandom().nextFloat() * 0.4F);
             }
          }
          
@@ -158,7 +158,7 @@ public class BackpackItem extends AbilityItem{
                   backpackInventory.removeStack(i,count-remainderStack.getCount());
                } else {
                   backpackInventory.removeStack(i);
-                  SoundUtils.playSongToPlayer(player,SoundEvents.ITEM_BUNDLE_REMOVE_ONE, 0.8F, 0.8F + player.getWorld().getRandom().nextFloat() * 0.4F);
+                  SoundUtils.playSongToPlayer(player,SoundEvents.ITEM_BUNDLE_REMOVE_ONE, 0.8F, 0.8F + player.getEntityWorld().getRandom().nextFloat() * 0.4F);
                }
                break;
             }
@@ -195,7 +195,7 @@ public class BackpackItem extends AbilityItem{
                }else{
                   otherStack.setCount(0);
                }
-               SoundUtils.playSongToPlayer(player,SoundEvents.ITEM_BUNDLE_INSERT, 0.8F, 0.8F + player.getWorld().getRandom().nextFloat() * 0.4F);
+               SoundUtils.playSongToPlayer(player,SoundEvents.ITEM_BUNDLE_INSERT, 0.8F, 0.8F + player.getEntityWorld().getRandom().nextFloat() * 0.4F);
             }
          }
          this.onContentChanged(player, stack);
@@ -204,7 +204,7 @@ public class BackpackItem extends AbilityItem{
          for(int i = backpackInventory.size()-1; i >= 0; i--){
             ItemStack removeStack = backpackInventory.getStack(i);
             if(!removeStack.isEmpty()){
-               SoundUtils.playSongToPlayer(player,SoundEvents.ITEM_BUNDLE_REMOVE_ONE, 0.8F, 0.8F + player.getWorld().getRandom().nextFloat() * 0.4F);
+               SoundUtils.playSongToPlayer(player,SoundEvents.ITEM_BUNDLE_REMOVE_ONE, 0.8F, 0.8F + player.getEntityWorld().getRandom().nextFloat() * 0.4F);
                cursorStackReference.set(backpackInventory.removeStack(i));
                break;
             }

@@ -35,7 +35,7 @@ public class EntityMixin {
       Entity entity = (Entity)(Object) this;
       if(entity instanceof ServerPlayerEntity player){
          IArchetypeProfile profile = profile(player);
-         ServerWorld world = player.getWorld();
+         ServerWorld world = player.getEntityWorld();
          
          if(profile.hasAbility(ArchetypeRegistry.LIGHTWEIGHT)){
             return true;
@@ -49,7 +49,7 @@ public class EntityMixin {
       Entity entity = (Entity)(Object) this;
       if(entity instanceof ServerPlayerEntity player){
          IArchetypeProfile profile = profile(player);
-         ServerWorld world = player.getWorld();
+         ServerWorld world = player.getEntityWorld();
          
          if(profile.hasAbility(ArchetypeRegistry.BOUNCY) && !player.isDead()){
             if (!player.bypassesLandingEffects()) {
@@ -69,18 +69,18 @@ public class EntityMixin {
    @Inject(method = "removePassenger", at = @At("TAIL"))
    private void archetypes$onRemovePassenger(Entity passenger, CallbackInfo callbackInfo){
       Entity entity = (Entity) (Object) this;
-      if(!entity.getWorld().isClient && entity instanceof PlayerEntity)
+      if(!entity.getEntityWorld().isClient() && entity instanceof PlayerEntity)
          ((ServerPlayerEntity) entity).networkHandler.sendPacket(new EntityPassengersSetS2CPacket(entity));
    }
    
-   @Inject(method = "startRiding(Lnet/minecraft/entity/Entity;Z)Z", at = @At("TAIL"))
-   private void archetypes$onStartRiding(Entity entity, boolean force, CallbackInfoReturnable<Boolean> cir){
-      if(!entity.getWorld().isClient && entity instanceof PlayerEntity)
+   @Inject(method = "startRiding(Lnet/minecraft/entity/Entity;ZZ)Z", at = @At("TAIL"))
+   private void archetypes$onStartRiding(Entity entity, boolean force, boolean emit, CallbackInfoReturnable<Boolean> cir){
+      if(!entity.getEntityWorld().isClient() && entity instanceof PlayerEntity)
          ((ServerPlayerEntity)entity).networkHandler.sendPacket(new EntityPassengersSetS2CPacket(entity));
    }
    
-   @WrapOperation(method = "startRiding(Lnet/minecraft/entity/Entity;Z)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityType;isSaveable()Z"))
-   private boolean playerladder$allowRidingPlayers(EntityType<?> instance, Operation<Boolean> original, Entity entity, boolean force) {
+   @WrapOperation(method = "startRiding(Lnet/minecraft/entity/Entity;ZZ)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityType;isSaveable()Z"))
+   private boolean playerladder$allowRidingPlayers(EntityType<?> instance, Operation<Boolean> original, Entity entity, boolean force, boolean emit) {
       if(instance == EntityType.PLAYER && entity instanceof ServerPlayerEntity player && AncestralArchetypes.profile(player).hasAbility(ArchetypeRegistry.RIDEABLE)) {
          return true;
       }else{

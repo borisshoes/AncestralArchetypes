@@ -73,7 +73,7 @@ public abstract class PlayerEntityMixin {
          if(profile.hasAbility(ArchetypeRegistry.THORNY) && attacker.isAlive() && !source.isIn(DamageTypeTags.AVOIDS_GUARDIAN_THORNS) && !source.isOf(DamageTypes.THORNS)){
             double cap = CONFIG.getDouble(ArchetypeRegistry.THORNY_REFLECTION_CAP);
             float damage = (float) Math.min(cap < 0 ? Float.MAX_VALUE : cap, amount * CONFIG.getDouble(ArchetypeRegistry.THORNY_REFLECTION_MODIFIER));
-            attacker.damage(player.getWorld(), player.getDamageSources().thorns(player), damage);
+            attacker.damage(player.getEntityWorld(), player.getDamageSources().thorns(player), damage);
          }
       }
    }
@@ -93,7 +93,7 @@ public abstract class PlayerEntityMixin {
    @Inject(method = "tick", at = @At("TAIL"))
    private void archetypes$onTick(CallbackInfo callbackInfo){
       PlayerEntity entity = (PlayerEntity) (Object) this;
-      if(!entity.getWorld().isClient && entity.hasPassengers() && entity.isSneaking() && entity.isOnGround()) entity.getFirstPassenger().stopRiding();
+      if(!entity.getEntityWorld().isClient() && entity.hasPassengers() && entity.isSneaking() && entity.isOnGround()) entity.getFirstPassenger().stopRiding();
    }
    
    @ModifyReturnValue(method = "isClimbing", at = @At("RETURN"))

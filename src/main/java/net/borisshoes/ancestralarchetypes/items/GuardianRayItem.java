@@ -57,26 +57,26 @@ public class GuardianRayItem extends AbilityItem{
       int duration = CONFIG.getInt(ArchetypeRegistry.GUARDIAN_RAY_DURATION);
       
       MinecraftUtils.LasercastResult lasercast = MinecraftUtils.lasercast(world, player.getEyePos(), player.getRotationVecClient(), 25, false, player);
-      ArchetypeParticles.guardianRay(player.getWorld(),lasercast.startPos().subtract(0,player.getHeight()/3,0),lasercast.endPos(), useTime);
+      ArchetypeParticles.guardianRay(player.getEntityWorld(),lasercast.startPos().subtract(0,player.getHeight()/3,0),lasercast.endPos(), useTime);
       
       if(useTime < windup){ // Windup
-         if(useTime % 5 == 0) SoundUtils.playSound(player.getWorld(),player.getBlockPos(),SoundEvents.ENTITY_GUARDIAN_ATTACK, SoundCategory.PLAYERS,0.3f, 0.5f + 1.2f*((float) useTime / windup));
+         if(useTime % 5 == 0) SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(),SoundEvents.ENTITY_GUARDIAN_ATTACK, SoundCategory.PLAYERS,0.3f, 0.5f + 1.2f*((float) useTime / windup));
       }else if(useTime < (windup+duration)){ // Shoot
          if(useTime == windup) {
-            SoundUtils.playSound(player.getWorld(),player.getBlockPos(),SoundEvents.ENTITY_GUARDIAN_AMBIENT_LAND, SoundCategory.PLAYERS,1.2f, 0.8f);
-            SoundUtils.playSound(player.getWorld(),player.getBlockPos(),SoundEvents.BLOCK_BEACON_POWER_SELECT, SoundCategory.PLAYERS,1.2f, 1.2f);
+            SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(),SoundEvents.ENTITY_GUARDIAN_AMBIENT_LAND, SoundCategory.PLAYERS,1.2f, 0.8f);
+            SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(),SoundEvents.BLOCK_BEACON_POWER_SELECT, SoundCategory.PLAYERS,1.2f, 1.2f);
          }
          
          float damage = (float) CONFIG.getDouble(ArchetypeRegistry.GUARDIAN_RAY_DAMAGE);
          if(useTime % 15 == 0){
             for(Entity hit : lasercast.sortedHits()){
-               hit.damage(player.getWorld(), player.getDamageSources().indirectMagic(player,player), damage);
+               hit.damage(player.getEntityWorld(), player.getDamageSources().indirectMagic(player,player), damage);
             }
          }
          
          if(useTime % 20 == 0){
-            SoundUtils.playSound(player.getWorld(), player.getBlockPos(), SoundEvents.BLOCK_BEACON_AMBIENT, SoundCategory.PLAYERS, 1.2f, 1.2f);
-            SoundUtils.playSound(player.getWorld(),player.getBlockPos(),SoundEvents.ENTITY_GUARDIAN_AMBIENT_LAND, SoundCategory.PLAYERS,0.75f, 0.7f);
+            SoundUtils.playSound(player.getEntityWorld(), player.getBlockPos(), SoundEvents.BLOCK_BEACON_AMBIENT, SoundCategory.PLAYERS, 1.2f, 1.2f);
+            SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(),SoundEvents.ENTITY_GUARDIAN_AMBIENT_LAND, SoundCategory.PLAYERS,0.75f, 0.7f);
          }
       }else{ // Reset
          player.stopUsingItem();

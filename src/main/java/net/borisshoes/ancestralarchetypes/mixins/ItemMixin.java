@@ -83,7 +83,7 @@ public class ItemMixin {
          if((profile.hasAbility(ArchetypeRegistry.SLIME_TOTEM) && stack.isIn(ArchetypeRegistry.SLIME_GROW_ITEMS))
                || (profile.hasAbility(ArchetypeRegistry.MAGMA_TOTEM) && stack.isIn(ArchetypeRegistry.MAGMA_CUBE_GROW_ITEMS))){
             profile.changeDeathReductionSizeLevel(true);
-            playerEntity.getWorld().spawnParticles(ParticleTypes.TOTEM_OF_UNDYING,playerEntity.getX(), playerEntity.getY()+playerEntity.getHeight()/2, playerEntity.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
+            playerEntity.getEntityWorld().spawnParticles(ParticleTypes.TOTEM_OF_UNDYING,playerEntity.getX(), playerEntity.getY()+playerEntity.getHeight()/2, playerEntity.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
             playerEntity.playSound(SoundEvents.ENTITY_ZOMBIE_VILLAGER_CONVERTED);
          }
          
@@ -109,7 +109,7 @@ public class ItemMixin {
          if(profile.hasAbility(ArchetypeRegistry.HURT_BY_WATER) && stack.contains(DataComponentTypes.POTION_CONTENTS) && !playerEntity.hasStatusEffect(StatusEffects.WATER_BREATHING)){
             PotionContentsComponent potions = stack.get(DataComponentTypes.POTION_CONTENTS);
             if(potions.potion().isPresent() && potions.potion().get().equals(Potions.WATER)){
-               playerEntity.damage(playerEntity.getWorld(), world.getDamageSources().drown(), (float) CONFIG.getDouble(ArchetypeRegistry.HURT_BY_WATER_SWIM_DAMAGE));
+               playerEntity.damage(playerEntity.getEntityWorld(), world.getDamageSources().drown(), (float) CONFIG.getDouble(ArchetypeRegistry.HURT_BY_WATER_SWIM_DAMAGE));
                world.playSound(null, playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), SoundEvents.ENTITY_GENERIC_BURN, playerEntity.getSoundCategory(), 0.4F, 2.0F + playerEntity.getRandom().nextFloat() * 0.4F);
             }
          }

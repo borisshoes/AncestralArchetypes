@@ -69,18 +69,18 @@ public class EndflameItem extends AbilityItem{
       final double closeW = 1.5;
       final double farW = 5.5;
       double mul = 1.5*range;
-      Vec3d boxStart = player.getPos().subtract(mul,mul,mul);
-      Vec3d boxEnd = player.getPos().add(mul,mul,mul);
+      Vec3d boxStart = player.getEntityPos().subtract(mul,mul,mul);
+      Vec3d boxEnd = player.getEntityPos().add(mul,mul,mul);
       Box rangeBox = new Box(boxStart,boxEnd);
       
       if(remainingUseTicks % 5 == 2){
          SoundUtils.playSound(world, player.getBlockPos(), SoundEvents.ENTITY_ENDER_DRAGON_SHOOT, SoundCategory.PLAYERS, 0.6f, (float) (Math.random() * .5 + .5));
          
-         List<Entity> entities = player.getWorld().getOtherEntities(player,rangeBox, e -> e instanceof LivingEntity);
+         List<Entity> entities = player.getEntityWorld().getOtherEntities(player,rangeBox, e -> e instanceof LivingEntity);
          for(Entity e : entities){
             if(!(e instanceof LivingEntity entity)) continue;
             if(MathUtils.inCone(player.getEyePos(),player.getRotationVector(),range,closeW,farW,e.getEyePos())){
-               entity.damage(player.getWorld(),player.getDamageSources().indirectMagic(player,player),(float) CONFIG.getDouble(ArchetypeRegistry.ENDERFLAME_BUFFET_DAMAGE));
+               entity.damage(player.getEntityWorld(),player.getDamageSources().indirectMagic(player,player),(float) CONFIG.getDouble(ArchetypeRegistry.ENDERFLAME_BUFFET_DAMAGE));
             }
          }
       }
@@ -102,7 +102,7 @@ public class EndflameItem extends AbilityItem{
          Vec3d unRotatedOffset = new Vec3d(r * Math.cos(theta), percentage*range, r * Math.sin(theta));
          Vec3d rotatedOffset = xBasis.multiply(unRotatedOffset.getX()).add(axis.multiply(unRotatedOffset.getY())).add(zBasis.multiply(unRotatedOffset.getZ()));
          Vec3d pos = rotatedOffset.add(player.getEyePos());
-         player.getWorld().spawnParticles(dust,pos.getX(),pos.getY(),pos.getZ(),1,0.1,0.1+layerWidth/2.0,0.1,0.01);
+         player.getEntityWorld().spawnParticles(dust,pos.getX(),pos.getY(),pos.getZ(),1,0.1,0.1+layerWidth/2.0,0.1,0.01);
       }
    }
    
@@ -150,9 +150,9 @@ public class EndflameItem extends AbilityItem{
             .add(randomOrthogonal.crossProduct(player.getRotationVector()).multiply(Math.sin(randomTheta) * Math.sin(randomAngle)))
             .normalize();
       
-      DragonFireballEntity smallFireballEntity = new DragonFireballEntity(player.getWorld(), player, rotatedVector.multiply(1.5));
+      DragonFireballEntity smallFireballEntity = new DragonFireballEntity(player.getEntityWorld(), player, rotatedVector.multiply(1.5));
       smallFireballEntity.setPosition(smallFireballEntity.getX(), player.getBodyY(0.5) + 0.5, smallFireballEntity.getZ());
-      player.getWorld().spawnEntity(smallFireballEntity);
-      SoundUtils.playSound(player.getWorld(),player.getBlockPos(),SoundEvents.ENTITY_ENDER_DRAGON_SHOOT, SoundCategory.PLAYERS,1f, 1.25f);
+      player.getEntityWorld().spawnEntity(smallFireballEntity);
+      SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(),SoundEvents.ENTITY_ENDER_DRAGON_SHOOT, SoundCategory.PLAYERS,1f, 1.25f);
    }
 }

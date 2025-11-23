@@ -51,7 +51,7 @@ public class RandomTeleportItem extends AbilityItem{
          return ActionResult.PASS;
       }
       
-      if(teleport(player.getWorld(),player)){
+      if(teleport(player.getEntityWorld(),player)){
          profile(player).setAbilityCooldown(this.ability, CONFIG.getInt(ArchetypeRegistry.RANDOM_TELEPORT_COOLDOWN));
          player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, player.getStackInHand(hand)));
          return ActionResult.SUCCESS;
@@ -77,7 +77,7 @@ public class RandomTeleportItem extends AbilityItem{
             user.stopRiding();
          }
          
-         Vec3d vec3d = user.getPos();
+         Vec3d vec3d = user.getEntityPos();
          if (user.teleport(d, e, f, true)) {
             world.emitGameEvent(GameEvent.TELEPORT, vec3d, GameEvent.Emitter.of(user));
             SoundCategory soundCategory;

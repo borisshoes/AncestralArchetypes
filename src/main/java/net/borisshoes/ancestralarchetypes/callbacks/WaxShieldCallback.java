@@ -29,7 +29,7 @@ public class WaxShieldCallback extends TickTimerCallback {
    @Override
    public void onTimer(){
       try{
-         ServerPlayerEntity player1 = player.getServer().getPlayerManager().getPlayer(player.getUuid());
+         ServerPlayerEntity player1 = player.getEntityWorld().getServer().getPlayerManager().getPlayer(player.getUuid());
          if(player1 == null){
             BorisLib.addLoginCallback(new WaxShieldLoginCallback(player,hearts));
          }else{

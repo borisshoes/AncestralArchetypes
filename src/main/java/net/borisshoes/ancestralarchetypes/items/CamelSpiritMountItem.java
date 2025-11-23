@@ -18,7 +18,7 @@ public class CamelSpiritMountItem extends SpiritMountItem{
    
    @Override
    protected LivingEntity getMountEntity(ServerPlayerEntity player){
-      CamelEntity camel = EntityType.CAMEL.create(player.getWorld(), SpawnReason.MOB_SUMMONED);
+      CamelEntity camel = EntityType.CAMEL.create(player.getEntityWorld(), SpawnReason.MOB_SUMMONED);
       camel.getAttributeInstance(EntityAttributes.MAX_HEALTH).setBaseValue(60.0f);
       camel.getAttributeInstance(EntityAttributes.MOVEMENT_SPEED).setBaseValue(0.15f);
       camel.getAttributeInstance(EntityAttributes.JUMP_STRENGTH).setBaseValue(0.65f);

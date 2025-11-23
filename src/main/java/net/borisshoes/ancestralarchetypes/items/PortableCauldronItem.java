@@ -80,9 +80,9 @@ public class PortableCauldronItem extends AbilityItem{
             player.setCurrentHand(hand);
          }else{
             if(potionStack.isOf(Items.SPLASH_POTION)){
-               ProjectileEntity.spawnWithVelocity(SplashPotionEntity::new, player.getWorld(), potionStack, user, -20.0f, 0.7f, 0.25f);
+               ProjectileEntity.spawnWithVelocity(SplashPotionEntity::new, player.getEntityWorld(), potionStack, user, -20.0f, 0.7f, 0.25f);
             }else if(potionStack.isOf(Items.LINGERING_POTION)){
-               ProjectileEntity.spawnWithVelocity(LingeringPotionEntity::new, player.getWorld(), potionStack, user, -20.0f, 0.7f, 0.25f);
+               ProjectileEntity.spawnWithVelocity(LingeringPotionEntity::new, player.getEntityWorld(), potionStack, user, -20.0f, 0.7f, 0.25f);
             }
             PotionContentsComponent potionComp = potionStack.get(DataComponentTypes.POTION_CONTENTS);
             AtomicInteger totalDuration = new AtomicInteger();

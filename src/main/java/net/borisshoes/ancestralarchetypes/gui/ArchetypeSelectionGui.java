@@ -148,7 +148,7 @@ public class ArchetypeSelectionGui extends SimpleGui {
       setSlot(26,GuiElementBuilder.from(GraphicalItem.withColor(GraphicalItem.MENU_RIGHT_CONNECTOR,0x20c3e0)).hideTooltip());
       
       GameProfile gameProfile = player.getGameProfile();
-      GuiElementBuilder head = new GuiElementBuilder(Items.PLAYER_HEAD).setSkullOwner(gameProfile,player.getServer());
+      GuiElementBuilder head = new GuiElementBuilder(Items.PLAYER_HEAD).setSkullOwner(gameProfile,player.getEntityWorld().getServer());
       head.setName(Text.translatable("text.ancestralarchetypes.gui_title").formatted(Formatting.AQUA));
       head.addLoreLine(TextUtils.removeItalics(Text.translatable("text.ancestralarchetypes.gui_subtitle_1").formatted(Formatting.DARK_AQUA)));
       if(profile.getSubArchetype() != null && !showOnly){

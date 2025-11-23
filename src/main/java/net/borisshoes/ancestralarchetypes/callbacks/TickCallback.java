@@ -60,7 +60,7 @@ public class TickCallback {
    public static void onTick(MinecraftServer server){
       for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList()){
          IArchetypeProfile profile = profile(player);
-         ServerWorld world = player.getWorld();
+         ServerWorld world = player.getEntityWorld();
          
          deathReductionSize(profile,player);
          
@@ -153,7 +153,7 @@ public class TickCallback {
             temperatureCheck(profile,player);
          }
          
-         if(player.getServer().getTicks() % 18000 == 0 && profile.giveReminders()){ // Ability and Archetype check
+         if(player.getEntityWorld().getServer().getTicks() % 18000 == 0 && profile.giveReminders()){ // Ability and Archetype check
             reminders(profile,player);
          }
       }
@@ -165,10 +165,10 @@ public class TickCallback {
    private static void slowfaller(IArchetypeProfile profile, ServerPlayerEntity player){
       if(profile.hasAbility(ArchetypeRegistry.SLOW_FALLER)){
          int predictedFallDist = 0;
-         for(int y = player.getBlockY(); y >= player.getBlockY()-player.getWorld().getHeight(); y--){
+         for(int y = player.getBlockY(); y >= player.getBlockY()-player.getEntityWorld().getHeight(); y--){
             BlockPos blockPos = new BlockPos(player.getBlockX(),y,player.getBlockZ());
-            BlockState state = player.getWorld().getBlockState(blockPos);
-            if(state.isAir() || state.getCollisionShape(player.getWorld(),blockPos).isEmpty()){
+            BlockState state = player.getEntityWorld().getBlockState(blockPos);
+            if(state.isAir() || state.getCollisionShape(player.getEntityWorld(),blockPos).isEmpty()){
                predictedFallDist++;
             }else{
                break;
@@ -197,8 +197,8 @@ public class TickCallback {
    }
    
    private static void temperatureCheck(IArchetypeProfile profile, ServerPlayerEntity player){
-      ServerWorld world = player.getWorld();
-      RegistryEntry<Biome> biome = player.getWorld().getBiome(player.getBlockPos());
+      ServerWorld world = player.getEntityWorld();
+      RegistryEntry<Biome> biome = player.getEntityWorld().getBiome(player.getBlockPos());
       float temp = biome.value().getTemperature();
       
       boolean shouldFreeze = (biome.isIn(ArchetypeRegistry.COLD_DAMAGE_INCLUDE_BIOMES) || (temp < 0.1 && !biome.isIn(ArchetypeRegistry.COLD_DAMAGE_EXCEPTION_BIOMES))) &&
@@ -266,7 +266,7 @@ public class TickCallback {
          boolean alert = CONFIG.getBoolean(ArchetypeRegistry.SPYGLASS_REVEAL_ALERTS_PLAYER);
          ItemStack activeStack = player.getActiveItem();
          if(activeStack != null && activeStack.isOf(Items.SPYGLASS)){
-            MinecraftUtils.LasercastResult lasercast = MinecraftUtils.lasercast(player.getWorld(), player.getEyePos(), player.getRotationVecClient(), player.getServer().getPlayerManager().getViewDistance() * 16, true, player);
+            MinecraftUtils.LasercastResult lasercast = MinecraftUtils.lasercast(player.getEntityWorld(), player.getEyePos(), player.getRotationVecClient(), player.getEntityWorld().getServer().getPlayerManager().getViewDistance() * 16, true, player);
             for(Entity entity : lasercast.sortedHits()){
                if(entity instanceof ServerPlayerEntity target){
                   if(SPYGLASS_REVEAL_EVENTS.stream().anyMatch(event -> event.isReset() && event.getTarget().equals(target) && event.getInspector().equals(player))){
@@ -345,8 +345,8 @@ public class TickCallback {
          player.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAVING, 110, 0, false, false, true));
       }
       
-      if(profile.hasAbility(ArchetypeRegistry.MOONLIT_CAVE_SPIDER) && player.getWorld().getRegistryKey().equals(ServerWorld.OVERWORLD)){
-         long timeOfDay = player.getWorld().getTimeOfDay();
+      if(profile.hasAbility(ArchetypeRegistry.MOONLIT_CAVE_SPIDER) && player.getEntityWorld().getRegistryKey().equals(ServerWorld.OVERWORLD)){
+         long timeOfDay = player.getEntityWorld().getTimeOfDay();
          int day = (int) (timeOfDay/24000L % Integer.MAX_VALUE);
          int curPhase = day % 8;
          int moonLevel = Math.abs(-curPhase+4); // 0 - new moon, 4 - full moon
@@ -428,7 +428,7 @@ public class TickCallback {
       
       MinecraftUtils.attributeEffect(player, EntityAttributes.SAFE_FALL_DISTANCE, CONFIG.getDouble(ArchetypeRegistry.RESILIENT_JOINTS_EXTRA_FALL_BLOCKS), EntityAttributeModifier.Operation.ADD_VALUE, Identifier.of(MOD_ID,"resilient_joints"),!profile.hasAbility(ArchetypeRegistry.RESILIENT_JOINTS));
       
-      long timeOfDay = player.getWorld().getTimeOfDay();
+      long timeOfDay = player.getEntityWorld().getTimeOfDay();
       int day = (int) (timeOfDay/24000L % Integer.MAX_VALUE);
       int curPhase = day % 8;
       int moonLevel = Math.abs(-curPhase+4); // 0 - new moon, 4 - full moon
