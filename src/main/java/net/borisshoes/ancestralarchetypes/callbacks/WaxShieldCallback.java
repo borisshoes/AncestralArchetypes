@@ -1,15 +1,13 @@
 package net.borisshoes.ancestralarchetypes.callbacks;
 
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
-import net.borisshoes.arcananovum.callbacks.ShieldLoginCallback;
 import net.borisshoes.borislib.BorisLib;
 import net.borisshoes.borislib.timers.TickTimerCallback;
 import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.borisshoes.borislib.utils.SoundUtils;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 
@@ -17,7 +15,7 @@ public class WaxShieldCallback extends TickTimerCallback {
    
    private final float hearts;
    
-   public WaxShieldCallback(int time, ServerPlayerEntity player, float hearts){
+   public WaxShieldCallback(int time, ServerPlayer player, float hearts){
       super(time, null, player);
       this.hearts = hearts;
    }
@@ -29,15 +27,15 @@ public class WaxShieldCallback extends TickTimerCallback {
    @Override
    public void onTimer(){
       try{
-         ServerPlayerEntity player1 = player.getEntityWorld().getServer().getPlayerManager().getPlayer(player.getUuid());
+         ServerPlayer player1 = player.level().getServer().getPlayerList().getPlayer(player.getUUID());
          if(player1 == null){
             BorisLib.addLoginCallback(new WaxShieldLoginCallback(player,hearts));
          }else{
             float removed = Math.max(0,player1.getAbsorptionAmount()-hearts);
             if(player1.getAbsorptionAmount() != 0){
-               SoundUtils.playSongToPlayer(player1, SoundEvents.ITEM_HONEYCOMB_WAX_ON, 1.0f, .3f);
+               SoundUtils.playSongToPlayer(player1, SoundEvents.HONEYCOMB_WAX_ON, 1.0f, .3f);
             }
-            MinecraftUtils.removeMaxAbsorption(player1,Identifier.of(MOD_ID, ArchetypeRegistry.WAX_SHIELD.getId()),hearts);
+            MinecraftUtils.removeMaxAbsorption(player1, Identifier.fromNamespaceAndPath(MOD_ID, ArchetypeRegistry.WAX_SHIELD.id()),hearts);
             player1.setAbsorptionAmount(removed);
          }
       }catch(Exception e){

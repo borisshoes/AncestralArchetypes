@@ -2,30 +2,30 @@ package net.borisshoes.ancestralarchetypes.items;
 
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
-import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
+import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.ancestralarchetypes.entities.SnowblastEntity;
 import net.borisshoes.borislib.utils.SoundUtils;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import xyz.nucleoid.packettweaker.PacketContext;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
 public class SnowblastItem extends AbilityItem{
-   public SnowblastItem(Settings settings){
+   public SnowblastItem(Properties settings){
       super(ArchetypeRegistry.SNOW_BLAST, "❄", settings);
    }
    
@@ -39,19 +39,19 @@ public class SnowblastItem extends AbilityItem{
    }
    
    @Override
-   public ActionResult use(World world, PlayerEntity user, Hand hand){
-      if(!(user instanceof ServerPlayerEntity player)) return ActionResult.PASS;
-      IArchetypeProfile profile = profile(player);
+   public InteractionResult use(Level world, Player user, InteractionHand hand){
+      if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
+      PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendMessage(Text.translatable("text.ancestralarchetypes.ability_on_cooldown").formatted(Formatting.RED,Formatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.BLOCK_FIRE_EXTINGUISH,0.25f,0.8f);
-         return ActionResult.PASS;
+         player.displayClientMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         return InteractionResult.PASS;
       }
       
-      ProjectileEntity.spawnWithVelocity(SnowblastEntity::new, player.getEntityWorld(), user.getStackInHand(hand), user, 0.0F, 1.5f, 1.0F);
+      Projectile.spawnProjectileFromRotation(SnowblastEntity::new, player.level(), user.getItemInHand(hand), user, 0.0F, 1.5f, 1.0F);
       profile(player).setAbilityCooldown(this.ability, CONFIG.getInt(ArchetypeRegistry.SNOW_BLAST_COOLDOWN));
-      world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_SNOWBALL_THROW, SoundCategory.NEUTRAL, 0.8F, 0.3F / (world.getRandom().nextFloat() * 0.3F + 0.6F));
-      player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, player.getStackInHand(hand)));
-      return ActionResult.SUCCESS;
+      world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.NEUTRAL, 0.8F, 0.3F / (world.getRandom().nextFloat() * 0.3F + 0.6F));
+      player.connection.send(new ClientboundContainerSetSlotPacket(player.inventoryMenu.containerId, player.inventoryMenu.incrementStateId(), player.getUsedItemHand() == InteractionHand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, player.getItemInHand(hand)));
+      return InteractionResult.SUCCESS;
    }
 }

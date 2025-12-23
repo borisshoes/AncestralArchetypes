@@ -5,14 +5,14 @@ import net.borisshoes.ancestralarchetypes.items.LevitationBulletItem;
 import net.borisshoes.borislib.BorisLib;
 import net.borisshoes.borislib.events.Event;
 import net.borisshoes.borislib.timers.TickTimerCallback;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 
 public class DeglowTimerCallback extends TickTimerCallback {
-   public final ServerPlayerEntity player;
+   public final ServerPlayer player;
    public final LivingEntity target;
    
-   public DeglowTimerCallback(ServerPlayerEntity player, LivingEntity target) {
+   public DeglowTimerCallback(ServerPlayer player, LivingEntity target) {
       super(1, null, null);
       this.player = player;
       this.target = target;

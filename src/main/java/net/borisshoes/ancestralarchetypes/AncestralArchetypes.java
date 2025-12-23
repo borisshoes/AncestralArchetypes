@@ -1,13 +1,10 @@
 package net.borisshoes.ancestralarchetypes;
 
-import com.mojang.authlib.GameProfile;
 import net.borisshoes.ancestralarchetypes.callbacks.*;
-import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.misc.SpyglassRevealEvent;
-import net.borisshoes.borislib.BorisLib;
 import net.borisshoes.borislib.config.ConfigManager;
+import net.borisshoes.borislib.datastorage.DataAccess;
 import net.borisshoes.borislib.utils.ItemModDataHandler;
-import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -18,10 +15,8 @@ import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,7 +24,6 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.CONFIG_SETTINGS;
-import static net.borisshoes.ancestralarchetypes.cca.PlayerComponentInitializer.PLAYER_DATA;
 
 public class AncestralArchetypes implements ModInitializer, ClientModInitializer {
    
@@ -75,17 +69,27 @@ public class AncestralArchetypes implements ModInitializer, ClientModInitializer
       if (lastDotIndex == -1) {
          return null;
       }
-      return ArchetypeRegistry.ABILITIES.get(Identifier.of(MOD_ID,tag.substring(lastDotIndex + 1)));
+      return ArchetypeRegistry.ABILITIES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,tag.substring(lastDotIndex + 1)));
    }
    
-   public static IArchetypeProfile profile(PlayerEntity player){
+   public static PlayerArchetypeData profile(Player player){
       if(player == null){
          return null;
       }
       try{
-         return PLAYER_DATA.get(player);
+         return profile(player.getUUID());
       }catch(Exception e){
-         log(3,"Failed to get Archetype Profile for "+player.getNameForScoreboard() + " ("+player.getUuidAsString()+")");
+         log(3,"Failed to get Archetype Profile for "+player.getScoreboardName() + " ("+player.getStringUUID()+")");
+         log(3,e.toString());
+      }
+      return null;
+   }
+   
+   public static PlayerArchetypeData profile(UUID playerId){
+      try{
+         return DataAccess.getPlayer(playerId, PlayerArchetypeData.KEY);
+      }catch(Exception e){
+         log(3,"Failed to get Archetype Profile for ("+playerId+")");
          log(3,e.toString());
       }
       return null;

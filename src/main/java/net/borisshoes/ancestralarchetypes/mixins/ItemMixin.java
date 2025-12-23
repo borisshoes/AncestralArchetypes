@@ -2,31 +2,29 @@ package net.borisshoes.ancestralarchetypes.mixins;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
+import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.ancestralarchetypes.callbacks.WaxShieldCallback;
-import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
-import net.borisshoes.arcananovum.augments.ArcanaAugments;
-import net.borisshoes.arcananovum.callbacks.ShieldTimerCallback;
 import net.borisshoes.borislib.BorisLib;
 import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.borisshoes.borislib.utils.SoundUtils;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ConsumableComponent;
-import net.minecraft.component.type.PotionContentsComponent;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.potion.Potions;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.component.Consumable;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -39,11 +37,11 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 @Mixin(Item.class)
 public class ItemMixin {
    
-   @Inject(method = "finishUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/component/type/ConsumableComponent;finishConsumption(Lnet/minecraft/world/World;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;"), cancellable = true)
-   private void archetypes$onFinishUsing(ItemStack stack, World world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir, @Local ConsumableComponent component){
-      if (user instanceof ServerPlayerEntity playerEntity) {
-         IArchetypeProfile profile = profile(playerEntity);
-         HashMap<Item, Pair<Float,Integer>> map = null;
+   @Inject(method = "finishUsingItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/Consumable;onConsume(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/item/ItemStack;"), cancellable = true)
+   private void archetypes$onFinishUsing(ItemStack stack, Level world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir, @Local Consumable component){
+      if (user instanceof ServerPlayer playerEntity) {
+         PlayerArchetypeData profile = profile(playerEntity);
+         HashMap<Item, Tuple<Float,Integer>> map = null;
          float healthMod = 1.0f;
          
          if(ArchetypeRegistry.TUFF_FOODS.containsKey(stack.getItem())){
@@ -75,42 +73,42 @@ public class ItemMixin {
          }
          
          if(map != null){
-            Pair<Float,Integer> pair = map.get(stack.getItem());
-            playerEntity.heal(pair.getLeft() * healthMod);
-            world.playSound(null, playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), SoundEvents.ENTITY_IRON_GOLEM_REPAIR, SoundCategory.PLAYERS, 0.5f, MathHelper.nextBetween(playerEntity.getRandom(), 0.9f, 1.0f));
+            Tuple<Float,Integer> pair = map.get(stack.getItem());
+            playerEntity.heal(pair.getA() * healthMod);
+            world.playSound(null, playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), SoundEvents.IRON_GOLEM_REPAIR, SoundSource.PLAYERS, 0.5f, Mth.randomBetween(playerEntity.getRandom(), 0.9f, 1.0f));
          }
          
-         if((profile.hasAbility(ArchetypeRegistry.SLIME_TOTEM) && stack.isIn(ArchetypeRegistry.SLIME_GROW_ITEMS))
-               || (profile.hasAbility(ArchetypeRegistry.MAGMA_TOTEM) && stack.isIn(ArchetypeRegistry.MAGMA_CUBE_GROW_ITEMS))){
-            profile.changeDeathReductionSizeLevel(true);
-            playerEntity.getEntityWorld().spawnParticles(ParticleTypes.TOTEM_OF_UNDYING,playerEntity.getX(), playerEntity.getY()+playerEntity.getHeight()/2, playerEntity.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
-            playerEntity.playSound(SoundEvents.ENTITY_ZOMBIE_VILLAGER_CONVERTED);
+         if((profile.hasAbility(ArchetypeRegistry.SLIME_TOTEM) && stack.is(ArchetypeRegistry.SLIME_GROW_ITEMS))
+               || (profile.hasAbility(ArchetypeRegistry.MAGMA_TOTEM) && stack.is(ArchetypeRegistry.MAGMA_CUBE_GROW_ITEMS))){
+            profile.changeDeathReductionSizeLevel(playerEntity,true);
+            playerEntity.level().sendParticles(ParticleTypes.TOTEM_OF_UNDYING,playerEntity.getX(), playerEntity.getY()+playerEntity.getBbHeight()/2, playerEntity.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
+            playerEntity.makeSound(SoundEvents.ZOMBIE_VILLAGER_CONVERTED);
          }
          
-         if(profile.hasAbility(ArchetypeRegistry.FUNGUS_SPEED_BOOST) && stack.isOf(Items.WARPED_FUNGUS)){
+         if(profile.hasAbility(ArchetypeRegistry.FUNGUS_SPEED_BOOST) && stack.is(Items.WARPED_FUNGUS)){
             profile.fungusBoost();
          }
          
-         if(profile.hasAbility(ArchetypeRegistry.WAX_SHIELD) && stack.isOf(Items.HONEYCOMB)){
+         if(profile.hasAbility(ArchetypeRegistry.WAX_SHIELD) && stack.is(Items.HONEYCOMB)){
             double maxAbs = CONFIG.getDouble(ArchetypeRegistry.WAX_SHIELD_MAX_HEALTH);
             float curAbs = playerEntity.getAbsorptionAmount();
             float addedAbs = (float) Math.min(maxAbs,CONFIG.getDouble(ArchetypeRegistry.WAX_SHIELD_HEALTH));
             int duration = CONFIG.getInt(ArchetypeRegistry.WAX_SHIELD_DURATION);
             BorisLib.addTickTimerCallback(new WaxShieldCallback(duration,playerEntity,addedAbs));
-            SoundUtils.playSongToPlayer(playerEntity, SoundEvents.ITEM_AXE_WAX_OFF, 0.5f, 1.8f);
-            MinecraftUtils.addMaxAbsorption(playerEntity, Identifier.of(MOD_ID,ArchetypeRegistry.WAX_SHIELD.getId()),addedAbs);
+            SoundUtils.playSongToPlayer(playerEntity, SoundEvents.AXE_WAX_OFF, 0.5f, 1.8f);
+            MinecraftUtils.addMaxAbsorption(playerEntity, Identifier.fromNamespaceAndPath(MOD_ID,ArchetypeRegistry.WAX_SHIELD.id()),addedAbs);
             playerEntity.setAbsorptionAmount((curAbs + addedAbs));
          }
          
-         if(profile.getSubArchetype() == ArchetypeRegistry.PARROT && stack.isOf(Items.COOKIE)){
-            playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON,100,2,true,true,true),playerEntity);
+         if(profile.getSubArchetype() == ArchetypeRegistry.PARROT && stack.is(Items.COOKIE)){
+            playerEntity.addEffect(new MobEffectInstance(MobEffects.POISON,100,2,true,true,true),playerEntity);
          }
          
-         if(profile.hasAbility(ArchetypeRegistry.HURT_BY_WATER) && stack.contains(DataComponentTypes.POTION_CONTENTS) && !playerEntity.hasStatusEffect(StatusEffects.WATER_BREATHING)){
-            PotionContentsComponent potions = stack.get(DataComponentTypes.POTION_CONTENTS);
+         if(profile.hasAbility(ArchetypeRegistry.HURT_BY_WATER) && stack.has(DataComponents.POTION_CONTENTS) && !playerEntity.hasEffect(MobEffects.WATER_BREATHING)){
+            PotionContents potions = stack.get(DataComponents.POTION_CONTENTS);
             if(potions.potion().isPresent() && potions.potion().get().equals(Potions.WATER)){
-               playerEntity.damage(playerEntity.getEntityWorld(), world.getDamageSources().drown(), (float) CONFIG.getDouble(ArchetypeRegistry.HURT_BY_WATER_SWIM_DAMAGE));
-               world.playSound(null, playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), SoundEvents.ENTITY_GENERIC_BURN, playerEntity.getSoundCategory(), 0.4F, 2.0F + playerEntity.getRandom().nextFloat() * 0.4F);
+               playerEntity.hurtServer(playerEntity.level(), world.damageSources().drown(), (float) CONFIG.getDouble(ArchetypeRegistry.HURT_BY_WATER_SWIM_DAMAGE));
+               world.playSound(null, playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), SoundEvents.GENERIC_BURN, playerEntity.getSoundSource(), 0.4F, 2.0F + playerEntity.getRandom().nextFloat() * 0.4F);
             }
          }
       }

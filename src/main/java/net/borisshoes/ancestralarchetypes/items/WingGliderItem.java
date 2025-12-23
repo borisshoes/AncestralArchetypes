@@ -1,61 +1,61 @@
 package net.borisshoes.ancestralarchetypes.items;
 
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
-import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
+import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.borislib.utils.SoundUtils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
-import net.minecraft.particle.DustParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
 public class WingGliderItem extends GliderItem{
    
-   public WingGliderItem(Settings settings){
+   public WingGliderItem(Properties settings){
       super(ArchetypeRegistry.WING_GLIDER, ArchetypeRegistry.PARROT.getColor(), settings, ArchetypeRegistry.WING_GLIDER_TRIM_PATTERN);
    }
    
    @Override
-   public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot){
+   public void inventoryTick(ItemStack stack, ServerLevel world, Entity entity, EquipmentSlot slot){
       super.inventoryTick(stack, world, entity, slot);
-      if(!(entity instanceof ServerPlayerEntity player)) return;
+      if(!(entity instanceof ServerPlayer player)) return;
       
-      if(stack.equals(player.getEquippedStack(EquipmentSlot.CHEST)) && player.isGliding()){
-         if(player.isSneaking()){
-            Vec3d lookingVec = player.getRotationVector();
+      if(stack.equals(player.getItemBySlot(EquipmentSlot.CHEST)) && player.isFallFlying()){
+         if(player.isShiftKeyDown()){
+            Vec3 lookingVec = player.getLookAngle();
             double d = 1.5;
             double e = 0.1;
             double f = 0.5;
-            Vec3d velVec = player.getVelocity();
-            Vec3d deltaV = new Vec3d(
+            Vec3 velVec = player.getDeltaMovement();
+            Vec3 deltaV = new Vec3(
                   lookingVec.x * e + (lookingVec.x * d - velVec.x) * f,
                   lookingVec.y * e + (lookingVec.y * d - velVec.y) * f,
                   lookingVec.z * e + (lookingVec.z * d - velVec.z) * f
             );
-            double dp = deltaV.dotProduct(lookingVec);
+            double dp = deltaV.dot(lookingVec);
             if(dp < 0){
-               deltaV = deltaV.subtract(lookingVec.multiply(dp));
+               deltaV = deltaV.subtract(lookingVec.scale(dp));
             }
             
-            player.setVelocity(velVec.add(deltaV));
-            player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player));
-            IArchetypeProfile profile = profile(player);
+            player.setDeltaMovement(velVec.add(deltaV));
+            player.connection.send(new ClientboundSetEntityMotionPacket(player));
+            PlayerArchetypeData profile = profile(player);
 
-            world.spawnParticles(new DustParticleEffect(profile.getGliderColor(),player.getRandom().nextFloat()+0.5f),false, false,
+            world.sendParticles(new DustParticleOptions(profile.getGliderColor(),player.getRandom().nextFloat()+0.5f),false, false,
                   player.getX(), player.getY(), player.getZ(),
                   3, 0.15, 0.15, 0.15, 1);
             
-            if(world.getServer().getTicks() % 30 == 0){
-               SoundUtils.playSound(world,player.getBlockPos(), SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.PLAYERS, 0.4f, 1.2f);
-               world.spawnParticles(ParticleTypes.POOF,false, false,
+            if(world.getServer().getTickCount() % 30 == 0){
+               SoundUtils.playSound(world,player.blockPosition(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 0.4f, 1.2f);
+               world.sendParticles(ParticleTypes.POOF,false, false,
                      player.getX(), player.getY(), player.getZ(),
                      10, 0.05, 0.05, 0.05, 0.25);
             }

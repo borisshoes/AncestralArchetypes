@@ -3,33 +3,33 @@ package net.borisshoes.ancestralarchetypes.items;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import io.github.ladysnake.pal.VanillaAbilities;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
-import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
+import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.borislib.utils.SoundUtils;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.DyedColorComponent;
-import net.minecraft.component.type.EquippableComponent;
-import net.minecraft.component.type.TooltipDisplayComponent;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.equipment.trim.ArmorTrim;
-import net.minecraft.item.equipment.trim.ArmorTrimMaterial;
-import net.minecraft.item.equipment.trim.ArmorTrimPattern;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.item.equipment.Equippable;
+import net.minecraft.world.item.equipment.trim.ArmorTrim;
+import net.minecraft.world.item.equipment.trim.TrimMaterial;
+import net.minecraft.world.item.equipment.trim.TrimPattern;
+import net.minecraft.world.level.Level;
 import xyz.nucleoid.packettweaker.PacketContext;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
@@ -38,7 +38,7 @@ import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.EQUIPMENT_ASS
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.SLOW_HOVER_ABILITY;
 
 public class HoverItem extends AbilityItem{
-   public HoverItem(Settings settings){
+   public HoverItem(Properties settings){
       super(ArchetypeRegistry.SLOW_HOVER, "\uD83D\uDE81", settings);
    }
    
@@ -52,29 +52,29 @@ public class HoverItem extends AbilityItem{
    }
    
    @Override
-   public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot){
+   public void inventoryTick(ItemStack stack, ServerLevel world, Entity entity, EquipmentSlot slot){
       super.inventoryTick(stack, world, entity, slot);
       
-      if(!(entity instanceof ServerPlayerEntity player)) return;
-      IArchetypeProfile profile = profile(player);
+      if(!(entity instanceof ServerPlayer player)) return;
+      PlayerArchetypeData profile = profile(player);
       double hoverPercentage = ((double)profile.getHoverTime() / profile.getMaxHoverTime());
       boolean onCooldown = profile.getAbilityCooldown(this.ability) > 0;
       if(onCooldown){
-         stack.setDamage(stack.getMaxDamage() - 1);
+         stack.setDamageValue(stack.getMaxDamage() - 1);
       }else{
-         stack.setDamage((int) ((stack.getMaxDamage()-1) * (1-hoverPercentage)));
+         stack.setDamageValue((int) ((stack.getMaxDamage()-1) * (1-hoverPercentage)));
       }
       
-      DyedColorComponent dyedColorComponent = stack.get(DataComponentTypes.DYED_COLOR);
+      DyedItemColor dyedColorComponent = stack.get(DataComponents.DYED_COLOR);
       if(dyedColorComponent == null || dyedColorComponent.rgb() != profile.getHelmetColor()){
-         stack.set(DataComponentTypes.DYED_COLOR, new DyedColorComponent(profile.getHelmetColor()));
-         stack.set(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT.with(DataComponentTypes.DYED_COLOR,true));
+         stack.set(DataComponents.DYED_COLOR, new DyedItemColor(profile.getHelmetColor()));
+         stack.set(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT.withHidden(DataComponents.DYED_COLOR,true));
       }
       
       boolean hovering = !player.isCreative() && VanillaAbilities.ALLOW_FLYING.getTracker(player).isEnabled() &&
             VanillaAbilities.ALLOW_FLYING.getTracker(player).isGrantedBy(SLOW_HOVER_ABILITY) &&
             VanillaAbilities.FLYING.isEnabledFor(player);
-      if(stack.equals(player.getEquippedStack(EquipmentSlot.HEAD)) && hovering){
+      if(stack.equals(player.getItemBySlot(EquipmentSlot.HEAD)) && hovering){
          int glideValue = (int) (hoverPercentage * 100);
          char[] unicodeChars = {'▁', '▂', '▃', '▅', '▆', '▇', '▌'};
          StringBuilder message = new StringBuilder("≈ ");
@@ -90,36 +90,36 @@ public class HoverItem extends AbilityItem{
             }
          }
          message.append(" ≈");
-         player.sendMessage(Text.literal(message.toString()).withColor(ArchetypeRegistry.GHASTLING.getColor()), true);
-         stack.set(DataComponentTypes.EQUIPPABLE, EquippableComponent.builder(EquipmentSlot.HEAD).equipSound(SoundEvents.ITEM_ARMOR_EQUIP_LEATHER).model(RegistryKey.of(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.of(MOD_ID,"aviator_helmet_on"))).damageOnHurt(false).build());
-         stack.remove(DataComponentTypes.TRIM);
+         player.displayClientMessage(Component.literal(message.toString()).withColor(ArchetypeRegistry.GHASTLING.getColor()), true);
+         stack.set(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER).setAsset(ResourceKey.create(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.fromNamespaceAndPath(MOD_ID,"aviator_helmet_on"))).setDamageOnHurt(false).build());
+         stack.remove(DataComponents.TRIM);
       }else{
-         stack.set(DataComponentTypes.EQUIPPABLE, EquippableComponent.builder(EquipmentSlot.HEAD).equipSound(SoundEvents.ITEM_ARMOR_EQUIP_LEATHER).model(RegistryKey.of(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.of(MOD_ID,"aviator_helmet_off"))).damageOnHurt(false).build());
-         stack.remove(DataComponentTypes.TRIM);
+         stack.set(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER).setAsset(ResourceKey.create(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.fromNamespaceAndPath(MOD_ID,"aviator_helmet_off"))).setDamageOnHurt(false).build());
+         stack.remove(DataComponents.TRIM);
       }
       
-      ArmorTrim armorTrim = stack.get(DataComponentTypes.TRIM);
-      RegistryKey<ArmorTrimPattern> pattern = hovering ? ArchetypeRegistry.HELMET_TRIM_PATTERN_ON : ArchetypeRegistry.HELMET_TRIM_PATTERN_OFF;
-      RegistryEntry<ArmorTrimMaterial> material = profile.getHelmetTrimMaterial();
-      String curId = armorTrim == null ? "" : armorTrim.material().getIdAsString();
-      String neededId = material == null ? "" : material.getIdAsString();
+      ArmorTrim armorTrim = stack.get(DataComponents.TRIM);
+      ResourceKey<TrimPattern> pattern = hovering ? ArchetypeRegistry.HELMET_TRIM_PATTERN_ON : ArchetypeRegistry.HELMET_TRIM_PATTERN_OFF;
+      Holder<TrimMaterial> material = profile.getHelmetTrimMaterial();
+      String curId = armorTrim == null ? "" : armorTrim.material().getRegisteredName();
+      String neededId = material == null ? "" : material.getRegisteredName();
       if(!curId.equals(neededId)){
          if(neededId.isEmpty()){
-            stack.remove(DataComponentTypes.TRIM);
+            stack.remove(DataComponents.TRIM);
          }else{
-            stack.set(DataComponentTypes.TRIM, new ArmorTrim(material, world.getRegistryManager().getOrThrow(RegistryKeys.TRIM_PATTERN).getOptional(pattern).get()));
+            stack.set(DataComponents.TRIM, new ArmorTrim(material, world.registryAccess().lookupOrThrow(Registries.TRIM_PATTERN).get(pattern).get()));
          }
       }
    }
    
    @Override
-   public ActionResult use(World world, PlayerEntity user, Hand hand){
-      if(!(user instanceof ServerPlayerEntity player)) return ActionResult.PASS;
-      IArchetypeProfile profile = profile(player);
+   public InteractionResult use(Level world, Player user, InteractionHand hand){
+      if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
+      PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendMessage(Text.translatable("text.ancestralarchetypes.ability_on_cooldown").formatted(Formatting.RED,Formatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.BLOCK_FIRE_EXTINGUISH,0.25f,0.8f);
-         return ActionResult.PASS;
+         player.displayClientMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         return InteractionResult.PASS;
       }
       
       return super.use(world, user, hand);

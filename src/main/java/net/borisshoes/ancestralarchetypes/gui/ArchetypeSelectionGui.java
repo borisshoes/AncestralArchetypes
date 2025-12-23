@@ -4,20 +4,15 @@ import com.mojang.authlib.GameProfile;
 import eu.pb4.sgui.api.ClickType;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
-import net.borisshoes.ancestralarchetypes.Archetype;
-import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
-import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
-import net.borisshoes.ancestralarchetypes.SubArchetype;
-import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
+import net.borisshoes.ancestralarchetypes.*;
 import net.borisshoes.borislib.gui.GraphicalItem;
 import net.borisshoes.borislib.gui.GuiHelper;
 import net.borisshoes.borislib.utils.TextUtils;
-import net.minecraft.item.Items;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,50 +31,50 @@ public class ArchetypeSelectionGui extends SimpleGui {
    private int page = 1;
    private final int numPages = Math.max(1, (int)Math.ceil((float)ArchetypeRegistry.ARCHETYPES.size() / 7.0));
    
-   public ArchetypeSelectionGui(ServerPlayerEntity player, SubArchetype subArchetype, boolean showOnly){
+   public ArchetypeSelectionGui(ServerPlayer player, SubArchetype subArchetype, boolean showOnly){
       super(getScreenType(subArchetype), player, false);
       this.subArchetype = subArchetype;
       this.map = new HashMap<>();
       this.showOnly = showOnly;
-      setTitle(Text.translatable("text.ancestralarchetypes.gui_title"));
+      setTitle(Component.translatable("text.ancestralarchetypes.gui_title"));
       if(this.subArchetype != null) menuOnClose = true;
       build();
    }
    
-   private static ScreenHandlerType<?> getScreenType(SubArchetype sub){
-      if(sub == null) return ScreenHandlerType.GENERIC_9X6;
+   private static MenuType<?> getScreenType(SubArchetype sub){
+      if(sub == null) return MenuType.GENERIC_9x6;
       ArrayList<ArchetypeAbility> abilities = new ArrayList<>();
       abilities.addAll(Arrays.asList(sub.getAbilities()));
       abilities.addAll(Arrays.asList(sub.getArchetype().getAbilities()));
       abilities.removeIf(a1 -> abilities.stream().anyMatch(a2 -> a2.overrides(a1)));
       int size = abilities.size();
       if(size <= 7){
-         return ScreenHandlerType.GENERIC_9X3;
+         return MenuType.GENERIC_9x3;
       }else if(size <= 14){
-         return ScreenHandlerType.GENERIC_9X4;
+         return MenuType.GENERIC_9x4;
       }else if(size <= 21){
-         return ScreenHandlerType.GENERIC_9X5;
+         return MenuType.GENERIC_9x5;
       }else{
-         return ScreenHandlerType.GENERIC_9X6;
+         return MenuType.GENERIC_9x6;
       }
    }
    
    @Override
-   public boolean onAnyClick(int index, ClickType type, SlotActionType action){
-      IArchetypeProfile profile = profile(player);
+   public boolean onAnyClick(int index, ClickType type, net.minecraft.world.inventory.ClickType action){
+      PlayerArchetypeData profile = profile(player);
       if(subArchetype == null){
          if(this.map.containsKey(index)){
             ArchetypeSelectionGui gui = new ArchetypeSelectionGui(player,this.map.get(index),this.showOnly);
             gui.open();
          }else if(index == 4 && profile.getSubArchetype() != null && !showOnly){
-            profile.changeArchetype(null);
+            profile.changeArchetype(player,null);
             this.close();
          }
       }else{
          if(index == (getSize()-9) || index == 4){
             this.close();
          }else if(index == (getSize()-5) && profile.getSubArchetype() != subArchetype && !showOnly){
-            profile.changeArchetype(subArchetype);
+            profile.changeArchetype(player,subArchetype);
             this.menuOnClose = false;
             this.close();
          }
@@ -96,12 +91,12 @@ public class ArchetypeSelectionGui extends SimpleGui {
    }
    
    private void buildArchetypeMenu(){
-      IArchetypeProfile profile = profile(player);
-      GuiHelper.outlineGUI(this,subArchetype.getColor(), Text.empty());
+      PlayerArchetypeData profile = profile(player);
+      GuiHelper.outlineGUI(this,subArchetype.getColor(), Component.empty());
       
       GuiElementBuilder subArchetypeItem = GuiElementBuilder.from(subArchetype.getDisplayItem()).hideDefaultTooltip();
       subArchetypeItem.setName(subArchetype.getName().withColor(subArchetype.getColor()));
-      subArchetypeItem.addLoreLine(subArchetype.getDescription().formatted(TextUtils.getClosestFormatting(subArchetype.getColor())));
+      subArchetypeItem.addLoreLine(subArchetype.getDescription().withStyle(TextUtils.getClosestFormatting(subArchetype.getColor())));
       setSlot(4,subArchetypeItem);
       
       ArrayList<ArchetypeAbility> abilities = new ArrayList<>();
@@ -120,41 +115,41 @@ public class ArchetypeSelectionGui extends SimpleGui {
             int index = i*7 + j;
             int offset = 1 + dynamicSlot[j];
             ArchetypeAbility ability = abilities.get(index);
-            GuiElementBuilder abilityItem = GuiElementBuilder.from(ability.getDisplayStack()).hideDefaultTooltip();
+            GuiElementBuilder abilityItem = GuiElementBuilder.from(ability.displayStack()).hideDefaultTooltip();
             abilityItem.setName(ability.getName().withColor(subArchetype.getColor()));
-            abilityItem.addLoreLine(ability.getDescription().formatted(TextUtils.getClosestFormatting(subArchetype.getColor())));
+            abilityItem.addLoreLine(ability.getDescription().withStyle(TextUtils.getClosestFormatting(subArchetype.getColor())));
             setSlot((i+1)*9+offset,abilityItem);
          }
       }
       
       if(!showOnly){
          setSlot(getSize()-5, GuiElementBuilder.from(GraphicalItem.with(GraphicalItem.CONFIRM)).hideDefaultTooltip()
-               .setName(Text.translatable("text.ancestralarchetypes.confirm_selection").formatted(Formatting.GREEN))
-               .addLoreLine(Text.translatable("text.ancestralarchetypes.warning").formatted(Formatting.DARK_RED,Formatting.ITALIC))
+               .setName(Component.translatable("text.ancestralarchetypes.confirm_selection").withStyle(ChatFormatting.GREEN))
+               .addLoreLine(Component.translatable("text.ancestralarchetypes.warning").withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC))
          );
       }
       
       setSlot(getSize()-9, GuiElementBuilder.from(GraphicalItem.with(GraphicalItem.LEFT_ARROW)).hideDefaultTooltip()
-            .setName(Text.translatable("text.ancestralarchetypes.return").formatted(Formatting.GOLD))
+            .setName(Component.translatable("text.ancestralarchetypes.return").withStyle(ChatFormatting.GOLD))
       );
    }
    
    
    private void buildMainMenu(){
       this.map.clear();
-      IArchetypeProfile profile = profile(player);
-      GuiHelper.outlineGUI(this,0x20c3e0, Text.empty());
+      PlayerArchetypeData profile = profile(player);
+      GuiHelper.outlineGUI(this,0x20c3e0, Component.empty());
       setSlot(18,GuiElementBuilder.from(GraphicalItem.withColor(GraphicalItem.MENU_LEFT_CONNECTOR,0x20c3e0)).hideTooltip());
       setSlot(26,GuiElementBuilder.from(GraphicalItem.withColor(GraphicalItem.MENU_RIGHT_CONNECTOR,0x20c3e0)).hideTooltip());
       
       GameProfile gameProfile = player.getGameProfile();
-      GuiElementBuilder head = new GuiElementBuilder(Items.PLAYER_HEAD).setSkullOwner(gameProfile,player.getEntityWorld().getServer());
-      head.setName(Text.translatable("text.ancestralarchetypes.gui_title").formatted(Formatting.AQUA));
-      head.addLoreLine(TextUtils.removeItalics(Text.translatable("text.ancestralarchetypes.gui_subtitle_1").formatted(Formatting.DARK_AQUA)));
+      GuiElementBuilder head = new GuiElementBuilder(Items.PLAYER_HEAD).setSkullOwner(gameProfile,player.level().getServer());
+      head.setName(Component.translatable("text.ancestralarchetypes.gui_title").withStyle(ChatFormatting.AQUA));
+      head.addLoreLine(TextUtils.removeItalics(Component.translatable("text.ancestralarchetypes.gui_subtitle_1").withStyle(ChatFormatting.DARK_AQUA)));
       if(profile.getSubArchetype() != null && !showOnly){
-         head.addLoreLine(Text.empty());
-         head.addLoreLine(TextUtils.removeItalics(Text.translatable("text.ancestralarchetypes.gui_subtitle_2").formatted(Formatting.RED)));
-         head.addLoreLine(TextUtils.removeItalics(Text.translatable("text.ancestralarchetypes.warning").formatted(Formatting.DARK_RED, Formatting.ITALIC)));
+         head.addLoreLine(Component.empty());
+         head.addLoreLine(TextUtils.removeItalics(Component.translatable("text.ancestralarchetypes.gui_subtitle_2").withStyle(ChatFormatting.RED)));
+         head.addLoreLine(TextUtils.removeItalics(Component.translatable("text.ancestralarchetypes.warning").withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC)));
       }
       setSlot(4,head);
       
@@ -171,7 +166,7 @@ public class ArchetypeSelectionGui extends SimpleGui {
          Archetype archetype = archetypes.get(i);
          GuiElementBuilder archetypeItem = GuiElementBuilder.from(archetype.getDisplayItem()).hideDefaultTooltip();
          archetypeItem.setName(archetype.getName().withColor(archetype.getColor()));
-         archetypeItem.addLoreLine(archetype.getDescription().formatted(TextUtils.getClosestFormatting(archetype.getColor())));
+         archetypeItem.addLoreLine(archetype.getDescription().withStyle(TextUtils.getClosestFormatting(archetype.getColor())));
          setSlot(9+offset,archetypeItem);
          setSlot(18+offset,GuiElementBuilder.from(GraphicalItem.withColor(GraphicalItem.MENU_HORIZONTAL,archetype.getColor())).hideTooltip());
          
@@ -182,9 +177,9 @@ public class ArchetypeSelectionGui extends SimpleGui {
                SubArchetype subArchetype = subArchetypes.get(j);
                subArchetypeItem = GuiElementBuilder.from(subArchetype.getDisplayItem()).hideDefaultTooltip();
                subArchetypeItem.setName(subArchetype.getName().withColor(subArchetype.getColor()));
-               subArchetypeItem.addLoreLine(subArchetype.getDescription().formatted(TextUtils.getClosestFormatting(subArchetype.getColor())));
-               subArchetypeItem.addLoreLine(Text.literal(""));
-               subArchetypeItem.addLoreLine(Text.translatable("text.ancestralarchetypes.gui_subtitle_1").formatted(Formatting.DARK_PURPLE,Formatting.ITALIC));
+               subArchetypeItem.addLoreLine(subArchetype.getDescription().withStyle(TextUtils.getClosestFormatting(subArchetype.getColor())));
+               subArchetypeItem.addLoreLine(Component.literal(""));
+               subArchetypeItem.addLoreLine(Component.translatable("text.ancestralarchetypes.gui_subtitle_1").withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
                this.map.put(27+offset+(9*j),subArchetype);
             }else{
                subArchetypeItem = GuiElementBuilder.from(GraphicalItem.withColor(GraphicalItem.PAGE_BG,archetype.getColor())).hideTooltip();
@@ -196,8 +191,8 @@ public class ArchetypeSelectionGui extends SimpleGui {
    
    private GuiElementBuilder createNextPageItem() {
       GuiElementBuilder nextPage = GuiElementBuilder.from(GraphicalItem.with(GraphicalItem.RIGHT_ARROW));
-      nextPage.setName(Text.translatable("gui.borislib.next_page_title", this.page, this.numPages).withColor(Formatting.AQUA.getColorValue().intValue()));
-      nextPage.addLoreLine(Text.translatable("text.borislib.two_elements", Text.translatable("gui.borislib.click").withColor(Formatting.GREEN.getColorValue().intValue()), Text.translatable("gui.borislib.next_page_sub").withColor(Formatting.DARK_AQUA.getColorValue().intValue())));
+      nextPage.setName(Component.translatable("gui.borislib.next_page_title", this.page, this.numPages).withColor(ChatFormatting.AQUA.getColor().intValue()));
+      nextPage.addLoreLine(Component.translatable("text.borislib.two_elements", Component.translatable("gui.borislib.click").withColor(ChatFormatting.GREEN.getColor().intValue()), Component.translatable("gui.borislib.next_page_sub").withColor(ChatFormatting.DARK_AQUA.getColor().intValue())));
       nextPage.setCallback((clickType) -> {
          if (this.page < this.numPages) {
             ++this.page;
@@ -209,8 +204,8 @@ public class ArchetypeSelectionGui extends SimpleGui {
    
    private GuiElementBuilder createPrevPageItem() {
       GuiElementBuilder prevPage = GuiElementBuilder.from(GraphicalItem.with(GraphicalItem.LEFT_ARROW));
-      prevPage.setName(Text.translatable("gui.borislib.prev_page_title", this.page, this.numPages).withColor(Formatting.AQUA.getColorValue().intValue()));
-      prevPage.addLoreLine(Text.translatable("text.borislib.two_elements", Text.translatable("gui.borislib.click").withColor(Formatting.GREEN.getColorValue().intValue()), Text.translatable("gui.borislib.prev_page_sub").withColor(Formatting.DARK_AQUA.getColorValue().intValue())));
+      prevPage.setName(Component.translatable("gui.borislib.prev_page_title", this.page, this.numPages).withColor(ChatFormatting.AQUA.getColor().intValue()));
+      prevPage.addLoreLine(Component.translatable("text.borislib.two_elements", Component.translatable("gui.borislib.click").withColor(ChatFormatting.GREEN.getColor().intValue()), Component.translatable("gui.borislib.prev_page_sub").withColor(ChatFormatting.DARK_AQUA.getColor().intValue())));
       prevPage.setCallback((clickType) -> {
          if (this.page > 1) {
             --this.page;
@@ -225,7 +220,7 @@ public class ArchetypeSelectionGui extends SimpleGui {
       int firstInd = Math.max(lastInd-6,0);
       List<Archetype> archetypes = new ArrayList<>();
       for(int i = firstInd; i <= lastInd; i++){
-         archetypes.add(ArchetypeRegistry.ARCHETYPES.get(i));
+         archetypes.add(ArchetypeRegistry.ARCHETYPES.byId(i));
       }
       return archetypes;
    }

@@ -8,11 +8,9 @@ import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import io.github.ladysnake.pal.AbilitySource;
 import io.github.ladysnake.pal.Pal;
 import net.borisshoes.ancestralarchetypes.callbacks.WaxShieldLoginCallback;
-import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.entities.LevitationBulletEntity;
 import net.borisshoes.ancestralarchetypes.entities.SnowblastEntity;
 import net.borisshoes.ancestralarchetypes.items.*;
-import net.borisshoes.arcananovum.callbacks.ShieldLoginCallback;
 import net.borisshoes.borislib.BorisLib;
 import net.borisshoes.borislib.callbacks.LoginCallback;
 import net.borisshoes.borislib.config.ConfigSetting;
@@ -22,27 +20,34 @@ import net.borisshoes.borislib.config.values.DoubleConfigValue;
 import net.borisshoes.borislib.config.values.IntConfigValue;
 import net.borisshoes.borislib.gui.GraphicalItem;
 import net.borisshoes.borislib.utils.TextUtils;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.*;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.SpawnGroup;
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.consume.UseAction;
-import net.minecraft.item.equipment.EquipmentAsset;
-import net.minecraft.item.equipment.trim.ArmorTrimPattern;
-import net.minecraft.registry.*;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.*;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.Tuple;
+import net.minecraft.util.Unit;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.Consumable;
+import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.item.equipment.EquipmentAsset;
+import net.minecraft.world.item.equipment.Equippable;
+import net.minecraft.world.item.equipment.trim.TrimPattern;
+import net.minecraft.world.level.biome.Biome;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -53,36 +58,36 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 import static net.borisshoes.borislib.BorisLib.registerGraphicItem;
 
 public class ArchetypeRegistry {
-   public static final Registry<ArchetypeAbility> ABILITIES = new SimpleRegistry<>(RegistryKey.ofRegistry(Identifier.of(MOD_ID,"ability")), Lifecycle.stable());
-   public static final Registry<Archetype> ARCHETYPES = new SimpleRegistry<>(RegistryKey.ofRegistry(Identifier.of(MOD_ID,"archetype")), Lifecycle.stable());
-   public static final Registry<SubArchetype> SUBARCHETYPES = new SimpleRegistry<>(RegistryKey.ofRegistry(Identifier.of(MOD_ID,"subarchetype")), Lifecycle.stable());
-   public static final Registry<Item> ITEMS = new SimpleRegistry<>(RegistryKey.ofRegistry(Identifier.of(MOD_ID,"item")), Lifecycle.stable());
-   public static final Registry<IConfigSetting<?>> CONFIG_SETTINGS = new SimpleRegistry<>(RegistryKey.ofRegistry(Identifier.of(MOD_ID,"config_settings")), Lifecycle.stable());
-   public static final HashMap<Item, Pair<Float,Integer>> TUFF_FOODS = new HashMap<>();
-   public static final HashMap<Item, Pair<Float,Integer>> COPPER_FOODS = new HashMap<>();
-   public static final HashMap<Item, Pair<Float,Integer>> IRON_FOODS = new HashMap<>();
+   public static final Registry<ArchetypeAbility> ABILITIES = new MappedRegistry<>(ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(MOD_ID,"ability")), Lifecycle.stable());
+   public static final Registry<Archetype> ARCHETYPES = new MappedRegistry<>(ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(MOD_ID,"archetype")), Lifecycle.stable());
+   public static final Registry<SubArchetype> SUBARCHETYPES = new MappedRegistry<>(ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(MOD_ID,"subarchetype")), Lifecycle.stable());
+   public static final Registry<Item> ITEMS = new MappedRegistry<>(ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(MOD_ID,"item")), Lifecycle.stable());
+   public static final Registry<IConfigSetting<?>> CONFIG_SETTINGS = new MappedRegistry<>(ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(MOD_ID,"config_settings")), Lifecycle.stable());
+   public static final HashMap<Item, Tuple<Float,Integer>> TUFF_FOODS = new HashMap<>();
+   public static final HashMap<Item, Tuple<Float,Integer>> COPPER_FOODS = new HashMap<>();
+   public static final HashMap<Item, Tuple<Float,Integer>> IRON_FOODS = new HashMap<>();
    
-   public static final TagKey<Item> CARNIVORE_FOODS = TagKey.of(RegistryKeys.ITEM, Identifier.of(MOD_ID,"carnivore_foods"));
-   public static final TagKey<Item> SLIME_GROW_ITEMS = TagKey.of(RegistryKeys.ITEM, Identifier.of(MOD_ID,"slime_grow_items"));
-   public static final TagKey<Item> MAGMA_CUBE_GROW_ITEMS = TagKey.of(RegistryKeys.ITEM, Identifier.of(MOD_ID,"magma_cube_grow_items"));
-   public static final TagKey<Item> BACKPACK_DISALLOWED_ITEMS = TagKey.of(RegistryKeys.ITEM, Identifier.of(MOD_ID,"backpack_disallowed_items"));
-   public static final TagKey<Item> ABILITY_ITEMS = TagKey.of(RegistryKeys.ITEM, Identifier.of(MOD_ID,"ability_items"));
-   public static final TagKey<Biome> COLD_DAMAGE_EXCEPTION_BIOMES = TagKey.of(RegistryKeys.BIOME, Identifier.of(MOD_ID,"cold_damage_exception_biomes"));
-   public static final TagKey<Biome> COLD_DAMAGE_INCLUDE_BIOMES = TagKey.of(RegistryKeys.BIOME, Identifier.of(MOD_ID,"cold_damage_include_biomes"));
-   public static final TagKey<Biome> DRY_OUT_EXCEPTION_BIOMES = TagKey.of(RegistryKeys.BIOME, Identifier.of(MOD_ID,"dry_out_exception_biomes"));
-   public static final TagKey<Biome> DRY_OUT_INCLUDE_BIOMES = TagKey.of(RegistryKeys.BIOME, Identifier.of(MOD_ID,"dry_out_include_biomes"));
-   public static final TagKey<DamageType> NO_STARTLE = TagKey.of(RegistryKeys.DAMAGE_TYPE, Identifier.of(MOD_ID,"no_startle"));
+   public static final TagKey<Item> CARNIVORE_FOODS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MOD_ID,"carnivore_foods"));
+   public static final TagKey<Item> SLIME_GROW_ITEMS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MOD_ID,"slime_grow_items"));
+   public static final TagKey<Item> MAGMA_CUBE_GROW_ITEMS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MOD_ID,"magma_cube_grow_items"));
+   public static final TagKey<Item> BACKPACK_DISALLOWED_ITEMS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MOD_ID,"backpack_disallowed_items"));
+   public static final TagKey<Item> ABILITY_ITEMS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MOD_ID,"ability_items"));
+   public static final TagKey<Biome> COLD_DAMAGE_EXCEPTION_BIOMES = TagKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(MOD_ID,"cold_damage_exception_biomes"));
+   public static final TagKey<Biome> COLD_DAMAGE_INCLUDE_BIOMES = TagKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(MOD_ID,"cold_damage_include_biomes"));
+   public static final TagKey<Biome> DRY_OUT_EXCEPTION_BIOMES = TagKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(MOD_ID,"dry_out_exception_biomes"));
+   public static final TagKey<Biome> DRY_OUT_INCLUDE_BIOMES = TagKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(MOD_ID,"dry_out_include_biomes"));
+   public static final TagKey<DamageType> NO_STARTLE = TagKey.create(Registries.DAMAGE_TYPE, Identifier.fromNamespaceAndPath(MOD_ID,"no_startle"));
    
-   public static final GraphicalItem.GraphicElement LOCKED_POTION = registerGraphicItem(new GraphicalItem.GraphicElement(Identifier.of(MOD_ID, "locked_potion"), Items.POTION, false));
-   public static final GraphicalItem.GraphicElement LOCKED_SPLASH_POTION = registerGraphicItem(new GraphicalItem.GraphicElement(Identifier.of(MOD_ID, "locked_splash_potion"), Items.SPLASH_POTION, false));
-   public static final GraphicalItem.GraphicElement LOCKED_LINGERING_POTION = registerGraphicItem(new GraphicalItem.GraphicElement(Identifier.of(MOD_ID, "locked_lingering_potion"), Items.LINGERING_POTION, false));
+   public static final GraphicalItem.GraphicElement LOCKED_POTION = registerGraphicItem(new GraphicalItem.GraphicElement(Identifier.fromNamespaceAndPath(MOD_ID, "locked_potion"), Items.POTION, false));
+   public static final GraphicalItem.GraphicElement LOCKED_SPLASH_POTION = registerGraphicItem(new GraphicalItem.GraphicElement(Identifier.fromNamespaceAndPath(MOD_ID, "locked_splash_potion"), Items.SPLASH_POTION, false));
+   public static final GraphicalItem.GraphicElement LOCKED_LINGERING_POTION = registerGraphicItem(new GraphicalItem.GraphicElement(Identifier.fromNamespaceAndPath(MOD_ID, "locked_lingering_potion"), Items.LINGERING_POTION, false));
    
    public static final EntityType<SnowblastEntity> SNOWBLAST_ENTITY = registerEntity( "snowblast",
-         EntityType.Builder.<SnowblastEntity>create(SnowblastEntity::new, SpawnGroup.MISC).dimensions(0.25f, 0.25f).dropsNothing().maxTrackingRange(4).trackingTickInterval(3)
+         EntityType.Builder.<SnowblastEntity>of(SnowblastEntity::new, MobCategory.MISC).sized(0.25f, 0.25f).noLootTable().clientTrackingRange(4).updateInterval(3)
    );
    
    public static final EntityType<LevitationBulletEntity> LEVITATION_BULLET_ENTITY = registerEntity( "levitation_bullet",
-         EntityType.Builder.<LevitationBulletEntity>create(LevitationBulletEntity::new, SpawnGroup.MISC).dimensions(0.3125F, 0.3125F).dropsNothing().maxTrackingRange(4).trackingTickInterval(3)
+         EntityType.Builder.<LevitationBulletEntity>of(LevitationBulletEntity::new, MobCategory.MISC).sized(0.3125F, 0.3125F).noLootTable().clientTrackingRange(4).updateInterval(3)
    );
    
    public static final IConfigSetting<?> SPYGLASS_REVEALS_ARCHETYPE = registerConfigSetting(new ConfigSetting<>(
@@ -421,7 +426,7 @@ public class ArchetypeRegistry {
    public static final ItemStack backpackDisplay;
    static {
       backpackDisplay = new ItemStack(Items.MAGENTA_BUNDLE);
-      backpackDisplay.remove(DataComponentTypes.BUNDLE_CONTENTS);
+      backpackDisplay.remove(DataComponents.BUNDLE_CONTENTS);
    }
    public static final ArchetypeAbility GOOD_SWIMMER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("good_swimmer").setDisplayStack(new ItemStack(Items.COD)).build());
    public static final ArchetypeAbility GREAT_SWIMMER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("great_swimmer").setReliantConfigs(GREAT_SWIMMER_MOVE_SPEED_MODIFIER,GREAT_SWIMMER_SLIPPERY_DAMAGE_MODIFIER).setDisplayStack(new ItemStack(Items.TROPICAL_FISH)).build());
@@ -533,280 +538,284 @@ public class ArchetypeRegistry {
    public static final SubArchetype PARROT = register(new SubArchetype("parrot", EntityType.PARROT, new ItemStack(Items.ELYTRA), 0xb7d3df, WINDSWEPT, WING_GLIDER, LIGHTWEIGHT));
    public static final SubArchetype GHASTLING = register(new SubArchetype("ghastling", EntityType.HAPPY_GHAST, new ItemStack(Items.GRAY_HARNESS), 0xa9e5e7, WINDSWEPT, SLOW_HOVER, DRIES_OUT, SNOW_BLAST, RIDEABLE));
    
-   public static final RegistryKey<? extends Registry<EquipmentAsset>> EQUIPMENT_ASSET_REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.ofVanilla("equipment_asset"));
+   public static final ResourceKey<? extends Registry<EquipmentAsset>> EQUIPMENT_ASSET_REGISTRY_KEY = ResourceKey.createRegistryKey(Identifier.withDefaultNamespace("equipment_asset"));
    
-   public static final RegistryKey<ArmorTrimPattern> HELMET_TRIM_PATTERN = RegistryKey.of(RegistryKeys.TRIM_PATTERN,Identifier.of(MOD_ID,"aviator_helmet"));
-   public static final RegistryKey<ArmorTrimPattern> HELMET_TRIM_PATTERN_ON = RegistryKey.of(RegistryKeys.TRIM_PATTERN,Identifier.of(MOD_ID,"aviator_helmet_on"));
-   public static final RegistryKey<ArmorTrimPattern> HELMET_TRIM_PATTERN_OFF = RegistryKey.of(RegistryKeys.TRIM_PATTERN,Identifier.of(MOD_ID,"aviator_helmet_off"));
-   public static final RegistryKey<ArmorTrimPattern> WING_GLIDER_TRIM_PATTERN = RegistryKey.of(RegistryKeys.TRIM_PATTERN,Identifier.of(MOD_ID,"wing_glider"));
-   public static final RegistryKey<ArmorTrimPattern> END_GLIDER_TRIM_PATTERN = RegistryKey.of(RegistryKeys.TRIM_PATTERN,Identifier.of(MOD_ID,"end_glider"));
+   public static final ResourceKey<TrimPattern> HELMET_TRIM_PATTERN = ResourceKey.create(Registries.TRIM_PATTERN, Identifier.fromNamespaceAndPath(MOD_ID,"aviator_helmet"));
+   public static final ResourceKey<TrimPattern> HELMET_TRIM_PATTERN_ON = ResourceKey.create(Registries.TRIM_PATTERN, Identifier.fromNamespaceAndPath(MOD_ID,"aviator_helmet_on"));
+   public static final ResourceKey<TrimPattern> HELMET_TRIM_PATTERN_OFF = ResourceKey.create(Registries.TRIM_PATTERN, Identifier.fromNamespaceAndPath(MOD_ID,"aviator_helmet_off"));
+   public static final ResourceKey<TrimPattern> WING_GLIDER_TRIM_PATTERN = ResourceKey.create(Registries.TRIM_PATTERN, Identifier.fromNamespaceAndPath(MOD_ID,"wing_glider"));
+   public static final ResourceKey<TrimPattern> END_GLIDER_TRIM_PATTERN = ResourceKey.create(Registries.TRIM_PATTERN, Identifier.fromNamespaceAndPath(MOD_ID,"end_glider"));
    
    public static final LoginCallback WAX_SHIELD_LOGIN = registerCallback(new WaxShieldLoginCallback());
    
    // PlayerAbilityLib Identifiers
-   public static final AbilitySource SLOW_HOVER_ABILITY = Pal.getAbilitySource(Identifier.of(MOD_ID, SLOW_HOVER.getId()), AbilitySource.RENEWABLE);
+   public static final AbilitySource SLOW_HOVER_ABILITY = Pal.getAbilitySource(Identifier.fromNamespaceAndPath(MOD_ID, SLOW_HOVER.id()), AbilitySource.RENEWABLE);
    
    public static final Item CHANGE_ITEM = registerItem("change_item", new ChangeItem(
-         new Item.Settings().maxCount(16).rarity(Rarity.EPIC)
-               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.change_item_description"))))
+         new Item.Properties().stacksTo(16).rarity(Rarity.EPIC)
+               .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("text.ancestralarchetypes.change_item_description"))))
    ));
-   public static final Item FIREBALL_VOLLEY_ITEM = registerItem(FIREBALL_VOLLEY.getId(), new FireballVolleyItem(
-         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
-               .component(DataComponentTypes.CONSUMABLE, ConsumableComponent.builder()
-                     .consumeSeconds(5).useAction(UseAction.BOW).consumeParticles(false)
-                     .sound(Registries.SOUND_EVENT.getEntry(SoundEvents.BLOCK_AMETHYST_BLOCK_CHIME)).build())
-               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.fireball_volley_description"))))
+   public static final Item FIREBALL_VOLLEY_ITEM = registerItem(FIREBALL_VOLLEY.id(), new FireballVolleyItem(
+         new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)
+               .component(DataComponents.CONSUMABLE, Consumable.builder()
+                     .consumeSeconds(5).animation(ItemUseAnimation.BOW).hasConsumeParticles(false)
+                     .sound(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.AMETHYST_BLOCK_CHIME)).build())
+               .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("text.ancestralarchetypes.fireball_volley_description"))))
    ));
-   public static final Item WIND_CHARGE_VOLLEY_ITEM = registerItem(WIND_CHARGE_VOLLEY.getId(), new WindChargeVolleyItem(
-         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
-               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.wind_charge_volley_description"))))
+   public static final Item WIND_CHARGE_VOLLEY_ITEM = registerItem(WIND_CHARGE_VOLLEY.id(), new WindChargeVolleyItem(
+         new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)
+               .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("text.ancestralarchetypes.wind_charge_volley_description"))))
    ));
    public static final Item POTION_BREWER_ITEM = registerItem("potion_brewer", new PortableCauldronItem(
-         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
-               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.potion_brewer_description"))))
+         new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)
+               .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("text.ancestralarchetypes.potion_brewer_description"))))
    ));
    public static final Item GLIDER_ITEM = registerItem("glider", new WingGliderItem(
-         new Item.Settings().maxCount(1).rarity(Rarity.EPIC).maxDamage(2048)
-               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.glider_description"))))
-               .component(DataComponentTypes.GLIDER, Unit.INSTANCE)
-               .component(DataComponentTypes.DYED_COLOR, new DyedColorComponent(0xeeeeee))
-               .component(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT.with(DataComponentTypes.DYED_COLOR,true).with(DataComponentTypes.TRIM,true))
-               .component(DataComponentTypes.EQUIPPABLE, EquippableComponent.builder(EquipmentSlot.CHEST).equipSound(SoundEvents.ITEM_ARMOR_EQUIP_ELYTRA).model(RegistryKey.of(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.of(MOD_ID,"glider"))).damageOnHurt(false).build())
+         new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).durability(2048)
+               .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("text.ancestralarchetypes.glider_description"))))
+               .component(DataComponents.GLIDER, Unit.INSTANCE)
+               .component(DataComponents.DYED_COLOR, new DyedItemColor(0xeeeeee))
+               .component(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT.withHidden(DataComponents.DYED_COLOR,true).withHidden(DataComponents.TRIM,true))
+               .component(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.CHEST).setEquipSound(SoundEvents.ARMOR_EQUIP_ELYTRA).setAsset(ResourceKey.create(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.fromNamespaceAndPath(MOD_ID,"glider"))).setDamageOnHurt(false).build())
    ));
-   public static final Item HORSE_SPIRIT_MOUNT_ITEM = registerItem(HORSE_SPIRIT_MOUNT.getId(), new HorseSpiritMountItem(
-         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
-               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.horse_spirit_mount_description"))))
+   public static final Item HORSE_SPIRIT_MOUNT_ITEM = registerItem(HORSE_SPIRIT_MOUNT.id(), new HorseSpiritMountItem(
+         new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)
+               .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("text.ancestralarchetypes.horse_spirit_mount_description"))))
    ));
-   public static final Item DONKEY_SPIRIT_MOUNT_ITEM = registerItem(DONKEY_SPIRIT_MOUNT.getId(), new DonkeySpiritMountItem(
-         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
-               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.donkey_spirit_mount_description"))))
+   public static final Item DONKEY_SPIRIT_MOUNT_ITEM = registerItem(DONKEY_SPIRIT_MOUNT.id(), new DonkeySpiritMountItem(
+         new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)
+               .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("text.ancestralarchetypes.donkey_spirit_mount_description"))))
    ));
-   public static final Item CAMEL_SPIRIT_MOUNT_ITEM = registerItem(CAMEL_SPIRIT_MOUNT.getId(), new CamelSpiritMountItem(
-         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
-               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.camel_spirit_mount_description"))))
+   public static final Item CAMEL_SPIRIT_MOUNT_ITEM = registerItem(CAMEL_SPIRIT_MOUNT.id(), new CamelSpiritMountItem(
+         new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)
+               .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("text.ancestralarchetypes.camel_spirit_mount_description"))))
    ));
-   public static final Item WEAVING_ITEM = registerItem(WEAVING.getId(), new WeavingItem(
-         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
-               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.weaving_web_description"))))
+   public static final Item WEAVING_ITEM = registerItem(WEAVING.id(), new WeavingItem(
+         new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)
+               .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("text.ancestralarchetypes.weaving_web_description"))))
    ));
-   public static final Item SLOW_HOVER_ITEM = registerItem(SLOW_HOVER.getId(), new HoverItem(
-         new Item.Settings().maxCount(1).rarity(Rarity.EPIC).maxDamage(2048)
-               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.hover_helmet_description"))))
-               .component(DataComponentTypes.DYED_COLOR, new DyedColorComponent(0xA06540))
-               .component(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT.with(DataComponentTypes.DYED_COLOR,true).with(DataComponentTypes.TRIM,true))
-               .component(DataComponentTypes.EQUIPPABLE, EquippableComponent.builder(EquipmentSlot.HEAD).equipSound(SoundEvents.ITEM_ARMOR_EQUIP_LEATHER).model(RegistryKey.of(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.of(MOD_ID,"aviator_helmet_off"))).damageOnHurt(false).build())
+   public static final Item SLOW_HOVER_ITEM = registerItem(SLOW_HOVER.id(), new HoverItem(
+         new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).durability(2048)
+               .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("text.ancestralarchetypes.hover_helmet_description"))))
+               .component(DataComponents.DYED_COLOR, new DyedItemColor(0xA06540))
+               .component(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT.withHidden(DataComponents.DYED_COLOR,true).withHidden(DataComponents.TRIM,true))
+               .component(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER).setAsset(ResourceKey.create(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.fromNamespaceAndPath(MOD_ID,"aviator_helmet_off"))).setDamageOnHurt(false).build())
    ));
-   public static final Item SNOW_BLAST_ITEM = registerItem(SNOW_BLAST.getId(), new SnowblastItem(
-         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
-               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.snow_blast_description"))))
+   public static final Item SNOW_BLAST_ITEM = registerItem(SNOW_BLAST.id(), new SnowblastItem(
+         new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)
+               .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("text.ancestralarchetypes.snow_blast_description"))))
    ));
-   public static final Item LONG_TELEPORT_ITEM = registerItem(LONG_TELEPORT.getId(), new LongTeleportItem(
-         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
-               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.long_teleport_description"))))
+   public static final Item LONG_TELEPORT_ITEM = registerItem(LONG_TELEPORT.id(), new LongTeleportItem(
+         new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)
+               .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("text.ancestralarchetypes.long_teleport_description"))))
    ));
-   public static final Item RANDOM_TELEPORT_ITEM = registerItem(RANDOM_TELEPORT.getId(), new RandomTeleportItem(
-         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
-               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.random_teleport_description"))))
+   public static final Item RANDOM_TELEPORT_ITEM = registerItem(RANDOM_TELEPORT.id(), new RandomTeleportItem(
+         new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)
+               .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("text.ancestralarchetypes.random_teleport_description"))))
    ));
-   public static final Item FORTIFY_ITEM = registerItem(FORTIFY.getId(), new FortifyItem(
-         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
-               .component(DataComponentTypes.CONSUMABLE, ConsumableComponent.builder()
-                     .consumeSeconds(72000).useAction(UseAction.BLOCK).consumeParticles(false)
-                     .sound(Registries.SOUND_EVENT.getEntry(SoundEvents.BLOCK_AMETHYST_BLOCK_CHIME)).build())
-               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.fortify_description"))))
+   public static final Item FORTIFY_ITEM = registerItem(FORTIFY.id(), new FortifyItem(
+         new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)
+               .component(DataComponents.CONSUMABLE, Consumable.builder()
+                     .consumeSeconds(72000).animation(ItemUseAnimation.BLOCK).hasConsumeParticles(false)
+                     .sound(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.AMETHYST_BLOCK_CHIME)).build())
+               .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("text.ancestralarchetypes.fortify_description"))))
    ));
-   public static final Item LEVITATION_BULLET_ITEM = registerItem(LEVITATION_BULLET.getId(), new LevitationBulletItem(
-         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
-               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.levitation_bullet_description"))))
+   public static final Item LEVITATION_BULLET_ITEM = registerItem(LEVITATION_BULLET.id(), new LevitationBulletItem(
+         new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)
+               .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("text.ancestralarchetypes.levitation_bullet_description"))))
    ));
-   public static final Item BACKPACK_ITEM = registerItem(BACKPACK.getId(), new BackpackItem(
-         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
-               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.backpack_description"))))
+   public static final Item BACKPACK_ITEM = registerItem(BACKPACK.id(), new BackpackItem(
+         new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)
+               .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("text.ancestralarchetypes.backpack_description"))))
    ));
-   public static final Item END_GLIDER_ITEM = registerItem(ENDER_GLIDER.getId(), new EndGliderItem(
-         new Item.Settings().maxCount(1).rarity(Rarity.EPIC).maxDamage(2048)
-               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.end_glider_description"))))
-               .component(DataComponentTypes.GLIDER, Unit.INSTANCE)
-               .component(DataComponentTypes.DYED_COLOR, new DyedColorComponent(0xaaaaaa))
-               .component(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT.with(DataComponentTypes.DYED_COLOR,true).with(DataComponentTypes.TRIM,true))
-               .component(DataComponentTypes.EQUIPPABLE, EquippableComponent.builder(EquipmentSlot.CHEST).equipSound(SoundEvents.ITEM_ARMOR_EQUIP_ELYTRA).model(RegistryKey.of(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.of(MOD_ID,"end_glider"))).damageOnHurt(false).build())
+   public static final Item END_GLIDER_ITEM = registerItem(ENDER_GLIDER.id(), new EndGliderItem(
+         new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).durability(2048)
+               .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("text.ancestralarchetypes.end_glider_description"))))
+               .component(DataComponents.GLIDER, Unit.INSTANCE)
+               .component(DataComponents.DYED_COLOR, new DyedItemColor(0xaaaaaa))
+               .component(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT.withHidden(DataComponents.DYED_COLOR,true).withHidden(DataComponents.TRIM,true))
+               .component(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.CHEST).setEquipSound(SoundEvents.ARMOR_EQUIP_ELYTRA).setAsset(ResourceKey.create(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.fromNamespaceAndPath(MOD_ID,"end_glider"))).setDamageOnHurt(false).build())
    ));
-   public static final Item ENDERFLAME_ITEM = registerItem(ENDERFLAME.getId(), new EndflameItem(
-         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
-               .component(DataComponentTypes.CONSUMABLE, ConsumableComponent.builder()
-                     .consumeSeconds(10).useAction(UseAction.BOW).consumeParticles(false)
-                     .sound(Registries.SOUND_EVENT.getEntry(SoundEvents.BLOCK_AMETHYST_BLOCK_CHIME)).build())
-               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.endflame_buffet_description"))))
+   public static final Item ENDERFLAME_ITEM = registerItem(ENDERFLAME.id(), new EndflameItem(
+         new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)
+               .component(DataComponents.CONSUMABLE, Consumable.builder()
+                     .consumeSeconds(10).animation(ItemUseAnimation.BOW).hasConsumeParticles(false)
+                     .sound(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.AMETHYST_BLOCK_CHIME)).build())
+               .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("text.ancestralarchetypes.endflame_buffet_description"))))
    ));
-   public static final Item GUARDIAN_RAY_ITEM = registerItem(GUARDIAN_RAY.getId(), new GuardianRayItem(
-         new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
-               .component(DataComponentTypes.CONSUMABLE, ConsumableComponent.builder()
-                     .consumeSeconds(72000).useAction(UseAction.BOW).consumeParticles(false)
-                     .sound(Registries.SOUND_EVENT.getEntry(SoundEvents.BLOCK_AMETHYST_BLOCK_CHIME)).build())
-               .component(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("text.ancestralarchetypes.guardian_ray_description"))))
+   public static final Item GUARDIAN_RAY_ITEM = registerItem(GUARDIAN_RAY.id(), new GuardianRayItem(
+         new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)
+               .component(DataComponents.CONSUMABLE, Consumable.builder()
+                     .consumeSeconds(72000).animation(ItemUseAnimation.BOW).hasConsumeParticles(false)
+                     .sound(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.AMETHYST_BLOCK_CHIME)).build())
+               .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("text.ancestralarchetypes.guardian_ray_description"))))
    ));
    
    static{
-      TUFF_FOODS.put(Items.TUFF,new Pair<>(2.0f,20));
-      TUFF_FOODS.put(Items.TUFF_SLAB,new Pair<>(1.0f,10));
-      TUFF_FOODS.put(Items.TUFF_STAIRS,new Pair<>(2.5f,21));
-      TUFF_FOODS.put(Items.TUFF_WALL,new Pair<>(2.5f,21));
-      TUFF_FOODS.put(Items.POLISHED_TUFF,new Pair<>(3.0f,22));
-      TUFF_FOODS.put(Items.POLISHED_TUFF_SLAB,new Pair<>(2.0f,16));
-      TUFF_FOODS.put(Items.POLISHED_TUFF_STAIRS,new Pair<>(3.5f,23));
-      TUFF_FOODS.put(Items.POLISHED_TUFF_WALL,new Pair<>(3.5f,23));
-      TUFF_FOODS.put(Items.TUFF_BRICKS,new Pair<>(4.0f,24));
-      TUFF_FOODS.put(Items.CHISELED_TUFF,new Pair<>(3.75f,23));
-      TUFF_FOODS.put(Items.TUFF_BRICK_SLAB,new Pair<>(3.0f,19));
-      TUFF_FOODS.put(Items.TUFF_BRICK_STAIRS,new Pair<>(4.5f,25));
-      TUFF_FOODS.put(Items.TUFF_BRICK_WALL,new Pair<>(4.5f,25));
-      TUFF_FOODS.put(Items.CHISELED_TUFF_BRICKS,new Pair<>(5.0f,25));
+      TUFF_FOODS.put(Items.TUFF,new Tuple<>(2.0f,20));
+      TUFF_FOODS.put(Items.TUFF_SLAB,new Tuple<>(1.0f,10));
+      TUFF_FOODS.put(Items.TUFF_STAIRS,new Tuple<>(2.5f,21));
+      TUFF_FOODS.put(Items.TUFF_WALL,new Tuple<>(2.5f,21));
+      TUFF_FOODS.put(Items.POLISHED_TUFF,new Tuple<>(3.0f,22));
+      TUFF_FOODS.put(Items.POLISHED_TUFF_SLAB,new Tuple<>(2.0f,16));
+      TUFF_FOODS.put(Items.POLISHED_TUFF_STAIRS,new Tuple<>(3.5f,23));
+      TUFF_FOODS.put(Items.POLISHED_TUFF_WALL,new Tuple<>(3.5f,23));
+      TUFF_FOODS.put(Items.TUFF_BRICKS,new Tuple<>(4.0f,24));
+      TUFF_FOODS.put(Items.CHISELED_TUFF,new Tuple<>(3.75f,23));
+      TUFF_FOODS.put(Items.TUFF_BRICK_SLAB,new Tuple<>(3.0f,19));
+      TUFF_FOODS.put(Items.TUFF_BRICK_STAIRS,new Tuple<>(4.5f,25));
+      TUFF_FOODS.put(Items.TUFF_BRICK_WALL,new Tuple<>(4.5f,25));
+      TUFF_FOODS.put(Items.CHISELED_TUFF_BRICKS,new Tuple<>(5.0f,25));
       
-      IRON_FOODS.put(Items.IRON_NUGGET,new Pair<>(0.4f,2));
-      IRON_FOODS.put(Items.RAW_IRON,new Pair<>(2.0f,20));
-      IRON_FOODS.put(Items.IRON_INGOT,new Pair<>(4.0f,20));
-      IRON_FOODS.put(Items.IRON_ORE,new Pair<>(3.0f,25));
-      IRON_FOODS.put(Items.DEEPSLATE_IRON_ORE,new Pair<>(4.0f,25));
-      IRON_FOODS.put(Items.IRON_SHOVEL,new Pair<>(5f,15));
-      IRON_FOODS.put(Items.IRON_PICKAXE,new Pair<>(15f,35));
-      IRON_FOODS.put(Items.IRON_AXE,new Pair<>(15f,35));
-      IRON_FOODS.put(Items.IRON_HOE,new Pair<>(10f,25));
-      IRON_FOODS.put(Items.IRON_SWORD,new Pair<>(10f,25));
-      IRON_FOODS.put(Items.IRON_HELMET,new Pair<>(25f,55));
-      IRON_FOODS.put(Items.IRON_CHESTPLATE,new Pair<>(40f,85));
-      IRON_FOODS.put(Items.IRON_LEGGINGS,new Pair<>(35f,75));
-      IRON_FOODS.put(Items.IRON_BOOTS,new Pair<>(20f,45));
-      IRON_FOODS.put(Items.IRON_HORSE_ARMOR,new Pair<>(35f,75));
-      IRON_FOODS.put(Items.RAW_IRON_BLOCK,new Pair<>(15f,150));
-      IRON_FOODS.put(Items.IRON_BLOCK,new Pair<>(25f,125));
-      IRON_FOODS.put(Items.IRON_BARS,new Pair<>(2f,10));
-      IRON_FOODS.put(Items.IRON_DOOR,new Pair<>(6f,30));
-      IRON_FOODS.put(Items.IRON_TRAPDOOR,new Pair<>(10f,50));
-      IRON_FOODS.put(Items.IRON_CHAIN,new Pair<>(5f,20));
-      IRON_FOODS.put(Items.LANTERN,new Pair<>(3.75f,15));
-      IRON_FOODS.put(Items.SOUL_LANTERN,new Pair<>(4f,16));
-      IRON_FOODS.put(Items.HEAVY_WEIGHTED_PRESSURE_PLATE,new Pair<>(5f,25));
-      IRON_FOODS.put(Items.CAULDRON,new Pair<>(19f,95));
-      IRON_FOODS.put(Items.ANVIL,new Pair<>(50.0f,200));
-      IRON_FOODS.put(Items.CHIPPED_ANVIL,new Pair<>(50.0f,225));
-      IRON_FOODS.put(Items.DAMAGED_ANVIL,new Pair<>(50.0f,250));
-      IRON_FOODS.put(Items.MINECART,new Pair<>(25f,55));
-      IRON_FOODS.put(Items.SHEARS,new Pair<>(10f,25));
-      IRON_FOODS.put(Items.HOPPER,new Pair<>(13f,65));
-      IRON_FOODS.put(Items.COMPASS,new Pair<>(11f,55));
-      IRON_FOODS.put(Items.ACTIVATOR_RAIL,new Pair<>(6f,24));
-      IRON_FOODS.put(Items.DETECTOR_RAIL,new Pair<>(6.5f,26));
-      IRON_FOODS.put(Items.RAIL,new Pair<>(1.6f,8));
-      IRON_FOODS.put(Items.HOPPER_MINECART,new Pair<>(50.0f,95));
+      IRON_FOODS.put(Items.IRON_NUGGET,new Tuple<>(0.4f,2));
+      IRON_FOODS.put(Items.RAW_IRON,new Tuple<>(2.0f,20));
+      IRON_FOODS.put(Items.IRON_INGOT,new Tuple<>(4.0f,20));
+      IRON_FOODS.put(Items.IRON_ORE,new Tuple<>(3.0f,25));
+      IRON_FOODS.put(Items.DEEPSLATE_IRON_ORE,new Tuple<>(4.0f,25));
+      IRON_FOODS.put(Items.IRON_SHOVEL,new Tuple<>(5f,15));
+      IRON_FOODS.put(Items.IRON_SPEAR,new Tuple<>(5f,15));
+      IRON_FOODS.put(Items.IRON_PICKAXE,new Tuple<>(15f,35));
+      IRON_FOODS.put(Items.IRON_AXE,new Tuple<>(15f,35));
+      IRON_FOODS.put(Items.IRON_HOE,new Tuple<>(10f,25));
+      IRON_FOODS.put(Items.IRON_SWORD,new Tuple<>(10f,25));
+      IRON_FOODS.put(Items.IRON_HELMET,new Tuple<>(25f,55));
+      IRON_FOODS.put(Items.IRON_NAUTILUS_ARMOR,new Tuple<>(25f,55));
+      IRON_FOODS.put(Items.IRON_CHESTPLATE,new Tuple<>(40f,85));
+      IRON_FOODS.put(Items.IRON_LEGGINGS,new Tuple<>(35f,75));
+      IRON_FOODS.put(Items.IRON_BOOTS,new Tuple<>(20f,45));
+      IRON_FOODS.put(Items.IRON_HORSE_ARMOR,new Tuple<>(35f,75));
+      IRON_FOODS.put(Items.RAW_IRON_BLOCK,new Tuple<>(15f,150));
+      IRON_FOODS.put(Items.IRON_BLOCK,new Tuple<>(25f,125));
+      IRON_FOODS.put(Items.IRON_BARS,new Tuple<>(2f,10));
+      IRON_FOODS.put(Items.IRON_DOOR,new Tuple<>(6f,30));
+      IRON_FOODS.put(Items.IRON_TRAPDOOR,new Tuple<>(10f,50));
+      IRON_FOODS.put(Items.IRON_CHAIN,new Tuple<>(5f,20));
+      IRON_FOODS.put(Items.LANTERN,new Tuple<>(3.75f,15));
+      IRON_FOODS.put(Items.SOUL_LANTERN,new Tuple<>(4f,16));
+      IRON_FOODS.put(Items.HEAVY_WEIGHTED_PRESSURE_PLATE,new Tuple<>(5f,25));
+      IRON_FOODS.put(Items.CAULDRON,new Tuple<>(19f,95));
+      IRON_FOODS.put(Items.ANVIL,new Tuple<>(50.0f,200));
+      IRON_FOODS.put(Items.CHIPPED_ANVIL,new Tuple<>(50.0f,225));
+      IRON_FOODS.put(Items.DAMAGED_ANVIL,new Tuple<>(50.0f,250));
+      IRON_FOODS.put(Items.MINECART,new Tuple<>(25f,55));
+      IRON_FOODS.put(Items.SHEARS,new Tuple<>(10f,25));
+      IRON_FOODS.put(Items.HOPPER,new Tuple<>(13f,65));
+      IRON_FOODS.put(Items.COMPASS,new Tuple<>(11f,55));
+      IRON_FOODS.put(Items.ACTIVATOR_RAIL,new Tuple<>(6f,24));
+      IRON_FOODS.put(Items.DETECTOR_RAIL,new Tuple<>(6.5f,26));
+      IRON_FOODS.put(Items.RAIL,new Tuple<>(1.6f,8));
+      IRON_FOODS.put(Items.HOPPER_MINECART,new Tuple<>(50.0f,95));
       
-      COPPER_FOODS.put(Items.RAW_COPPER,new Pair<>(1f,20));
-      COPPER_FOODS.put(Items.COPPER_NUGGET,new Pair<>(0.1f,1));
-      COPPER_FOODS.put(Items.COPPER_INGOT,new Pair<>(1.0f,9));
-      COPPER_FOODS.put(Items.COPPER_ORE,new Pair<>(1.5f,20));
-      COPPER_FOODS.put(Items.DEEPSLATE_COPPER_ORE,new Pair<>(1.5f,15));
-      COPPER_FOODS.put(Items.RAW_COPPER_BLOCK,new Pair<>(8f,160));
-      COPPER_FOODS.put(Items.COPPER_BLOCK,new Pair<>(2f,16));
-      COPPER_FOODS.put(Items.CHISELED_COPPER,new Pair<>(3.25f,23));
-      COPPER_FOODS.put(Items.COPPER_GRATE,new Pair<>(3.0f,22));
-      COPPER_FOODS.put(Items.CUT_COPPER,new Pair<>(3.0f,22));
-      COPPER_FOODS.put(Items.CUT_COPPER_STAIRS,new Pair<>(3.5f,25));
-      COPPER_FOODS.put(Items.CUT_COPPER_SLAB,new Pair<>(2.0f,15));
-      COPPER_FOODS.put(Items.COPPER_DOOR,new Pair<>(1.25f,10));
-      COPPER_FOODS.put(Items.COPPER_TRAPDOOR,new Pair<>(1.75f,14));
-      COPPER_FOODS.put(Items.COPPER_BULB,new Pair<>(4f,29));
-      COPPER_FOODS.put(Items.COPPER_BARS.unaffected(),new Pair<>(0.5f,4));
-      COPPER_FOODS.put(Items.COPPER_LANTERNS.unaffected(),new Pair<>(0.9f,8));
-      COPPER_FOODS.put(Items.COPPER_CHAINS.unaffected(),new Pair<>(1.2f,9));
-      COPPER_FOODS.put(Items.COPPER_CHEST,new Pair<>(3.25f,23));
-      COPPER_FOODS.put(Items.COPPER_GOLEM_STATUE,new Pair<>(4f,27));
-      COPPER_FOODS.put(Items.LIGHTNING_ROD,new Pair<>(1.5f,12));
-      COPPER_FOODS.put(Items.EXPOSED_COPPER,new Pair<>(4f,27));
-      COPPER_FOODS.put(Items.EXPOSED_CHISELED_COPPER,new Pair<>(5.25f,32));
-      COPPER_FOODS.put(Items.EXPOSED_COPPER_GRATE,new Pair<>(5f,31));
-      COPPER_FOODS.put(Items.EXPOSED_CUT_COPPER,new Pair<>(5f,31));
-      COPPER_FOODS.put(Items.EXPOSED_CUT_COPPER_STAIRS,new Pair<>(5.5f,33));
-      COPPER_FOODS.put(Items.EXPOSED_CUT_COPPER_SLAB,new Pair<>(3.5f,22));
-      COPPER_FOODS.put(Items.EXPOSED_COPPER_DOOR,new Pair<>(2.75f,19));
-      COPPER_FOODS.put(Items.EXPOSED_COPPER_TRAPDOOR,new Pair<>(3.25f,22));
-      COPPER_FOODS.put(Items.EXPOSED_COPPER_BULB,new Pair<>(6.0f,37));
-      COPPER_FOODS.put(Items.COPPER_BARS.exposed(),new Pair<>(1f,7));
-      COPPER_FOODS.put(Items.COPPER_LANTERNS.exposed(),new Pair<>(1.8f,12));
-      COPPER_FOODS.put(Items.COPPER_CHAINS.exposed(),new Pair<>(2.4f,16));
-      COPPER_FOODS.put(Items.EXPOSED_COPPER_CHEST,new Pair<>(5.25f,32));
-      COPPER_FOODS.put(Items.EXPOSED_COPPER_GOLEM_STATUE,new Pair<>(6f,35));
-      COPPER_FOODS.put(Items.EXPOSED_LIGHTNING_ROD,new Pair<>(3f,21));
-      COPPER_FOODS.put(Items.WEATHERED_COPPER,new Pair<>(6f,34));
-      COPPER_FOODS.put(Items.WEATHERED_CHISELED_COPPER,new Pair<>(7.25f,38));
-      COPPER_FOODS.put(Items.WEATHERED_COPPER_GRATE,new Pair<>(7f,37));
-      COPPER_FOODS.put(Items.WEATHERED_CUT_COPPER,new Pair<>(7f,37));
-      COPPER_FOODS.put(Items.WEATHERED_CUT_COPPER_STAIRS,new Pair<>(7.5f,39));
-      COPPER_FOODS.put(Items.WEATHERED_CUT_COPPER_SLAB,new Pair<>(5f,26));
-      COPPER_FOODS.put(Items.WEATHERED_COPPER_DOOR,new Pair<>(4.25f,24));
-      COPPER_FOODS.put(Items.WEATHERED_COPPER_TRAPDOOR,new Pair<>(4.75f,27));
-      COPPER_FOODS.put(Items.WEATHERED_COPPER_BULB,new Pair<>(9f,48));
-      COPPER_FOODS.put(Items.COPPER_BARS.weathered(),new Pair<>(1.5f,9));
-      COPPER_FOODS.put(Items.COPPER_LANTERNS.weathered(),new Pair<>(2.7f,15));
-      COPPER_FOODS.put(Items.COPPER_CHAINS.weathered(),new Pair<>(3.6f,20));
-      COPPER_FOODS.put(Items.WEATHERED_COPPER_CHEST,new Pair<>(7.25f,28));
-      COPPER_FOODS.put(Items.WEATHERED_COPPER_GOLEM_STATUE,new Pair<>(8f,41));
-      COPPER_FOODS.put(Items.WEATHERED_LIGHTNING_ROD,new Pair<>(3.5f,26));
-      COPPER_FOODS.put(Items.OXIDIZED_COPPER,new Pair<>(8f,40));
-      COPPER_FOODS.put(Items.OXIDIZED_CHISELED_COPPER,new Pair<>(9.25f,44));
-      COPPER_FOODS.put(Items.OXIDIZED_COPPER_GRATE,new Pair<>(9f,43));
-      COPPER_FOODS.put(Items.OXIDIZED_CUT_COPPER,new Pair<>(9f,43));
-      COPPER_FOODS.put(Items.OXIDIZED_CUT_COPPER_STAIRS,new Pair<>(9.5f,45));
-      COPPER_FOODS.put(Items.OXIDIZED_CUT_COPPER_SLAB,new Pair<>(6.5f,31));
-      COPPER_FOODS.put(Items.OXIDIZED_COPPER_DOOR,new Pair<>(5.75f,29));
-      COPPER_FOODS.put(Items.OXIDIZED_COPPER_TRAPDOOR,new Pair<>(6.25f,31));
-      COPPER_FOODS.put(Items.OXIDIZED_COPPER_BULB,new Pair<>(10.0f,48));
-      COPPER_FOODS.put(Items.COPPER_BARS.oxidized(),new Pair<>(2f,10));
-      COPPER_FOODS.put(Items.COPPER_LANTERNS.oxidized(),new Pair<>(3.6f,18));
-      COPPER_FOODS.put(Items.COPPER_CHAINS.oxidized(),new Pair<>(4.8f,24));
-      COPPER_FOODS.put(Items.OXIDIZED_COPPER_CHEST,new Pair<>(9.25f,44));
-      COPPER_FOODS.put(Items.OXIDIZED_COPPER_GOLEM_STATUE,new Pair<>(10f,47));
-      COPPER_FOODS.put(Items.OXIDIZED_LIGHTNING_ROD,new Pair<>(6f,30));
-      COPPER_FOODS.put(Items.COPPER_SHOVEL,new Pair<>(3f,15));
-      COPPER_FOODS.put(Items.COPPER_HOE,new Pair<>(6f,20));
-      COPPER_FOODS.put(Items.COPPER_SWORD,new Pair<>(6f,20));
-      COPPER_FOODS.put(Items.COPPER_PICKAXE,new Pair<>(9f,25));
-      COPPER_FOODS.put(Items.COPPER_AXE,new Pair<>(9f,25));
-      COPPER_FOODS.put(Items.COPPER_BOOTS,new Pair<>(12f,30));
-      COPPER_FOODS.put(Items.COPPER_HELMET,new Pair<>(15f,35));
-      COPPER_FOODS.put(Items.COPPER_LEGGINGS,new Pair<>(21f,40));
-      COPPER_FOODS.put(Items.COPPER_HORSE_ARMOR,new Pair<>(21f,40));
-      COPPER_FOODS.put(Items.COPPER_CHESTPLATE,new Pair<>(24f,45));
+      COPPER_FOODS.put(Items.RAW_COPPER,new Tuple<>(1f,20));
+      COPPER_FOODS.put(Items.COPPER_NUGGET,new Tuple<>(0.1f,1));
+      COPPER_FOODS.put(Items.COPPER_INGOT,new Tuple<>(1.0f,9));
+      COPPER_FOODS.put(Items.COPPER_ORE,new Tuple<>(1.5f,20));
+      COPPER_FOODS.put(Items.DEEPSLATE_COPPER_ORE,new Tuple<>(1.5f,15));
+      COPPER_FOODS.put(Items.RAW_COPPER_BLOCK,new Tuple<>(8f,160));
+      COPPER_FOODS.put(Items.COPPER_BLOCK,new Tuple<>(2f,16));
+      COPPER_FOODS.put(Items.CHISELED_COPPER,new Tuple<>(3.25f,23));
+      COPPER_FOODS.put(Items.COPPER_GRATE,new Tuple<>(3.0f,22));
+      COPPER_FOODS.put(Items.CUT_COPPER,new Tuple<>(3.0f,22));
+      COPPER_FOODS.put(Items.CUT_COPPER_STAIRS,new Tuple<>(3.5f,25));
+      COPPER_FOODS.put(Items.CUT_COPPER_SLAB,new Tuple<>(2.0f,15));
+      COPPER_FOODS.put(Items.COPPER_DOOR,new Tuple<>(1.25f,10));
+      COPPER_FOODS.put(Items.COPPER_TRAPDOOR,new Tuple<>(1.75f,14));
+      COPPER_FOODS.put(Items.COPPER_BULB,new Tuple<>(4f,29));
+      COPPER_FOODS.put(Items.COPPER_BARS.unaffected(),new Tuple<>(0.5f,4));
+      COPPER_FOODS.put(Items.COPPER_LANTERN.unaffected(),new Tuple<>(0.9f,8));
+      COPPER_FOODS.put(Items.COPPER_CHAIN.unaffected(),new Tuple<>(1.2f,9));
+      COPPER_FOODS.put(Items.COPPER_CHEST,new Tuple<>(3.25f,23));
+      COPPER_FOODS.put(Items.COPPER_GOLEM_STATUE,new Tuple<>(4f,27));
+      COPPER_FOODS.put(Items.LIGHTNING_ROD,new Tuple<>(1.5f,12));
+      COPPER_FOODS.put(Items.EXPOSED_COPPER,new Tuple<>(4f,27));
+      COPPER_FOODS.put(Items.EXPOSED_CHISELED_COPPER,new Tuple<>(5.25f,32));
+      COPPER_FOODS.put(Items.EXPOSED_COPPER_GRATE,new Tuple<>(5f,31));
+      COPPER_FOODS.put(Items.EXPOSED_CUT_COPPER,new Tuple<>(5f,31));
+      COPPER_FOODS.put(Items.EXPOSED_CUT_COPPER_STAIRS,new Tuple<>(5.5f,33));
+      COPPER_FOODS.put(Items.EXPOSED_CUT_COPPER_SLAB,new Tuple<>(3.5f,22));
+      COPPER_FOODS.put(Items.EXPOSED_COPPER_DOOR,new Tuple<>(2.75f,19));
+      COPPER_FOODS.put(Items.EXPOSED_COPPER_TRAPDOOR,new Tuple<>(3.25f,22));
+      COPPER_FOODS.put(Items.EXPOSED_COPPER_BULB,new Tuple<>(6.0f,37));
+      COPPER_FOODS.put(Items.COPPER_BARS.exposed(),new Tuple<>(1f,7));
+      COPPER_FOODS.put(Items.COPPER_LANTERN.exposed(),new Tuple<>(1.8f,12));
+      COPPER_FOODS.put(Items.COPPER_CHAIN.exposed(),new Tuple<>(2.4f,16));
+      COPPER_FOODS.put(Items.EXPOSED_COPPER_CHEST,new Tuple<>(5.25f,32));
+      COPPER_FOODS.put(Items.EXPOSED_COPPER_GOLEM_STATUE,new Tuple<>(6f,35));
+      COPPER_FOODS.put(Items.EXPOSED_LIGHTNING_ROD,new Tuple<>(3f,21));
+      COPPER_FOODS.put(Items.WEATHERED_COPPER,new Tuple<>(6f,34));
+      COPPER_FOODS.put(Items.WEATHERED_CHISELED_COPPER,new Tuple<>(7.25f,38));
+      COPPER_FOODS.put(Items.WEATHERED_COPPER_GRATE,new Tuple<>(7f,37));
+      COPPER_FOODS.put(Items.WEATHERED_CUT_COPPER,new Tuple<>(7f,37));
+      COPPER_FOODS.put(Items.WEATHERED_CUT_COPPER_STAIRS,new Tuple<>(7.5f,39));
+      COPPER_FOODS.put(Items.WEATHERED_CUT_COPPER_SLAB,new Tuple<>(5f,26));
+      COPPER_FOODS.put(Items.WEATHERED_COPPER_DOOR,new Tuple<>(4.25f,24));
+      COPPER_FOODS.put(Items.WEATHERED_COPPER_TRAPDOOR,new Tuple<>(4.75f,27));
+      COPPER_FOODS.put(Items.WEATHERED_COPPER_BULB,new Tuple<>(9f,48));
+      COPPER_FOODS.put(Items.COPPER_BARS.weathered(),new Tuple<>(1.5f,9));
+      COPPER_FOODS.put(Items.COPPER_LANTERN.weathered(),new Tuple<>(2.7f,15));
+      COPPER_FOODS.put(Items.COPPER_CHAIN.weathered(),new Tuple<>(3.6f,20));
+      COPPER_FOODS.put(Items.WEATHERED_COPPER_CHEST,new Tuple<>(7.25f,28));
+      COPPER_FOODS.put(Items.WEATHERED_COPPER_GOLEM_STATUE,new Tuple<>(8f,41));
+      COPPER_FOODS.put(Items.WEATHERED_LIGHTNING_ROD,new Tuple<>(3.5f,26));
+      COPPER_FOODS.put(Items.OXIDIZED_COPPER,new Tuple<>(8f,40));
+      COPPER_FOODS.put(Items.OXIDIZED_CHISELED_COPPER,new Tuple<>(9.25f,44));
+      COPPER_FOODS.put(Items.OXIDIZED_COPPER_GRATE,new Tuple<>(9f,43));
+      COPPER_FOODS.put(Items.OXIDIZED_CUT_COPPER,new Tuple<>(9f,43));
+      COPPER_FOODS.put(Items.OXIDIZED_CUT_COPPER_STAIRS,new Tuple<>(9.5f,45));
+      COPPER_FOODS.put(Items.OXIDIZED_CUT_COPPER_SLAB,new Tuple<>(6.5f,31));
+      COPPER_FOODS.put(Items.OXIDIZED_COPPER_DOOR,new Tuple<>(5.75f,29));
+      COPPER_FOODS.put(Items.OXIDIZED_COPPER_TRAPDOOR,new Tuple<>(6.25f,31));
+      COPPER_FOODS.put(Items.OXIDIZED_COPPER_BULB,new Tuple<>(10.0f,48));
+      COPPER_FOODS.put(Items.COPPER_BARS.oxidized(),new Tuple<>(2f,10));
+      COPPER_FOODS.put(Items.COPPER_LANTERN.oxidized(),new Tuple<>(3.6f,18));
+      COPPER_FOODS.put(Items.COPPER_CHAIN.oxidized(),new Tuple<>(4.8f,24));
+      COPPER_FOODS.put(Items.OXIDIZED_COPPER_CHEST,new Tuple<>(9.25f,44));
+      COPPER_FOODS.put(Items.OXIDIZED_COPPER_GOLEM_STATUE,new Tuple<>(10f,47));
+      COPPER_FOODS.put(Items.OXIDIZED_LIGHTNING_ROD,new Tuple<>(6f,30));
+      COPPER_FOODS.put(Items.COPPER_SHOVEL,new Tuple<>(3f,15));
+      COPPER_FOODS.put(Items.COPPER_SPEAR,new Tuple<>(3f,15));
+      COPPER_FOODS.put(Items.COPPER_HOE,new Tuple<>(6f,20));
+      COPPER_FOODS.put(Items.COPPER_SWORD,new Tuple<>(6f,20));
+      COPPER_FOODS.put(Items.COPPER_PICKAXE,new Tuple<>(9f,25));
+      COPPER_FOODS.put(Items.COPPER_AXE,new Tuple<>(9f,25));
+      COPPER_FOODS.put(Items.COPPER_BOOTS,new Tuple<>(12f,30));
+      COPPER_FOODS.put(Items.COPPER_HELMET,new Tuple<>(15f,35));
+      COPPER_FOODS.put(Items.COPPER_NAUTILUS_ARMOR,new Tuple<>(15f,35));
+      COPPER_FOODS.put(Items.COPPER_LEGGINGS,new Tuple<>(21f,40));
+      COPPER_FOODS.put(Items.COPPER_HORSE_ARMOR,new Tuple<>(21f,40));
+      COPPER_FOODS.put(Items.COPPER_CHESTPLATE,new Tuple<>(24f,45));
    }
    
    private static ArchetypeAbility register(ArchetypeAbility ability){
-      Registry.register(ABILITIES,Identifier.of(MOD_ID, ability.getId()), ability);
+      Registry.register(ABILITIES, Identifier.fromNamespaceAndPath(MOD_ID, ability.id()), ability);
       return ability;
    }
    
    private static Archetype register(Archetype archetype){
-      Registry.register(ARCHETYPES,Identifier.of(MOD_ID, archetype.getId()), archetype);
+      Registry.register(ARCHETYPES, Identifier.fromNamespaceAndPath(MOD_ID, archetype.getId()), archetype);
       return archetype;
    }
    
    private static SubArchetype register(SubArchetype subarchetype){
-      Registry.register(SUBARCHETYPES,Identifier.of(MOD_ID, subarchetype.getId()), subarchetype);
+      Registry.register(SUBARCHETYPES, Identifier.fromNamespaceAndPath(MOD_ID, subarchetype.getId()), subarchetype);
       return subarchetype;
    }
    
    private static Item registerItem(String id, Item item){
-      Identifier identifier = Identifier.of(MOD_ID,id);
-      Registry.register(ITEMS, identifier, Registry.register(Registries.ITEM, identifier, item));
+      Identifier identifier = Identifier.fromNamespaceAndPath(MOD_ID,id);
+      Registry.register(ITEMS, identifier, Registry.register(BuiltInRegistries.ITEM, identifier, item));
       return item;
    }
    
    private static IConfigSetting<?> registerConfigSetting(IConfigSetting<?> setting){
-      Registry.register(CONFIG_SETTINGS,Identifier.of(MOD_ID,setting.getId()),setting);
+      Registry.register(CONFIG_SETTINGS, Identifier.fromNamespaceAndPath(MOD_ID,setting.getId()),setting);
       return setting;
    }
    
    public static <T extends Entity> EntityType<T> registerEntity(String id, EntityType.Builder<T> builder){
-      Identifier identifier = Identifier.of(MOD_ID,id);
-      EntityType<T> entityType = builder.build(RegistryKey.of(RegistryKeys.ENTITY_TYPE, identifier));
-      Registry.register(Registries.ENTITY_TYPE, Identifier.of(MOD_ID,id), entityType);
+      Identifier identifier = Identifier.fromNamespaceAndPath(MOD_ID,id);
+      EntityType<T> entityType = builder.build(ResourceKey.create(Registries.ENTITY_TYPE, identifier));
+      Registry.register(BuiltInRegistries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(MOD_ID,id), entityType);
       PolymerEntityUtils.registerType(entityType);
       return entityType;
    }
@@ -820,22 +829,22 @@ public class ArchetypeRegistry {
       
       PolymerItemUtils.CONTEXT_ITEM_CHECK.register(
             (itemStack, packetContext) -> {
-               ServerPlayerEntity player = packetContext.getPlayer();
+               ServerPlayer player = packetContext.getPlayer();
                if(player == null) return false;
-               IArchetypeProfile profile = profile(player);
+               PlayerArchetypeData profile = profile(player);
                if(profile.hasAbility(TUFF_EATER) && TUFF_FOODS.containsKey(itemStack.getItem())){
                   return true;
                }else if(profile.hasAbility(IRON_EATER) && IRON_FOODS.containsKey(itemStack.getItem())){
                   return true;
                }else if(profile.hasAbility(COPPER_EATER) && COPPER_FOODS.containsKey(itemStack.getItem())){
                   return true;
-               }else if(profile.hasAbility(SLIME_TOTEM) && itemStack.isIn(SLIME_GROW_ITEMS)){
+               }else if(profile.hasAbility(SLIME_TOTEM) && itemStack.is(SLIME_GROW_ITEMS)){
                   return true;
-               }else if(profile.hasAbility(MAGMA_TOTEM) && itemStack.isIn(MAGMA_CUBE_GROW_ITEMS)){
+               }else if(profile.hasAbility(MAGMA_TOTEM) && itemStack.is(MAGMA_CUBE_GROW_ITEMS)){
                   return true;
-               }else if(profile.hasAbility(FUNGUS_SPEED_BOOST) && itemStack.isOf(Items.WARPED_FUNGUS)){
+               }else if(profile.hasAbility(FUNGUS_SPEED_BOOST) && itemStack.is(Items.WARPED_FUNGUS)){
                   return true;
-               }else if(profile.hasAbility(WAX_SHIELD) && itemStack.isOf(Items.HONEYCOMB)){
+               }else if(profile.hasAbility(WAX_SHIELD) && itemStack.is(Items.HONEYCOMB)){
                   return true;
                }
                return false;
@@ -844,10 +853,10 @@ public class ArchetypeRegistry {
       
       PolymerItemUtils.ITEM_MODIFICATION_EVENT.register(
             (original, client, context) -> {
-               ServerPlayerEntity player = context.getPlayer();
+               ServerPlayer player = context.getPlayer();
                if(player == null) return original;
-               IArchetypeProfile profile = profile(player);
-               HashMap<Item, Pair<Float,Integer>> map = null;
+               PlayerArchetypeData profile = profile(player);
+               HashMap<Item, Tuple<Float,Integer>> map = null;
                float healthMod = 1.0f;
                float durationMod = 1.0f;
                
@@ -868,106 +877,106 @@ public class ArchetypeRegistry {
                }
                
                if(map != null){
-                  LoreComponent lore = client.getOrDefault(DataComponentTypes.LORE,LoreComponent.DEFAULT);
-                  List<Text> currentLore = new ArrayList<>(lore.styledLines());
-                  Pair<Float,Integer> pair = map.get(original.getItem());
-                  currentLore.add(getFoodLoreLine(new Pair<>(pair.getLeft() * healthMod, Math.round(pair.getRight() * durationMod))));
-                  client.set(DataComponentTypes.LORE,new LoreComponent(currentLore,currentLore));
+                  ItemLore lore = client.getOrDefault(DataComponents.LORE, ItemLore.EMPTY);
+                  List<Component> currentLore = new ArrayList<>(lore.styledLines());
+                  Tuple<Float,Integer> pair = map.get(original.getItem());
+                  currentLore.add(getFoodLoreLine(new Tuple<>(pair.getA() * healthMod, Math.round(pair.getB() * durationMod))));
+                  client.set(DataComponents.LORE,new ItemLore(currentLore,currentLore));
                }
                
-               if(profile.hasAbility(SLIME_TOTEM) && original.isIn(ArchetypeRegistry.SLIME_GROW_ITEMS)){
-                  LoreComponent lore = client.getOrDefault(DataComponentTypes.LORE,LoreComponent.DEFAULT);
-                  List<Text> currentLore = new ArrayList<>(lore.styledLines());
+               if(profile.hasAbility(SLIME_TOTEM) && original.is(ArchetypeRegistry.SLIME_GROW_ITEMS)){
+                  ItemLore lore = client.getOrDefault(DataComponents.LORE, ItemLore.EMPTY);
+                  List<Component> currentLore = new ArrayList<>(lore.styledLines());
                   currentLore.add(getGrowItemLoreLine());
-                  client.set(DataComponentTypes.LORE,new LoreComponent(currentLore,currentLore));
+                  client.set(DataComponents.LORE,new ItemLore(currentLore,currentLore));
                }
                
-               if(profile.hasAbility(MAGMA_TOTEM) && original.isIn(ArchetypeRegistry.MAGMA_CUBE_GROW_ITEMS)){
-                  LoreComponent lore = client.getOrDefault(DataComponentTypes.LORE,LoreComponent.DEFAULT);
-                  List<Text> currentLore = new ArrayList<>(lore.styledLines());
+               if(profile.hasAbility(MAGMA_TOTEM) && original.is(ArchetypeRegistry.MAGMA_CUBE_GROW_ITEMS)){
+                  ItemLore lore = client.getOrDefault(DataComponents.LORE, ItemLore.EMPTY);
+                  List<Component> currentLore = new ArrayList<>(lore.styledLines());
                   currentLore.add(getGrowItemLoreLine());
-                  client.set(DataComponentTypes.LORE,new LoreComponent(currentLore,currentLore));
+                  client.set(DataComponents.LORE,new ItemLore(currentLore,currentLore));
                }
                
-               if(profile.hasAbility(FUNGUS_SPEED_BOOST) && original.isOf(Items.WARPED_FUNGUS)){
-                  LoreComponent lore = client.getOrDefault(DataComponentTypes.LORE,LoreComponent.DEFAULT);
-                  List<Text> currentLore = new ArrayList<>(lore.styledLines());
+               if(profile.hasAbility(FUNGUS_SPEED_BOOST) && original.is(Items.WARPED_FUNGUS)){
+                  ItemLore lore = client.getOrDefault(DataComponents.LORE, ItemLore.EMPTY);
+                  List<Component> currentLore = new ArrayList<>(lore.styledLines());
                   currentLore.add(fungusLoreLine());
-                  client.set(DataComponentTypes.LORE,new LoreComponent(currentLore,currentLore));
+                  client.set(DataComponents.LORE,new ItemLore(currentLore,currentLore));
                }
                
-               if(profile.hasAbility(WAX_SHIELD) && original.isOf(Items.HONEYCOMB)){
-                  LoreComponent lore = client.getOrDefault(DataComponentTypes.LORE,LoreComponent.DEFAULT);
-                  List<Text> currentLore = new ArrayList<>(lore.styledLines());
+               if(profile.hasAbility(WAX_SHIELD) && original.is(Items.HONEYCOMB)){
+                  ItemLore lore = client.getOrDefault(DataComponents.LORE, ItemLore.EMPTY);
+                  List<Component> currentLore = new ArrayList<>(lore.styledLines());
                   currentLore.add(waxLoreLine());
-                  client.set(DataComponentTypes.LORE,new LoreComponent(currentLore,currentLore));
+                  client.set(DataComponents.LORE,new ItemLore(currentLore,currentLore));
                }
                
                return client;
             }
       );
       
-      final ItemGroup ITEM_GROUP = PolymerItemGroupUtils.builder().displayName(Text.translatable("itemGroup.archetype_items")).icon(() -> new ItemStack(CHANGE_ITEM)).entries((displayContext, entries) -> {
+      final CreativeModeTab ITEM_GROUP = PolymerItemGroupUtils.builder().title(Component.translatable("itemGroup.archetype_items")).icon(() -> new ItemStack(CHANGE_ITEM)).displayItems((displayContext, entries) -> {
          for(Item item : ITEMS){
-            entries.add(new ItemStack(item));
+            entries.accept(new ItemStack(item));
          }
       }).build();
       
-      PolymerItemGroupUtils.registerPolymerItemGroup(Identifier.of(MOD_ID,"archetype_items"), ITEM_GROUP);
+      PolymerItemGroupUtils.registerPolymerItemGroup(Identifier.fromNamespaceAndPath(MOD_ID,"archetype_items"), ITEM_GROUP);
    }
    
-   private static Text getFoodLoreLine(Pair<Float,Integer> pair){
+   private static Component getFoodLoreLine(Tuple<Float,Integer> pair){
       DecimalFormat df = new DecimalFormat("0.###");
-      return TextUtils.removeItalics(Text.literal("").formatted(Formatting.DARK_PURPLE)
-            .append(Text.translatable("text.ancestralarchetypes.consume_1"))
-            .append(Text.literal(df.format(pair.getRight()/20.0)+" ").formatted(Formatting.GOLD))
-            .append(Text.translatable("text.ancestralarchetypes.seconds").formatted(Formatting.GOLD))
-            .append(Text.translatable("text.ancestralarchetypes.consume_2"))
-            .append(Text.literal(df.format(pair.getLeft()/2.0)+" ").formatted(Formatting.RED))
-            .append(Text.translatable("text.ancestralarchetypes.hearts").formatted(Formatting.RED))
+      return TextUtils.removeItalics(Component.literal("").withStyle(ChatFormatting.DARK_PURPLE)
+            .append(Component.translatable("text.ancestralarchetypes.consume_1"))
+            .append(Component.literal(df.format(pair.getB()/20.0)+" ").withStyle(ChatFormatting.GOLD))
+            .append(Component.translatable("text.ancestralarchetypes.seconds").withStyle(ChatFormatting.GOLD))
+            .append(Component.translatable("text.ancestralarchetypes.consume_2"))
+            .append(Component.literal(df.format(pair.getA()/2.0)+" ").withStyle(ChatFormatting.RED))
+            .append(Component.translatable("text.ancestralarchetypes.hearts").withStyle(ChatFormatting.RED))
       );
    }
    
-   private static Text getGrowItemLoreLine(){
+   private static Component getGrowItemLoreLine(){
       DecimalFormat df = new DecimalFormat("0.###");
       int eatTime = CONFIG.getInt(ArchetypeRegistry.GELATIAN_GROW_ITEM_EAT_DURATION);
-      return TextUtils.removeItalics(Text.literal("").formatted(Formatting.DARK_PURPLE)
-            .append(Text.translatable("text.ancestralarchetypes.consume_1"))
-            .append(Text.literal(df.format(eatTime/20.0)+" ").formatted(Formatting.GOLD))
-            .append(Text.translatable("text.ancestralarchetypes.seconds").formatted(Formatting.GOLD))
-            .append(Text.translatable("text.ancestralarchetypes.consume_regrow"))
+      return TextUtils.removeItalics(Component.literal("").withStyle(ChatFormatting.DARK_PURPLE)
+            .append(Component.translatable("text.ancestralarchetypes.consume_1"))
+            .append(Component.literal(df.format(eatTime/20.0)+" ").withStyle(ChatFormatting.GOLD))
+            .append(Component.translatable("text.ancestralarchetypes.seconds").withStyle(ChatFormatting.GOLD))
+            .append(Component.translatable("text.ancestralarchetypes.consume_regrow"))
       );
    }
    
-   private static Text fungusLoreLine(){
+   private static Component fungusLoreLine(){
       DecimalFormat df = new DecimalFormat("0.###");
       int eatTime = CONFIG.getInt(ArchetypeRegistry.FUNGUS_SPEED_BOOST_CONSUME_DURATION);
       double boost = CONFIG.getDouble(ArchetypeRegistry.FUNGUS_SPEED_BOOST_MULTIPLIER);
       int boostDuration = CONFIG.getInt(ArchetypeRegistry.FUNGUS_SPEED_BOOST_DURATION);
-      return TextUtils.removeItalics(Text.translatable("text.ancestralarchetypes.fungus_consume",
-            Text.literal(df.format(eatTime/20.0)).formatted(Formatting.GOLD),
-            Text.translatable("text.ancestralarchetypes.seconds").formatted(Formatting.GOLD),
-            Text.literal(df.format(boost)).formatted(Formatting.GOLD),
-            Text.literal(df.format(boostDuration/20.0)).formatted(Formatting.GOLD),
-            Text.translatable("text.ancestralarchetypes.seconds").formatted(Formatting.GOLD)
-      ).formatted(Formatting.DARK_PURPLE));
+      return TextUtils.removeItalics(Component.translatable("text.ancestralarchetypes.fungus_consume",
+            Component.literal(df.format(eatTime/20.0)).withStyle(ChatFormatting.GOLD),
+            Component.translatable("text.ancestralarchetypes.seconds").withStyle(ChatFormatting.GOLD),
+            Component.literal(df.format(boost)).withStyle(ChatFormatting.GOLD),
+            Component.literal(df.format(boostDuration/20.0)).withStyle(ChatFormatting.GOLD),
+            Component.translatable("text.ancestralarchetypes.seconds").withStyle(ChatFormatting.GOLD)
+      ).withStyle(ChatFormatting.DARK_PURPLE));
    }
    
-   private static Text waxLoreLine(){
+   private static Component waxLoreLine(){
       DecimalFormat df = new DecimalFormat("0.###");
       int eatTime = CONFIG.getInt(ArchetypeRegistry.WAX_SHIELD_CONSUME_DURATION);
       double boost = CONFIG.getDouble(ArchetypeRegistry.WAX_SHIELD_HEALTH);
       double boostMax = CONFIG.getDouble(ArchetypeRegistry.WAX_SHIELD_MAX_HEALTH);
       int boostDuration = CONFIG.getInt(ArchetypeRegistry.WAX_SHIELD_DURATION);
-      return TextUtils.removeItalics(Text.translatable("text.ancestralarchetypes.wax_consume",
-            Text.literal(df.format(eatTime/20.0)).formatted(Formatting.GOLD),
-            Text.translatable("text.ancestralarchetypes.seconds").formatted(Formatting.GOLD),
-            Text.literal(df.format(boost/2.0)).formatted(Formatting.RED),
-            Text.translatable("text.ancestralarchetypes.hearts").formatted(Formatting.RED),
-            Text.literal(df.format(boostMax/2.0)).formatted(Formatting.RED),
-            Text.translatable("text.ancestralarchetypes.hearts").formatted(Formatting.RED),
-            Text.literal(df.format(boostDuration/20.0)).formatted(Formatting.GOLD),
-            Text.translatable("text.ancestralarchetypes.seconds").formatted(Formatting.GOLD)
-      ).formatted(Formatting.DARK_PURPLE));
+      return TextUtils.removeItalics(Component.translatable("text.ancestralarchetypes.wax_consume",
+            Component.literal(df.format(eatTime/20.0)).withStyle(ChatFormatting.GOLD),
+            Component.translatable("text.ancestralarchetypes.seconds").withStyle(ChatFormatting.GOLD),
+            Component.literal(df.format(boost/2.0)).withStyle(ChatFormatting.RED),
+            Component.translatable("text.ancestralarchetypes.hearts").withStyle(ChatFormatting.RED),
+            Component.literal(df.format(boostMax/2.0)).withStyle(ChatFormatting.RED),
+            Component.translatable("text.ancestralarchetypes.hearts").withStyle(ChatFormatting.RED),
+            Component.literal(df.format(boostDuration/20.0)).withStyle(ChatFormatting.GOLD),
+            Component.translatable("text.ancestralarchetypes.seconds").withStyle(ChatFormatting.GOLD)
+      ).withStyle(ChatFormatting.DARK_PURPLE));
    }
 }

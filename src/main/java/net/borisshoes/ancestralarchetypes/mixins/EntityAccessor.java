@@ -1,8 +1,8 @@
 package net.borisshoes.ancestralarchetypes.mixins;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.world.World;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -10,13 +10,13 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(Entity.class)
 public interface EntityAccessor {
    @Invoker
-   void callSetWorld(World var1);
+   void callSetLevel(Level var1);
    
-   @Invoker("isBeingRainedOn")
+   @Invoker("isInRain")
    boolean rainedOn();
    
-   @Accessor("FLAGS")
-   static TrackedData<Byte> getFLAGS(){
+   @Accessor("DATA_SHARED_FLAGS_ID")
+   static EntityDataAccessor<Byte> getFLAGS(){
       throw new AssertionError();
    }
 }

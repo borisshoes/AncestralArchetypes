@@ -11,34 +11,34 @@ import net.borisshoes.borislib.utils.AlgoUtils;
 import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.borisshoes.borislib.utils.ParticleEffectUtils;
 import net.borisshoes.borislib.utils.SoundUtils;
-import net.minecraft.component.type.PotionContentsComponent;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.passive.HorseColor;
-import net.minecraft.entity.passive.HorseMarking;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.inventory.StackWithSlot;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.equipment.trim.ArmorTrimMaterial;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.PlayerAbilitiesS2CPacket;
-import net.minecraft.particle.DustParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.potion.Potion;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
+import net.minecraft.core.Holder;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.ItemStackWithSlot;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.animal.equine.Markings;
+import net.minecraft.world.entity.animal.equine.Variant;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.equipment.trim.TrimMaterial;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.*;
 
@@ -49,7 +49,7 @@ import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.SLOW_HOVER_AB
 
 public class ArchetypeProfile implements IArchetypeProfile {
    
-   private final PlayerEntity player;
+   private final Player player;
    private boolean giveReminders = CONFIG.getBoolean(ArchetypeRegistry.REMINDERS_ON_BY_DEFAULT);
    private boolean gliderActive;
    private boolean hoverActive;
@@ -62,96 +62,135 @@ public class ArchetypeProfile implements IArchetypeProfile {
    private int fungusBoostTime;
    private int gliderColor = 0xFFFFFF;
    private int helmetColor = 0xA06540;
-   private RegistryEntry<ArmorTrimMaterial> gliderTrimMaterial;
-   private RegistryEntry<ArmorTrimMaterial> helmetTrimMaterial;
+   private Holder<TrimMaterial> gliderTrimMaterial;
+   private Holder<TrimMaterial> helmetTrimMaterial;
    private int archetypeChangesAllowed = CONFIG.getInt(ArchetypeRegistry.STARTING_ARCHETYPE_CHANGES);
    private int giveItemsCooldown;
    private float healthUpdate;
    private ItemStack potionBrewerStack = ItemStack.EMPTY;
-   private HorseMarking horseMarking = HorseMarking.NONE;
-   private HorseColor horseColor = HorseColor.CHESTNUT;
+   private Markings horseMarking = Markings.NONE;
+   private Variant horseColor = Variant.CHESTNUT;
    private String mountName = null;
    private SubArchetype subArchetype;
    private final ArrayList<ArchetypeAbility> abilities = new ArrayList<>();
    private final HashMap<ArchetypeAbility,CooldownEntry> abilityCooldowns = new HashMap<>();
-   private final HashMap<ArchetypeAbility,Pair<UUID,Float>> mountData = new HashMap<>();
-   private final SimpleInventory mountInventory = new SimpleInventory(54);
-   private final SimpleInventory backpackInventory = new SimpleInventory(18);
+   private final HashMap<ArchetypeAbility, Tuple<UUID,Float>> mountData = new HashMap<>();
+   private final SimpleContainer mountInventory = new SimpleContainer(54);
+   private final SimpleContainer backpackInventory = new SimpleContainer(18);
    
-   public ArchetypeProfile(PlayerEntity player){
+   public ArchetypeProfile(Player player){
       this.player = player;
    }
    
    @Override
-   public void readData(ReadView view){
-      this.deathReductionSizeLevel = view.getInt("deathReductionSizeLevel",0);
-      this.glideTime = view.getFloat("glideTime",0f);
-      this.hoverTime = view.getFloat("hoverTime",0f);
-      this.fortifyTime = view.getFloat("fortifyTime",0f);
-      this.savedFlySpeed = view.getFloat("savedFlySpeed",0.05f);
-      this.gliderActive = view.getBoolean("gliderActive",false);
-      this.hoverActive = view.getBoolean("hoverActive", false);
-      this.fortifyActive = view.getBoolean("fortifyActive", false);
-      this.archetypeChangesAllowed = view.getInt("archetypeChangesAllowed",0);
-      this.fungusBoostTime = view.getInt("fungusBoostTime",0);
-      this.gliderColor = view.getInt("gliderColor",0xffffff);
-      this.helmetColor = view.getInt("helmetColor",0xA06540);
-      this.gliderTrimMaterial = BorisLib.SERVER.getRegistryManager().getOrThrow(RegistryKeys.TRIM_MATERIAL).getEntry(Identifier.of(view.getString("gliderTrimMaterial",""))).orElse(null);
-      this.helmetTrimMaterial = BorisLib.SERVER.getRegistryManager().getOrThrow(RegistryKeys.TRIM_MATERIAL).getEntry(Identifier.of(view.getString("helmetTrimMaterial",""))).orElse(null);
-      this.giveReminders = view.getBoolean("giveReminders",CONFIG.getBoolean(ArchetypeRegistry.REMINDERS_ON_BY_DEFAULT));
-      this.subArchetype = ArchetypeRegistry.SUBARCHETYPES.get(Identifier.of(MOD_ID, view.getString("subArchetype","")));
-      this.giveItemsCooldown = view.getInt("giveItemsCooldown",0);
-      this.healthUpdate = view.getFloat("loginHealth",20f);
+   public boolean hasData(){
+      if(this.subArchetype != null) return true;
+      if(!this.mountInventory.isEmpty()) return true;
+      if(!this.backpackInventory.isEmpty()) return true;
+      return false;
+   }
+   
+   @Override
+   public void clearData(){
+      this.giveReminders = CONFIG.getBoolean(ArchetypeRegistry.REMINDERS_ON_BY_DEFAULT);
+      this.gliderActive = false;
+      this.hoverActive = false;
+      this.fortifyActive = false;
+      this.deathReductionSizeLevel = 0;
+      this.glideTime = 0f;
+      this.hoverTime = 0f;
+      this.fortifyTime = 0f;
+      this.savedFlySpeed = 0.05f;
+      this.fungusBoostTime = 0;
+      this.gliderColor = 0xFFFFFF;
+      this.helmetColor = 0xA06540;
+      this.gliderTrimMaterial = null;
+      this.helmetTrimMaterial = null;
+      this.archetypeChangesAllowed = 0;
+      this.giveItemsCooldown = 0;
+      this.healthUpdate = 20f;
+      this.potionBrewerStack = ItemStack.EMPTY;
+      this.horseMarking = Markings.NONE;
+      this.horseColor = Variant.CHESTNUT;
+      this.mountName = null;
+      this.subArchetype = null;
+      this.abilities.clear();
+      this.abilityCooldowns.clear();
+      this.mountData.clear();
+      this.mountInventory.clearContent();
+      this.backpackInventory.clearContent();
+   }
+   
+   @Override
+   public void readData(ValueInput view){
+      this.deathReductionSizeLevel = view.getIntOr("deathReductionSizeLevel",0);
+      this.glideTime = view.getFloatOr("glideTime",0f);
+      this.hoverTime = view.getFloatOr("hoverTime",0f);
+      this.fortifyTime = view.getFloatOr("fortifyTime",0f);
+      this.savedFlySpeed = view.getFloatOr("savedFlySpeed",0.05f);
+      this.gliderActive = view.getBooleanOr("gliderActive",false);
+      this.hoverActive = view.getBooleanOr("hoverActive", false);
+      this.fortifyActive = view.getBooleanOr("fortifyActive", false);
+      this.archetypeChangesAllowed = view.getIntOr("archetypeChangesAllowed",0);
+      this.fungusBoostTime = view.getIntOr("fungusBoostTime",0);
+      this.gliderColor = view.getIntOr("gliderColor",0xffffff);
+      this.helmetColor = view.getIntOr("helmetColor",0xA06540);
+      this.gliderTrimMaterial = BorisLib.SERVER.registryAccess().lookupOrThrow(Registries.TRIM_MATERIAL).get(Identifier.parse(view.getStringOr("gliderTrimMaterial",""))).orElse(null);
+      this.helmetTrimMaterial = BorisLib.SERVER.registryAccess().lookupOrThrow(Registries.TRIM_MATERIAL).get(Identifier.parse(view.getStringOr("helmetTrimMaterial",""))).orElse(null);
+      this.giveReminders = view.getBooleanOr("giveReminders",CONFIG.getBoolean(ArchetypeRegistry.REMINDERS_ON_BY_DEFAULT));
+      this.subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(Identifier.fromNamespaceAndPath(MOD_ID, view.getStringOr("subArchetype","")));
+      this.giveItemsCooldown = view.getIntOr("giveItemsCooldown",0);
+      this.healthUpdate = view.getFloatOr("loginHealth",20f);
       this.calculateAbilities();
       
       abilityCooldowns.clear();
-      NbtCompound cooldownTag = view.read("cooldowns",NbtCompound.CODEC).orElse(new NbtCompound());
-      for(String key : cooldownTag.getKeys()){
-         NbtCompound compound = cooldownTag.getCompound(key).orElse(new NbtCompound());
-         ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.get(Identifier.of(MOD_ID, key));
+      CompoundTag cooldownTag = view.read("cooldowns", CompoundTag.CODEC).orElse(new CompoundTag());
+      for(String key : cooldownTag.keySet()){
+         CompoundTag compound = cooldownTag.getCompound(key).orElse(new CompoundTag());
+         ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.getValue(Identifier.fromNamespaceAndPath(MOD_ID, key));
          if(ability != null){
-            abilityCooldowns.put(ability, new CooldownEntry(compound.getInt("cooldown", 0), compound.getInt("duration", 0)));
+            abilityCooldowns.put(ability, new CooldownEntry(compound.getIntOr("cooldown", 0), compound.getIntOr("duration", 0)));
          }
       }
       
-      this.potionBrewerStack = view.read("potionBrewerStack",ItemStack.CODEC).orElse(ItemStack.EMPTY);
-      this.horseMarking = HorseMarking.byIndex(view.getInt("horseMarking",0));
-      this.horseColor = HorseColor.byIndex(view.getInt("horseColor",0));
-      this.mountName = view.getString("mountName","");
+      this.potionBrewerStack = view.read("potionBrewerStack", ItemStack.CODEC).orElse(ItemStack.EMPTY);
+      this.horseMarking = Markings.byId(view.getIntOr("horseMarking",0));
+      this.horseColor = Variant.byId(view.getIntOr("horseColor",0));
+      this.mountName = view.getStringOr("mountName","");
       
       this.mountData.clear();
-      NbtCompound mountDataTag = view.read("mountData",NbtCompound.CODEC).orElse(new NbtCompound());
-      for(String key : mountDataTag.getKeys()){
-         ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.get(Identifier.of(MOD_ID, key));
+      CompoundTag mountDataTag = view.read("mountData", CompoundTag.CODEC).orElse(new CompoundTag());
+      for(String key : mountDataTag.keySet()){
+         ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.getValue(Identifier.fromNamespaceAndPath(MOD_ID, key));
          if(ability != null){
-            NbtCompound entryTag = mountDataTag.getCompound(key).orElse(new NbtCompound());
-            UUID uuid = AlgoUtils.getUUID(entryTag.getString("id",""));
-            mountData.put(ability,new Pair<>(uuid,entryTag.getFloat("hp",1f)));
+            CompoundTag entryTag = mountDataTag.getCompound(key).orElse(new CompoundTag());
+            UUID uuid = AlgoUtils.getUUID(entryTag.getStringOr("id",""));
+            mountData.put(ability,new Tuple<>(uuid,entryTag.getFloatOr("hp",1f)));
          }
       }
       
-      this.mountInventory.clear();
-      for(StackWithSlot stackWithSlot : view.getTypedListView("mountInventory", StackWithSlot.CODEC)){
-         if(stackWithSlot.isValidSlot(this.mountInventory.getHeldStacks().size())){
-            this.mountInventory.getHeldStacks().set(stackWithSlot.slot(), stackWithSlot.stack());
+      this.mountInventory.clearContent();
+      for(ItemStackWithSlot stackWithSlot : view.listOrEmpty("mountInventory", ItemStackWithSlot.CODEC)){
+         if(stackWithSlot.isValidInContainer(this.mountInventory.getItems().size())){
+            this.mountInventory.getItems().set(stackWithSlot.slot(), stackWithSlot.stack());
          }
       }
       
-      this.backpackInventory.clear();
-      for(StackWithSlot stackWithSlot : view.getTypedListView("backpackInventory", StackWithSlot.CODEC)){
-         if(stackWithSlot.isValidSlot(this.backpackInventory.getHeldStacks().size())){
-            this.backpackInventory.getHeldStacks().set(stackWithSlot.slot(), stackWithSlot.stack());
+      this.backpackInventory.clearContent();
+      for(ItemStackWithSlot stackWithSlot : view.listOrEmpty("backpackInventory", ItemStackWithSlot.CODEC)){
+         if(stackWithSlot.isValidInContainer(this.backpackInventory.getItems().size())){
+            this.backpackInventory.getItems().set(stackWithSlot.slot(), stackWithSlot.stack());
          }
       }
    }
    
    @Override
-   public void writeData(WriteView view){
+   public void writeData(ValueOutput view){
       view.putInt("deathReductionSizeLevel",this.deathReductionSizeLevel);
       view.putInt("gliderColor",this.gliderColor);
       view.putInt("helmetColor",this.helmetColor);
-      view.putInt("horseMarking",this.horseMarking.getIndex());
-      view.putInt("horseColor",this.horseColor.getIndex());
+      view.putInt("horseMarking",this.horseMarking.getId());
+      view.putInt("horseColor",this.horseColor.getId());
       view.putInt("archetypeChangesAllowed",this.archetypeChangesAllowed);
       view.putInt("giveItemsCooldown",this.giveItemsCooldown);
       view.putInt("fungusBoostTime",this.fungusBoostTime);
@@ -165,43 +204,43 @@ public class ArchetypeProfile implements IArchetypeProfile {
       view.putBoolean("hoverActive",this.hoverActive);
       view.putBoolean("fortifyActive",this.fortifyActive);
       view.putString("subArchetype",this.subArchetype != null ? this.subArchetype.getId() : "");
-      view.putString("gliderTrimMaterial",this.gliderTrimMaterial == null ? "" : this.gliderTrimMaterial.getIdAsString());
-      view.putString("helmetTrimMaterial",this.helmetTrimMaterial == null ? "" : this.helmetTrimMaterial.getIdAsString());
+      view.putString("gliderTrimMaterial",this.gliderTrimMaterial == null ? "" : this.gliderTrimMaterial.getRegisteredName());
+      view.putString("helmetTrimMaterial",this.helmetTrimMaterial == null ? "" : this.helmetTrimMaterial.getRegisteredName());
       if(this.mountName != null) view.putString("mountName",this.mountName);
       
-      NbtCompound cooldownTag = new NbtCompound();
+      CompoundTag cooldownTag = new CompoundTag();
       for(Map.Entry<ArchetypeAbility, CooldownEntry> entry : abilityCooldowns.entrySet()){
-         NbtCompound cooldownAbilityTag = new NbtCompound();
+         CompoundTag cooldownAbilityTag = new CompoundTag();
          cooldownAbilityTag.putInt("cooldown",entry.getValue().getCooldown());
          cooldownAbilityTag.putInt("duration",entry.getValue().getTotalDuration());
-         cooldownTag.put(entry.getKey().getId(),cooldownAbilityTag);
+         cooldownTag.put(entry.getKey().id(),cooldownAbilityTag);
       }
-      view.put("cooldowns",NbtCompound.CODEC,cooldownTag);
-      if(!this.potionBrewerStack.isEmpty()) view.put("potionBrewerStack",ItemStack.CODEC,potionBrewerStack);
+      view.store("cooldowns", CompoundTag.CODEC,cooldownTag);
+      if(!this.potionBrewerStack.isEmpty()) view.store("potionBrewerStack", ItemStack.CODEC,potionBrewerStack);
       
-      NbtCompound mountDataTag = new NbtCompound();
+      CompoundTag mountDataTag = new CompoundTag();
       mountData.forEach((ability, pair) -> {
-         NbtCompound tagEntry = new NbtCompound();
-         tagEntry.putString("id", pair.getLeft() != null ? pair.getLeft().toString() : "");
-         tagEntry.putFloat("hp", pair.getRight());
-         mountDataTag.put(ability.getId(),tagEntry);
+         CompoundTag tagEntry = new CompoundTag();
+         tagEntry.putString("id", pair.getA() != null ? pair.getA().toString() : "");
+         tagEntry.putFloat("hp", pair.getB());
+         mountDataTag.put(ability.id(),tagEntry);
       });
-      view.put("mountData",NbtCompound.CODEC,mountDataTag);
+      view.store("mountData", CompoundTag.CODEC,mountDataTag);
       
-      WriteView.ListAppender<StackWithSlot> listAppender = view.getListAppender("mountInventory", StackWithSlot.CODEC);
-      for(int i = 0; i < this.mountInventory.getHeldStacks().size(); ++i) {
-         ItemStack itemStack = this.mountInventory.getHeldStacks().get(i);
+      ValueOutput.TypedOutputList<ItemStackWithSlot> listAppender = view.list("mountInventory", ItemStackWithSlot.CODEC);
+      for(int i = 0; i < this.mountInventory.getItems().size(); ++i) {
+         ItemStack itemStack = this.mountInventory.getItems().get(i);
          if (!itemStack.isEmpty()) {
-            listAppender.add(new StackWithSlot(i, itemStack));
+            listAppender.add(new ItemStackWithSlot(i, itemStack));
          }
       }
       listAppender.isEmpty();
       
-      listAppender = view.getListAppender("backpackInventory", StackWithSlot.CODEC);
-      for(int i = 0; i < this.backpackInventory.getHeldStacks().size(); ++i) {
-         ItemStack itemStack = this.backpackInventory.getHeldStacks().get(i);
+      listAppender = view.list("backpackInventory", ItemStackWithSlot.CODEC);
+      for(int i = 0; i < this.backpackInventory.getItems().size(); ++i) {
+         ItemStack itemStack = this.backpackInventory.getItems().get(i);
          if (!itemStack.isEmpty()) {
-            listAppender.add(new StackWithSlot(i, itemStack));
+            listAppender.add(new ItemStackWithSlot(i, itemStack));
          }
       }
       listAppender.isEmpty();
@@ -287,9 +326,9 @@ public class ArchetypeProfile implements IArchetypeProfile {
    
    @Override
    public UUID getMountEntity(ArchetypeAbility ability){
-      Pair<UUID,Float> data = this.mountData.get(ability);
+      Tuple<UUID,Float> data = this.mountData.get(ability);
       if(data != null){
-         return data.getLeft();
+         return data.getA();
       }else{
          return null;
       }
@@ -297,9 +336,9 @@ public class ArchetypeProfile implements IArchetypeProfile {
    
    @Override
    public float getMountHealth(ArchetypeAbility ability){
-      Pair<UUID,Float> data = this.mountData.get(ability);
+      Tuple<UUID,Float> data = this.mountData.get(ability);
       if(data != null){
-         return data.getRight();
+         return data.getB();
       }else{
          return 0f;
       }
@@ -330,22 +369,22 @@ public class ArchetypeProfile implements IArchetypeProfile {
    }
    
    @Override
-   public SimpleInventory getMountInventory(){
+   public SimpleContainer getMountInventory(){
       return this.mountInventory;
    }
    
    @Override
-   public SimpleInventory getBackpackInventory(){
+   public SimpleContainer getBackpackInventory(){
       return this.backpackInventory;
    }
    
    @Override
-   public HorseMarking getHorseMarking(){
+   public Markings getHorseMarking(){
       return this.horseMarking;
    }
    
    @Override
-   public HorseColor getHorseColor(){
+   public Variant getHorseColor(){
       return this.horseColor;
    }
    
@@ -364,11 +403,11 @@ public class ArchetypeProfile implements IArchetypeProfile {
       return this.helmetColor;
    }
    
-   public RegistryEntry<ArmorTrimMaterial> getGliderTrimMaterial(){
+   public Holder<TrimMaterial> getGliderTrimMaterial(){
       return this.gliderTrimMaterial;
    }
    
-   public RegistryEntry<ArmorTrimMaterial> getHelmetTrimMaterial(){
+   public Holder<TrimMaterial> getHelmetTrimMaterial(){
       return this.helmetTrimMaterial;
    }
    
@@ -399,12 +438,12 @@ public class ArchetypeProfile implements IArchetypeProfile {
          return;
       }
       
-      MinecraftUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
-      MinecraftUtils.attributeEffect(player, EntityAttributes.SCALE,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
+      MinecraftUtils.attributeEffect(player, Attributes.MAX_HEALTH,0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.fromNamespaceAndPath(MOD_ID,"death_reduction_size_level"),true);
+      MinecraftUtils.attributeEffect(player, Attributes.SCALE,0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.fromNamespaceAndPath(MOD_ID,"death_reduction_size_level"),true);
       
       double scale = -(1 - Math.pow(0.5,this.deathReductionSizeLevel));
-      MinecraftUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH,scale, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),false);
-      MinecraftUtils.attributeEffect(player, EntityAttributes.SCALE,scale, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),false);
+      MinecraftUtils.attributeEffect(player, Attributes.MAX_HEALTH,scale, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.fromNamespaceAndPath(MOD_ID,"death_reduction_size_level"),false);
+      MinecraftUtils.attributeEffect(player, Attributes.SCALE,scale, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.fromNamespaceAndPath(MOD_ID,"death_reduction_size_level"),false);
       player.setHealth(player.getMaxHealth());
    }
    
@@ -412,8 +451,8 @@ public class ArchetypeProfile implements IArchetypeProfile {
    @Override
    public void resetDeathReductionSizeLevel(){
       this.deathReductionSizeLevel = 0;
-      MinecraftUtils.attributeEffect(player, EntityAttributes.MAX_HEALTH,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
-      MinecraftUtils.attributeEffect(player, EntityAttributes.SCALE,0, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.of(MOD_ID,"death_reduction_size_level"),true);
+      MinecraftUtils.attributeEffect(player, Attributes.MAX_HEALTH,0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.fromNamespaceAndPath(MOD_ID,"death_reduction_size_level"),true);
+      MinecraftUtils.attributeEffect(player, Attributes.SCALE,0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.fromNamespaceAndPath(MOD_ID,"death_reduction_size_level"),true);
    }
    
    @Override
@@ -431,7 +470,7 @@ public class ArchetypeProfile implements IArchetypeProfile {
       
       if(this.fungusBoostTime > 0){
          this.fungusBoostTime--;
-         ((ServerWorld)player.getEntityWorld()).spawnParticles(new DustParticleEffect(0x20c7b1,0.75f),player.getEntityPos().getX(),player.getEntityPos().getY()+player.getHeight()/2.0,player.getEntityPos().getZ(),1,player.getWidth()*0.65,player.getHeight()/2.0,player.getWidth()*0.65,1);
+         ((ServerLevel)player.level()).sendParticles(new DustParticleOptions(0x20c7b1,0.75f),player.position().x(),player.position().y()+player.getBbHeight()/2.0,player.position().z(),1,player.getBbWidth()*0.65,player.getBbHeight()/2.0,player.getBbWidth()*0.65,1);
       }
       if(this.giveItemsCooldown > 0) this.giveItemsCooldown--;
       
@@ -446,16 +485,16 @@ public class ArchetypeProfile implements IArchetypeProfile {
       }else{
          this.fortifyTime--;
          if((int)this.fortifyTime % 2 == 0){
-            double height = player.getHeight()/2*(Math.sin(Math.PI*2.0/60.0*fortifyTime)+1);
-            ParticleEffectUtils.circle((ServerWorld) player.getEntityWorld(),null,player.getEntityPos().add(0,height,0),ParticleTypes.END_ROD,player.getWidth(),(int)(player.getWidth()*12),1,0,0);
+            double height = player.getBbHeight()/2*(Math.sin(Math.PI*2.0/60.0*fortifyTime)+1);
+            ParticleEffectUtils.circle((ServerLevel) player.level(),null,player.position().add(0,height,0), ParticleTypes.END_ROD,player.getBbWidth(),(int)(player.getBbWidth()*12),1,0,0);
          }
       }
    }
    
    private void handleGlider(){
       boolean wasGliderActive = this.gliderActive;
-      boolean gliderEquipped = player.getEquippedStack(EquipmentSlot.CHEST).isOf(ArchetypeRegistry.GLIDER_ITEM) || player.getEquippedStack(EquipmentSlot.CHEST).isOf(ArchetypeRegistry.END_GLIDER_ITEM);
-      if(gliderEquipped && player.isGliding()){
+      boolean gliderEquipped = player.getItemBySlot(EquipmentSlot.CHEST).is(ArchetypeRegistry.GLIDER_ITEM) || player.getItemBySlot(EquipmentSlot.CHEST).is(ArchetypeRegistry.END_GLIDER_ITEM);
+      if(gliderEquipped && player.isFallFlying()){
          if(!wasGliderActive) this.gliderActive = true;
          this.glideTime--;
       }else{
@@ -477,7 +516,7 @@ public class ArchetypeProfile implements IArchetypeProfile {
    }
    
    private void handleHover(){
-      boolean canHover = !player.isCreative() && player.getEquippedStack(EquipmentSlot.HEAD).isOf(ArchetypeRegistry.SLOW_HOVER_ITEM) && getAbilityCooldown(ArchetypeRegistry.SLOW_HOVER) == 0 && this.hoverTime > 0;
+      boolean canHover = !player.isCreative() && player.getItemBySlot(EquipmentSlot.HEAD).is(ArchetypeRegistry.SLOW_HOVER_ITEM) && getAbilityCooldown(ArchetypeRegistry.SLOW_HOVER) == 0 && this.hoverTime > 0;
       if(SLOW_HOVER_ABILITY.grants(player, VanillaAbilities.ALLOW_FLYING) && !canHover){
          SLOW_HOVER_ABILITY.revokeFrom(player, VanillaAbilities.ALLOW_FLYING);
       }else if(!SLOW_HOVER_ABILITY.grants(player, VanillaAbilities.ALLOW_FLYING) && canHover){
@@ -490,22 +529,22 @@ public class ArchetypeProfile implements IArchetypeProfile {
       if(hovering){
          if(!wasHovering){
             this.hoverActive = true;
-            SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(), SoundEvents.ENTITY_ENDER_DRAGON_FLAP, SoundCategory.PLAYERS,0.5f,1.25f);
-            SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(), SoundEvents.ENTITY_HAPPY_GHAST_HARNESS_GOGGLES_DOWN, SoundCategory.PLAYERS,0.5f,0.8f);
-            this.savedFlySpeed = player.getAbilities().getFlySpeed();
-            player.getAbilities().setFlySpeed((float) (CONFIG.getDouble(ArchetypeRegistry.SLOW_HOVER_FLIGHT_SPEED)));
-            ((ServerPlayerEntity)player).networkHandler.sendPacket(new PlayerAbilitiesS2CPacket(player.getAbilities()));
+            SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS,0.5f,1.25f);
+            SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.HARNESS_GOGGLES_DOWN, SoundSource.PLAYERS,0.5f,0.8f);
+            this.savedFlySpeed = player.getAbilities().getFlyingSpeed();
+            player.getAbilities().setFlyingSpeed((float) (CONFIG.getDouble(ArchetypeRegistry.SLOW_HOVER_FLIGHT_SPEED)));
+            ((ServerPlayer)player).connection.send(new ClientboundPlayerAbilitiesPacket(player.getAbilities()));
          }
          this.hoverTime--;
-         if(player.getRandom().nextDouble() < 0.4) ((ServerPlayerEntity)player).getEntityWorld().spawnParticles(ParticleTypes.POOF,player.getX(),player.getY()-0.5,player.getZ(),1,0.2,0.2,0.2,0.01);
+         if(player.getRandom().nextDouble() < 0.4) ((ServerPlayer)player).level().sendParticles(ParticleTypes.POOF,player.getX(),player.getY()-0.5,player.getZ(),1,0.2,0.2,0.2,0.01);
       }else{
          if(wasHovering){
             this.hoverActive = false;
             setAbilityCooldown(ArchetypeRegistry.SLOW_HOVER,CONFIG.getInt(ArchetypeRegistry.SLOW_HOVER_FLIGHT_COOLDOWN));
-            SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(), SoundEvents.ENTITY_ENDER_DRAGON_FLAP, SoundCategory.PLAYERS,0.5f,0.85f);
-            SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(), SoundEvents.ENTITY_HAPPY_GHAST_HARNESS_GOGGLES_UP, SoundCategory.PLAYERS,0.5f,0.8f);
-            player.getAbilities().setFlySpeed(this.savedFlySpeed);
-            ((ServerPlayerEntity)player).networkHandler.sendPacket(new PlayerAbilitiesS2CPacket(player.getAbilities()));
+            SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS,0.5f,0.85f);
+            SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.HARNESS_GOGGLES_UP, SoundSource.PLAYERS,0.5f,0.8f);
+            player.getAbilities().setFlyingSpeed(this.savedFlySpeed);
+            ((ServerPlayer)player).connection.send(new ClientboundPlayerAbilitiesPacket(player.getAbilities()));
          }
          if(getAbilityCooldown(ArchetypeRegistry.SLOW_HOVER) == 0){
             this.hoverTime = (float) Math.min(CONFIG.getInt(ArchetypeRegistry.SLOW_HOVER_FLIGHT_DURATION),this.hoverTime + CONFIG.getDouble(ArchetypeRegistry.SLOW_HOVER_FLIGHT_RECOVERY_TIME));
@@ -527,27 +566,27 @@ public class ArchetypeProfile implements IArchetypeProfile {
    }
    
    @Override
-   public void setPotionType(Pair<Item, RegistryEntry<Potion>> pair){
-      this.potionBrewerStack = pair == null ? ItemStack.EMPTY : PotionContentsComponent.createStack(pair.getLeft(),pair.getRight());
+   public void setPotionType(Tuple<Item, Holder<Potion>> pair){
+      this.potionBrewerStack = pair == null ? ItemStack.EMPTY : PotionContents.createItemStack(pair.getA(),pair.getB());
    }
    
    @Override
    public void setMountEntity(ArchetypeAbility ability, UUID uuid){
-      Pair<UUID,Float> prev = this.mountData.get(ability);
+      Tuple<UUID,Float> prev = this.mountData.get(ability);
       if(prev != null){
-         this.mountData.put(ability, new Pair<>(uuid,prev.getRight()));
+         this.mountData.put(ability, new Tuple<>(uuid,prev.getB()));
       }else{
-         this.mountData.put(ability, new Pair<>(uuid,0f));
+         this.mountData.put(ability, new Tuple<>(uuid,0f));
       }
    }
    
    @Override
    public void setMountHealth(ArchetypeAbility ability, float health){
-      Pair<UUID,Float> prev = this.mountData.get(ability);
+      Tuple<UUID,Float> prev = this.mountData.get(ability);
       if(prev != null){
-         this.mountData.put(ability, new Pair<>(prev.getLeft(),health));
+         this.mountData.put(ability, new Tuple<>(prev.getA(),health));
       }else{
-         this.mountData.put(ability, new Pair<>(null,health));
+         this.mountData.put(ability, new Tuple<>(null,health));
       }
    }
    
@@ -557,7 +596,7 @@ public class ArchetypeProfile implements IArchetypeProfile {
    }
    
    @Override
-   public void setHorseVariant(HorseColor color, HorseMarking marking){
+   public void setHorseVariant(Variant color, Markings marking){
       this.horseMarking = marking;
       this.horseColor = color;
    }
@@ -572,11 +611,11 @@ public class ArchetypeProfile implements IArchetypeProfile {
       this.helmetColor = color;
    }
    
-   public void setGliderTrimMaterial(RegistryEntry<ArmorTrimMaterial> material){
+   public void setGliderTrimMaterial(Holder<TrimMaterial> material){
       this.gliderTrimMaterial = material;
    }
    
-   public void setHelmetTrimMaterial(RegistryEntry<ArmorTrimMaterial> material){
+   public void setHelmetTrimMaterial(Holder<TrimMaterial> material){
       this.helmetTrimMaterial = material;
    }
    
@@ -608,15 +647,15 @@ public class ArchetypeProfile implements IArchetypeProfile {
       if(this.giveItemsCooldown > 0) return false;
       
       List<ArchetypeAbility> abilities = getAbilities();
-      PlayerInventory inv = player.getInventory();
+      Inventory inv = player.getInventory();
       for(ArchetypeAbility ability : abilities){
-         if(!ability.isActive()) continue;
+         if(!ability.active()) continue;
          for(Item item : ITEMS){
             if(item instanceof AbilityItem abilityItem && ability.equals(abilityItem.ability)){
                boolean found = false;
-               for(int i = 0; i < inv.size(); i++){
-                  ItemStack stack = inv.getStack(i);
-                  if(stack.isOf(abilityItem)){
+               for(int i = 0; i < inv.getContainerSize(); i++){
+                  ItemStack stack = inv.getItem(i);
+                  if(stack.is(abilityItem)){
                      found = true;
                      break;
                   }

@@ -1,9 +1,9 @@
 package net.borisshoes.ancestralarchetypes;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,12 +27,12 @@ public class SubArchetype {
       this.displayItem = displayItem;
    }
    
-   public MutableText getName(){
-      return Text.translatable(MOD_ID+".subarchetype.name."+id);
+   public MutableComponent getName(){
+      return Component.translatable(MOD_ID+".subarchetype.name."+id);
    }
    
-   public MutableText getDescription(){
-      return Text.translatable(MOD_ID+".subarchetype.description."+id,this.parent == null ? Text.translatable("text.ancestralarchetypes.archetype") : parent.getName());
+   public MutableComponent getDescription(){
+      return Component.translatable(MOD_ID+".subarchetype.description."+id,this.parent == null ? Component.translatable("text.ancestralarchetypes.archetype") : parent.getName());
    }
    
    public String getId(){

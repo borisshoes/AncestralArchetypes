@@ -1,14 +1,14 @@
 package net.borisshoes.ancestralarchetypes.misc;
 
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 public class SpyglassRevealEvent {
-   private final ServerPlayerEntity inspector;
-   private final ServerPlayerEntity target;
+   private final ServerPlayer inspector;
+   private final ServerPlayer target;
    private final boolean reset;
    private int cooldown;
    
-   public SpyglassRevealEvent(ServerPlayerEntity inspector, ServerPlayerEntity target, int cooldown, boolean reset){
+   public SpyglassRevealEvent(ServerPlayer inspector, ServerPlayer target, int cooldown, boolean reset){
       this.inspector = inspector;
       this.target = target;
       this.cooldown = cooldown;
@@ -19,11 +19,11 @@ public class SpyglassRevealEvent {
       this.cooldown--;
    }
    
-   public ServerPlayerEntity getInspector(){
+   public ServerPlayer getInspector(){
       return inspector;
    }
    
-   public ServerPlayerEntity getTarget(){
+   public ServerPlayer getTarget(){
       return target;
    }
    

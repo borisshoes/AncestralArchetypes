@@ -2,80 +2,80 @@ package net.borisshoes.ancestralarchetypes.callbacks;
 
 import net.borisshoes.ancestralarchetypes.AncestralArchetypes;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
-import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
+import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.ancestralarchetypes.gui.MountInventoryGui;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.Tameable;
-import net.minecraft.entity.passive.CamelEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.scoreboard.Team;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.OwnableEntity;
+import net.minecraft.world.entity.animal.camel.Camel;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.scores.PlayerTeam;
 
 import java.util.List;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 
 public class EntityUseCallback {
-   public static ActionResult useEntity(PlayerEntity playerEntity, World world, Hand hand, Entity entity, EntityHitResult entityHitResult){
-      ActionResult mountCheck = mountCheck(playerEntity,entity);
-      if(mountCheck != ActionResult.PASS && mountCheck != ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION){
+   public static InteractionResult useEntity(Player playerEntity, Level world, InteractionHand hand, Entity entity, EntityHitResult entityHitResult){
+      InteractionResult mountCheck = mountCheck(playerEntity,entity);
+      if(mountCheck != InteractionResult.PASS && mountCheck != InteractionResult.TRY_WITH_EMPTY_HAND){
          return mountCheck;
       }
       
-      ActionResult rideableCheck = rideableCheck(playerEntity,entity);
-      if(rideableCheck != ActionResult.PASS && mountCheck != ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION){
+      InteractionResult rideableCheck = rideableCheck(playerEntity,entity);
+      if(rideableCheck != InteractionResult.PASS && mountCheck != InteractionResult.TRY_WITH_EMPTY_HAND){
          return rideableCheck;
       }
       
-      return ActionResult.PASS;
+      return InteractionResult.PASS;
    }
    
-   private static ActionResult rideableCheck(PlayerEntity playerEntity, Entity entity){
-      if(!(playerEntity instanceof ServerPlayerEntity user && entity instanceof ServerPlayerEntity ridden)) return ActionResult.PASS;
-      if(!AncestralArchetypes.profile(ridden).hasAbility(ArchetypeRegistry.RIDEABLE)) return ActionResult.PASS;
+   private static InteractionResult rideableCheck(Player playerEntity, Entity entity){
+      if(!(playerEntity instanceof ServerPlayer user && entity instanceof ServerPlayer ridden)) return InteractionResult.PASS;
+      if(!AncestralArchetypes.profile(ridden).hasAbility(ArchetypeRegistry.RIDEABLE)) return InteractionResult.PASS;
       
-      int passengers = user.getPlayerPassengers();
+      int passengers = user.countPlayerPassengers();
       if(passengers > 0){
-         return ActionResult.FAIL;
+         return InteractionResult.FAIL;
       }
       if(CONFIG.getBoolean(ArchetypeRegistry.RIDEABLE_TEAM_ONLY)){
-         Team riddenTeam = ridden.getScoreboardTeam();
+         PlayerTeam riddenTeam = ridden.getTeam();
          if(riddenTeam != null){
-            if(user.getScoreboardTeam() == null || !ridden.getScoreboardTeam().getName().equals(user.getScoreboardTeam().getName())) return ActionResult.FAIL;
+            if(user.getTeam() == null || !ridden.getTeam().getName().equals(user.getTeam().getName())) return InteractionResult.FAIL;
          }
       }
       user.startRiding(ridden);
-      return ActionResult.SUCCESS;
+      return InteractionResult.SUCCESS;
    }
    
-   private static ActionResult mountCheck(PlayerEntity playerEntity, Entity entity){
-      List<String> tags = entity.getCommandTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
+   private static InteractionResult mountCheck(Player playerEntity, Entity entity){
+      List<String> tags = entity.getTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
       boolean spiritMount = !tags.isEmpty();
-      if(!spiritMount) return ActionResult.PASS;
+      if(!spiritMount) return InteractionResult.PASS;
       
       LivingEntity rider = null;
-      if(entity instanceof CamelEntity camel){
+      if(entity instanceof Camel camel){
          rider = camel.getControllingPassenger();
       }
       
-      if((!(entity instanceof Tameable tameable) || !(tameable.getOwner() instanceof ServerPlayerEntity player))) return ActionResult.FAIL;
-      if(!player.equals(playerEntity) && (rider == null || !rider.equals(player))) return ActionResult.FAIL;
-      if(player.isSneaking()){
-         if(tags.getFirst().contains(ArchetypeRegistry.DONKEY_SPIRIT_MOUNT.getId())){
+      if((!(entity instanceof OwnableEntity tameable) || !(tameable.getOwner() instanceof ServerPlayer player))) return InteractionResult.FAIL;
+      if(!player.equals(playerEntity) && (rider == null || !rider.equals(player))) return InteractionResult.FAIL;
+      if(player.isShiftKeyDown()){
+         if(tags.getFirst().contains(ArchetypeRegistry.DONKEY_SPIRIT_MOUNT.id())){
             // Access inventory
-            IArchetypeProfile profile = profile(player);
+            PlayerArchetypeData profile = profile(player);
             MountInventoryGui gui = new MountInventoryGui(player, profile.getMountInventory());
             gui.open();
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
          }else{
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
          }
       }
-      return ActionResult.PASS;
+      return InteractionResult.PASS;
    }
 }

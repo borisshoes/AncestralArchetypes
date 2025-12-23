@@ -1,29 +1,29 @@
 package net.borisshoes.ancestralarchetypes.items;
 
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
-import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
+import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.borislib.utils.MathUtils;
 import net.borisshoes.borislib.utils.SoundUtils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.DragonFireballEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.consume.UseAction;
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
-import net.minecraft.particle.DustColorTransitionParticleEffect;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.particles.DustColorTransitionOptions;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.hurtingprojectile.DragonFireball;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.List;
@@ -32,7 +32,7 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
 public class EndflameItem extends AbilityItem{
-   public EndflameItem(Settings settings){
+   public EndflameItem(Properties settings){
       super(ArchetypeRegistry.ENDERFLAME, "\uD83D\uDD25", settings);
    }
    
@@ -42,45 +42,45 @@ public class EndflameItem extends AbilityItem{
    }
    
    @Override
-   public ActionResult use(World world, PlayerEntity user, Hand hand){
-      if(!(user instanceof ServerPlayerEntity player)) return ActionResult.PASS;
-      IArchetypeProfile profile = profile(player);
+   public InteractionResult use(Level world, Player user, InteractionHand hand){
+      if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
+      PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendMessage(Text.translatable("text.ancestralarchetypes.ability_on_cooldown").formatted(Formatting.RED,Formatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.BLOCK_FIRE_EXTINGUISH,0.25f,0.8f);
-         return ActionResult.PASS;
+         player.displayClientMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         return InteractionResult.PASS;
       }
       
-      if(player.isSneaking()){
+      if(player.isShiftKeyDown()){
          shootFireball(player);
          profile(player).setAbilityCooldown(this.ability,CONFIG.getInt(ArchetypeRegistry.ENDERFLAME_FIREBALL_COOLDOWN));
-         player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, user.getStackInHand(hand)));
+         player.connection.send(new ClientboundContainerSetSlotPacket(player.inventoryMenu.containerId, player.inventoryMenu.incrementStateId(), player.getUsedItemHand() == InteractionHand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, user.getItemInHand(hand)));
       }else{
-         player.setCurrentHand(hand);
+         player.startUsingItem(hand);
       }
-      return ActionResult.SUCCESS;
+      return InteractionResult.SUCCESS;
    }
    
    @Override
-   public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks){
-      if(!(user instanceof ServerPlayerEntity player)) return;
+   public void onUseTick(Level world, LivingEntity user, ItemStack stack, int remainingUseTicks){
+      if(!(user instanceof ServerPlayer player)) return;
       
       final double range = 10.0;
       final double closeW = 1.5;
       final double farW = 5.5;
       double mul = 1.5*range;
-      Vec3d boxStart = player.getEntityPos().subtract(mul,mul,mul);
-      Vec3d boxEnd = player.getEntityPos().add(mul,mul,mul);
-      Box rangeBox = new Box(boxStart,boxEnd);
+      Vec3 boxStart = player.position().subtract(mul,mul,mul);
+      Vec3 boxEnd = player.position().add(mul,mul,mul);
+      AABB rangeBox = new AABB(boxStart,boxEnd);
       
       if(remainingUseTicks % 5 == 2){
-         SoundUtils.playSound(world, player.getBlockPos(), SoundEvents.ENTITY_ENDER_DRAGON_SHOOT, SoundCategory.PLAYERS, 0.6f, (float) (Math.random() * .5 + .5));
+         SoundUtils.playSound(world, player.blockPosition(), SoundEvents.ENDER_DRAGON_SHOOT, SoundSource.PLAYERS, 0.6f, (float) (Math.random() * .5 + .5));
          
-         List<Entity> entities = player.getEntityWorld().getOtherEntities(player,rangeBox, e -> e instanceof LivingEntity);
+         List<Entity> entities = player.level().getEntities(player,rangeBox, e -> e instanceof LivingEntity);
          for(Entity e : entities){
             if(!(e instanceof LivingEntity entity)) continue;
-            if(MathUtils.inCone(player.getEyePos(),player.getRotationVector(),range,closeW,farW,e.getEyePos())){
-               entity.damage(player.getEntityWorld(),player.getDamageSources().indirectMagic(player,player),(float) CONFIG.getDouble(ArchetypeRegistry.ENDERFLAME_BUFFET_DAMAGE));
+            if(MathUtils.inCone(player.getEyePosition(),player.getLookAngle(),range,closeW,farW,e.getEyePosition())){
+               entity.hurtServer(player.level(),player.damageSources().indirectMagic(player,player),(float) CONFIG.getDouble(ArchetypeRegistry.ENDERFLAME_BUFFET_DAMAGE));
             }
          }
       }
@@ -88,71 +88,71 @@ public class EndflameItem extends AbilityItem{
       double mod = 10;
       double percentage = 1.0 - (remainingUseTicks % mod / mod);
       double R = (farW-closeW)*percentage + closeW;
-      DustColorTransitionParticleEffect dust = new DustColorTransitionParticleEffect(0xe400ff, 0xa106b8, 1.4f);
+      DustColorTransitionOptions dust = new DustColorTransitionOptions(0xe400ff, 0xa106b8, 1.4f);
       double layerWidth = range / mod;
       
-      Vec3d axis = player.getRotationVector();
-      Vec3d upRef = Math.abs(axis.y) < 0.999 ? new Vec3d(0, 1, 0) : new Vec3d(1, 0, 0);
-      Vec3d xBasis = axis.crossProduct(upRef).normalize();
-      Vec3d zBasis = axis.crossProduct(xBasis).normalize();
+      Vec3 axis = player.getLookAngle();
+      Vec3 upRef = Math.abs(axis.y) < 0.999 ? new Vec3(0, 1, 0) : new Vec3(1, 0, 0);
+      Vec3 xBasis = axis.cross(upRef).normalize();
+      Vec3 zBasis = axis.cross(xBasis).normalize();
       
       for(int i = 0; i < R*R*4; i++){
          double r = R * Math.sqrt(Math.random());
          double theta = Math.random() * 2 * Math.PI;
-         Vec3d unRotatedOffset = new Vec3d(r * Math.cos(theta), percentage*range, r * Math.sin(theta));
-         Vec3d rotatedOffset = xBasis.multiply(unRotatedOffset.getX()).add(axis.multiply(unRotatedOffset.getY())).add(zBasis.multiply(unRotatedOffset.getZ()));
-         Vec3d pos = rotatedOffset.add(player.getEyePos());
-         player.getEntityWorld().spawnParticles(dust,pos.getX(),pos.getY(),pos.getZ(),1,0.1,0.1+layerWidth/2.0,0.1,0.01);
+         Vec3 unRotatedOffset = new Vec3(r * Math.cos(theta), percentage*range, r * Math.sin(theta));
+         Vec3 rotatedOffset = xBasis.scale(unRotatedOffset.x()).add(axis.scale(unRotatedOffset.y())).add(zBasis.scale(unRotatedOffset.z()));
+         Vec3 pos = rotatedOffset.add(player.getEyePosition());
+         player.level().sendParticles(dust,pos.x(),pos.y(),pos.z(),1,0.1,0.1+layerWidth/2.0,0.1,0.01);
       }
    }
    
    @Override
-   public boolean onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-      if(!(user instanceof ServerPlayerEntity player)) return false;
+   public boolean releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks) {
+      if(!(user instanceof ServerPlayer player)) return false;
       int cooldown = CONFIG.getInt(ArchetypeRegistry.ENDERFLAME_BUFFET_COOLDOWN);
-      profile(player).setAbilityCooldown(this.ability, (int) Math.max(0.25*cooldown,cooldown*(1 - ((double)remainingUseTicks/getMaxUseTime(stack,user)))));
-      player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, stack));
+      profile(player).setAbilityCooldown(this.ability, (int) Math.max(0.25*cooldown,cooldown*(1 - ((double)remainingUseTicks/ getUseDuration(stack,user)))));
+      player.connection.send(new ClientboundContainerSetSlotPacket(player.inventoryMenu.containerId, player.inventoryMenu.incrementStateId(), player.getUsedItemHand() == InteractionHand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, stack));
       return false;
    }
    
    @Override
-   public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user){
-      if(!(user instanceof ServerPlayerEntity player)) return stack;
+   public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity user){
+      if(!(user instanceof ServerPlayer player)) return stack;
       profile(player).setAbilityCooldown(this.ability,CONFIG.getInt(ArchetypeRegistry.ENDERFLAME_BUFFET_COOLDOWN));
-      player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, stack));
+      player.connection.send(new ClientboundContainerSetSlotPacket(player.inventoryMenu.containerId, player.inventoryMenu.incrementStateId(), player.getUsedItemHand() == InteractionHand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, stack));
       return stack;
    }
    
    @Override
-   public UseAction getUseAction(ItemStack stack){
-      return UseAction.BOW;
+   public ItemUseAnimation getUseAnimation(ItemStack stack){
+      return ItemUseAnimation.BOW;
    }
    
    @Override
-   public int getMaxUseTime(ItemStack stack, LivingEntity user){
+   public int getUseDuration(ItemStack stack, LivingEntity user){
       return 200;
    }
    
-   private void shootFireball(ServerPlayerEntity player){
+   private void shootFireball(ServerPlayer player){
       double errorRad = Math.toRadians(0.25);
       
       double randomAngle = player.getRandom().nextDouble() * 2 * Math.PI;
       double randomTheta = Math.acos(1 - player.getRandom().nextDouble() * (1 - Math.cos(errorRad)));
       
-      Vec3d randomOrthogonal = player.getRotationVector().crossProduct(new Vec3d(
+      Vec3 randomOrthogonal = player.getLookAngle().cross(new Vec3(
             player.getRandom().nextDouble() - 0.5,
             player.getRandom().nextDouble() - 0.5,
             player.getRandom().nextDouble() - 0.5
       )).normalize();
       
-      Vec3d rotatedVector = player.getRotationVector().multiply(Math.cos(randomTheta))
-            .add(randomOrthogonal.multiply(Math.sin(randomTheta) * Math.cos(randomAngle)))
-            .add(randomOrthogonal.crossProduct(player.getRotationVector()).multiply(Math.sin(randomTheta) * Math.sin(randomAngle)))
+      Vec3 rotatedVector = player.getLookAngle().scale(Math.cos(randomTheta))
+            .add(randomOrthogonal.scale(Math.sin(randomTheta) * Math.cos(randomAngle)))
+            .add(randomOrthogonal.cross(player.getLookAngle()).scale(Math.sin(randomTheta) * Math.sin(randomAngle)))
             .normalize();
       
-      DragonFireballEntity smallFireballEntity = new DragonFireballEntity(player.getEntityWorld(), player, rotatedVector.multiply(1.5));
-      smallFireballEntity.setPosition(smallFireballEntity.getX(), player.getBodyY(0.5) + 0.5, smallFireballEntity.getZ());
-      player.getEntityWorld().spawnEntity(smallFireballEntity);
-      SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(),SoundEvents.ENTITY_ENDER_DRAGON_SHOOT, SoundCategory.PLAYERS,1f, 1.25f);
+      DragonFireball smallFireballEntity = new DragonFireball(player.level(), player, rotatedVector.scale(1.5));
+      smallFireballEntity.setPos(smallFireballEntity.getX(), player.getY(0.5) + 0.5, smallFireballEntity.getZ());
+      player.level().addFreshEntity(smallFireballEntity);
+      SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.ENDER_DRAGON_SHOOT, SoundSource.PLAYERS,1f, 1.25f);
    }
 }

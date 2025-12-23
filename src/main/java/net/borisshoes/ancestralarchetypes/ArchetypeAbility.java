@@ -1,58 +1,37 @@
 package net.borisshoes.ancestralarchetypes;
 
 import net.borisshoes.borislib.config.IConfigSetting;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.TooltipDisplayComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.TooltipDisplay;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 
-public class ArchetypeAbility {
+public record ArchetypeAbility(String id, boolean active, ItemStack displayStack, IConfigSetting<?>[] reliantConfigs, ArchetypeAbility... overrides) {
    
-   private final String id;
-   private final boolean active;
-   private final ArchetypeAbility[] overrides;
-   private final ItemStack displayStack;
-   private final IConfigSetting<?>[] reliantConfigs;
-   
-   public ArchetypeAbility(String id, boolean activeAbility, ItemStack displayStack, IConfigSetting<?>[] reliantConfigs, ArchetypeAbility... overrides){
+   public ArchetypeAbility(String id, boolean active, ItemStack displayStack, IConfigSetting<?>[] reliantConfigs, ArchetypeAbility... overrides){
       this.id = id;
-      this.active = activeAbility;
+      this.active = active;
       this.displayStack = displayStack;
       this.reliantConfigs = reliantConfigs;
       this.overrides = overrides;
-      this.displayStack.set(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT.with(DataComponentTypes.BUNDLE_CONTENTS,true));
+      this.displayStack.set(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT.withHidden(DataComponents.BUNDLE_CONTENTS, true));
    }
    
-   public MutableText getName(){
-      return Text.translatable(MOD_ID+".ability.name."+id);
+   public MutableComponent getName(){
+      return Component.translatable(MOD_ID + ".ability.name." + id);
    }
    
-   public MutableText getDescription(){
-      return Text.translatable(MOD_ID+".ability.description."+id);
+   public MutableComponent getDescription(){
+      return Component.translatable(MOD_ID + ".ability.description." + id);
    }
    
-   public String getId(){
-      return id;
-   }
-   
-   public ItemStack getDisplayStack(){
+   @Override
+   public ItemStack displayStack(){
       return displayStack.copy();
-   }
-   
-   public boolean isActive(){
-      return active;
-   }
-   
-   public ArchetypeAbility[] getOverrides(){
-      return overrides;
-   }
-   
-   public IConfigSetting<?>[] getReliantConfigs(){
-      return reliantConfigs;
    }
    
    public boolean overrides(ArchetypeAbility other){
@@ -62,7 +41,7 @@ public class ArchetypeAbility {
       return false;
    }
    
-   public static class ArchetypeAbilityBuilder{
+   public static class ArchetypeAbilityBuilder {
       private final String id;
       private boolean active = false;
       private ArchetypeAbility[] overrides;

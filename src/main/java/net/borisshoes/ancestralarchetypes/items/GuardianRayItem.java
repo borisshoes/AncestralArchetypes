@@ -2,24 +2,24 @@ package net.borisshoes.ancestralarchetypes.items;
 
 import net.borisshoes.ancestralarchetypes.ArchetypeParticles;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
-import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
+import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.borisshoes.borislib.utils.SoundUtils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.consume.UseAction;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import xyz.nucleoid.packettweaker.PacketContext;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
@@ -27,7 +27,7 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.GUARDIAN_RAY;
 
 public class GuardianRayItem extends AbilityItem{
-   public GuardianRayItem(Settings settings){
+   public GuardianRayItem(Properties settings){
       super(GUARDIAN_RAY, "⇏", settings);
    }
    
@@ -37,56 +37,56 @@ public class GuardianRayItem extends AbilityItem{
    }
    
    @Override
-   public ActionResult use(World world, PlayerEntity user, Hand hand){
-      if(!(user instanceof ServerPlayerEntity player)) return ActionResult.PASS;
-      IArchetypeProfile profile = profile(player);
+   public InteractionResult use(Level world, Player user, InteractionHand hand){
+      if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
+      PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendMessage(Text.translatable("text.ancestralarchetypes.ability_on_cooldown").formatted(Formatting.RED,Formatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.BLOCK_FIRE_EXTINGUISH,0.25f,0.8f);
-         return ActionResult.PASS;
+         player.displayClientMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         return InteractionResult.PASS;
       }
-      player.setCurrentHand(hand);
-      return ActionResult.SUCCESS;
+      player.startUsingItem(hand);
+      return InteractionResult.SUCCESS;
    }
    
    @Override
-   public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks){
-      if(!(user instanceof ServerPlayerEntity player)) return;
-      int useTime = this.getMaxUseTime(stack, user) - remainingUseTicks;
+   public void onUseTick(Level world, LivingEntity user, ItemStack stack, int remainingUseTicks){
+      if(!(user instanceof ServerPlayer player)) return;
+      int useTime = this.getUseDuration(stack, user) - remainingUseTicks;
       int windup = CONFIG.getInt(ArchetypeRegistry.GUARDIAN_RAY_WINDUP);
       int duration = CONFIG.getInt(ArchetypeRegistry.GUARDIAN_RAY_DURATION);
       
-      MinecraftUtils.LasercastResult lasercast = MinecraftUtils.lasercast(world, player.getEyePos(), player.getRotationVecClient(), 25, false, player);
-      ArchetypeParticles.guardianRay(player.getEntityWorld(),lasercast.startPos().subtract(0,player.getHeight()/3,0),lasercast.endPos(), useTime);
+      MinecraftUtils.LasercastResult lasercast = MinecraftUtils.lasercast(world, player.getEyePosition(), player.getForward(), 25, false, player);
+      ArchetypeParticles.guardianRay(player.level(),lasercast.startPos().subtract(0,player.getBbHeight()/3,0),lasercast.endPos(), useTime);
       
       if(useTime < windup){ // Windup
-         if(useTime % 5 == 0) SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(),SoundEvents.ENTITY_GUARDIAN_ATTACK, SoundCategory.PLAYERS,0.3f, 0.5f + 1.2f*((float) useTime / windup));
+         if(useTime % 5 == 0) SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.GUARDIAN_ATTACK, SoundSource.PLAYERS,0.3f, 0.5f + 1.2f*((float) useTime / windup));
       }else if(useTime < (windup+duration)){ // Shoot
          if(useTime == windup) {
-            SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(),SoundEvents.ENTITY_GUARDIAN_AMBIENT_LAND, SoundCategory.PLAYERS,1.2f, 0.8f);
-            SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(),SoundEvents.BLOCK_BEACON_POWER_SELECT, SoundCategory.PLAYERS,1.2f, 1.2f);
+            SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.GUARDIAN_AMBIENT_LAND, SoundSource.PLAYERS,1.2f, 0.8f);
+            SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS,1.2f, 1.2f);
          }
          
          float damage = (float) CONFIG.getDouble(ArchetypeRegistry.GUARDIAN_RAY_DAMAGE);
          if(useTime % 15 == 0){
             for(Entity hit : lasercast.sortedHits()){
-               hit.damage(player.getEntityWorld(), player.getDamageSources().indirectMagic(player,player), damage);
+               hit.hurtServer(player.level(), player.damageSources().indirectMagic(player,player), damage);
             }
          }
          
          if(useTime % 20 == 0){
-            SoundUtils.playSound(player.getEntityWorld(), player.getBlockPos(), SoundEvents.BLOCK_BEACON_AMBIENT, SoundCategory.PLAYERS, 1.2f, 1.2f);
-            SoundUtils.playSound(player.getEntityWorld(),player.getBlockPos(),SoundEvents.ENTITY_GUARDIAN_AMBIENT_LAND, SoundCategory.PLAYERS,0.75f, 0.7f);
+            SoundUtils.playSound(player.level(), player.blockPosition(), SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 1.2f, 1.2f);
+            SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.GUARDIAN_AMBIENT_LAND, SoundSource.PLAYERS,0.75f, 0.7f);
          }
       }else{ // Reset
-         player.stopUsingItem();
+         player.releaseUsingItem();
       }
    }
    
    @Override
-   public boolean onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-      if(!(user instanceof ServerPlayerEntity player)) return false;
-      int useTime = this.getMaxUseTime(stack, user) - remainingUseTicks;
+   public boolean releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks) {
+      if(!(user instanceof ServerPlayer player)) return false;
+      int useTime = this.getUseDuration(stack, user) - remainingUseTicks;
       int windup = CONFIG.getInt(ArchetypeRegistry.GUARDIAN_RAY_WINDUP);
       int duration = CONFIG.getInt(ArchetypeRegistry.GUARDIAN_RAY_DURATION);
       int cooldown = CONFIG.getInt(ArchetypeRegistry.GUARDIAN_RAY_COOLDOWN);
@@ -98,12 +98,12 @@ public class GuardianRayItem extends AbilityItem{
    }
    
    @Override
-   public UseAction getUseAction(ItemStack stack){
-      return UseAction.BOW;
+   public ItemUseAnimation getUseAnimation(ItemStack stack){
+      return ItemUseAnimation.BOW;
    }
    
    @Override
-   public int getMaxUseTime(ItemStack stack, LivingEntity user){
+   public int getUseDuration(ItemStack stack, LivingEntity user){
       return 72000;
    }
 }

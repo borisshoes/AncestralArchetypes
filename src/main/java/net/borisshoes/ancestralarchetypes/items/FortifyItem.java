@@ -2,25 +2,25 @@ package net.borisshoes.ancestralarchetypes.items;
 
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
-import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
+import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.borislib.utils.SoundUtils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.consume.UseAction;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.packettweaker.PacketContext;
 
@@ -28,7 +28,7 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
 public class FortifyItem extends AbilityItem{
-   public FortifyItem(Settings settings){
+   public FortifyItem(Properties settings){
       super(ArchetypeRegistry.FORTIFY, "⌛", settings);
    }
    
@@ -42,10 +42,10 @@ public class FortifyItem extends AbilityItem{
    }
    
    @Override
-   public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, @Nullable EquipmentSlot slot){
+   public void inventoryTick(ItemStack stack, ServerLevel world, Entity entity, @Nullable EquipmentSlot slot){
       super.inventoryTick(stack, world, entity, slot);
-      if(!(entity instanceof ServerPlayerEntity player)) return;
-      IArchetypeProfile profile = profile(player);
+      if(!(entity instanceof ServerPlayer player)) return;
+      PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
          return;
       }
@@ -66,28 +66,28 @@ public class FortifyItem extends AbilityItem{
          }
       }
       message.append(" \uD83D\uDEE1");
-      player.sendMessage(Text.literal(message.toString()).withColor(profile.getSubArchetype().getColor()), true);
+      player.displayClientMessage(Component.literal(message.toString()).withColor(profile.getSubArchetype().getColor()), true);
    }
    
    @Override
-   public ActionResult use(World world, PlayerEntity user, Hand hand){
-      if(!(user instanceof ServerPlayerEntity player)) return ActionResult.PASS;
-      IArchetypeProfile profile = profile(player);
+   public InteractionResult use(Level world, Player user, InteractionHand hand){
+      if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
+      PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendMessage(Text.translatable("text.ancestralarchetypes.ability_on_cooldown").formatted(Formatting.RED,Formatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.BLOCK_FIRE_EXTINGUISH,0.25f,0.8f);
-         return ActionResult.PASS;
+         player.displayClientMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         return InteractionResult.PASS;
       }
-      SoundUtils.playSound(world,player.getBlockPos(),SoundEvents.ENTITY_IRON_GOLEM_REPAIR,SoundCategory.PLAYERS,1f,1.5f);
+      SoundUtils.playSound(world,player.blockPosition(), SoundEvents.IRON_GOLEM_REPAIR, SoundSource.PLAYERS,1f,1.5f);
       profile.setFortifyActive(true);
-      player.setCurrentHand(hand);
-      return ActionResult.SUCCESS;
+      player.startUsingItem(hand);
+      return InteractionResult.SUCCESS;
    }
    
    @Override
-   public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks){
-      if(!(user instanceof ServerPlayerEntity player)) return;
-      IArchetypeProfile profile = profile(player);
+   public void onUseTick(Level world, LivingEntity user, ItemStack stack, int remainingUseTicks){
+      if(!(user instanceof ServerPlayer player)) return;
+      PlayerArchetypeData profile = profile(player);
       float remainingTime = profile.getFortifyTime();
       
       double fortifyPercentage = ((double)profile.getFortifyTime() / profile.getMaxFortifyTime());
@@ -106,31 +106,31 @@ public class FortifyItem extends AbilityItem{
          }
       }
       message.append(" \uD83D\uDEE1");
-      player.sendMessage(Text.literal(message.toString()).withColor(profile.getSubArchetype().getColor()), true);
+      player.displayClientMessage(Component.literal(message.toString()).withColor(profile.getSubArchetype().getColor()), true);
       
       if(remainingTime < 1 || profile.getAbilityCooldown(this.ability) > 0){
-         player.stopUsingItem();
+         player.releaseUsingItem();
          profile.setFortifyActive(false);
-         SoundUtils.playSound(world,player.getBlockPos(),SoundEvents.ENTITY_IRON_GOLEM_DAMAGE,SoundCategory.PLAYERS,1f,0.75f);
+         SoundUtils.playSound(world,player.blockPosition(), SoundEvents.IRON_GOLEM_DAMAGE, SoundSource.PLAYERS,1f,0.75f);
       }
    }
    
    @Override
-   public boolean onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-      if(!(user instanceof ServerPlayerEntity player)) return false;
-      IArchetypeProfile profile = profile(player);
+   public boolean releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks) {
+      if(!(user instanceof ServerPlayer player)) return false;
+      PlayerArchetypeData profile = profile(player);
       profile.setAbilityCooldown(this.ability, CONFIG.getInt(ArchetypeRegistry.FORTIFY_COOLDOWN));
       profile.setFortifyActive(false);
       return false;
    }
    
    @Override
-   public UseAction getUseAction(ItemStack stack){
-      return UseAction.BLOCK;
+   public ItemUseAnimation getUseAnimation(ItemStack stack){
+      return ItemUseAnimation.BLOCK;
    }
    
    @Override
-   public int getMaxUseTime(ItemStack stack, LivingEntity user){
+   public int getUseDuration(ItemStack stack, LivingEntity user){
       return 72000;
    }
 }

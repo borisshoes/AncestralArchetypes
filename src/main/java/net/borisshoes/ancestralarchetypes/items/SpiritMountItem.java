@@ -2,23 +2,23 @@ package net.borisshoes.ancestralarchetypes.items;
 
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
-import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
+import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.borislib.utils.SoundUtils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.s2c.play.PlayerRotationS2CPacket;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundPlayerRotationPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.UUID;
@@ -28,7 +28,7 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
 public abstract class SpiritMountItem extends AbilityItem{
    
-   public SpiritMountItem(ArchetypeAbility ability, String character, Settings settings){
+   public SpiritMountItem(ArchetypeAbility ability, String character, Properties settings){
       super(ability, character, settings);
    }
    
@@ -42,19 +42,19 @@ public abstract class SpiritMountItem extends AbilityItem{
    }
    
    @Override
-   public ActionResult use(World world, PlayerEntity user, Hand hand){
-      if(!(user instanceof ServerPlayerEntity player)) return ActionResult.PASS;
-      IArchetypeProfile profile = profile(player);
+   public InteractionResult use(Level world, Player user, InteractionHand hand){
+      if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
+      PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendMessage(Text.translatable("text.ancestralarchetypes.ability_on_cooldown").formatted(Formatting.RED,Formatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.BLOCK_FIRE_EXTINGUISH,0.25f,0.8f);
-         return ActionResult.PASS;
+         player.displayClientMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         return InteractionResult.PASS;
       }
       
       UUID mountId = profile.getMountEntity(this.ability);
-      if(player.isSneaking()){
+      if(player.isShiftKeyDown()){
          if(mountId != null){
-            Entity entity = player.getEntityWorld().getEntity(mountId);
+            Entity entity = player.level().getEntity(mountId);
             if(entity != null && entity.isAlive()){
                profile.setMountHealth(this.ability, ((LivingEntity)entity).getHealth());
                entity.discard();
@@ -64,55 +64,55 @@ public abstract class SpiritMountItem extends AbilityItem{
          }
       }else{
          if(mountId != null){
-            Entity entity = player.getEntityWorld().getEntity(mountId);
+            Entity entity = player.level().getEntity(mountId);
             if(entity != null && entity.isAlive()){
                profile.setMountHealth(this.ability, ((LivingEntity)entity).getHealth());
                entity.discard();
                profile.setMountEntity(this.ability, null);
                profile.setAbilityCooldown(ability, 20);
-               return ActionResult.SUCCESS;
+               return InteractionResult.SUCCESS;
             }
          }
          
-         if(player.isOnGround()){
+         if(player.onGround()){
             spawnMount(player);
          }else{
-            player.sendMessage(Text.translatable("text.ancestralarchetypes.spirit_mount_in_air").formatted(Formatting.RED,Formatting.ITALIC),true);
-            SoundUtils.playSongToPlayer(player, SoundEvents.BLOCK_FIRE_EXTINGUISH,0.25f,0.8f);
-            return ActionResult.PASS;
+            player.displayClientMessage(Component.translatable("text.ancestralarchetypes.spirit_mount_in_air").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
+            SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+            return InteractionResult.PASS;
          }
       }
       
-      return ActionResult.SUCCESS;
+      return InteractionResult.SUCCESS;
    }
    
-   private void spawnMount(ServerPlayerEntity player){
-      IArchetypeProfile profile = profile(player);
-      Vec3d summonPos = player.getEyePos().add(player.getRotationVector().multiply(1));
+   private void spawnMount(ServerPlayer player){
+      PlayerArchetypeData profile = profile(player);
+      Vec3 summonPos = player.getEyePosition().add(player.getLookAngle().scale(1));
       LivingEntity newMount = getMountEntity(player);
       String customName = profile.getMountName();
       if(customName != null){
-         newMount.setCustomName(Text.literal(customName));
+         newMount.setCustomName(Component.literal(customName));
          newMount.setCustomNameVisible(true);
       }
-      float p = player.getPitch();
-      float y = player.getYaw();
-      newMount.setPosition(summonPos);
-      newMount.refreshPositionAndAngles(summonPos.x, summonPos.y, summonPos.z, player.getYaw(), player.getPitch());
-      player.getEntityWorld().spawnNewEntityAndPassengers(newMount);
+      float p = player.getXRot();
+      float y = player.getYRot();
+      newMount.setPos(summonPos);
+      newMount.snapTo(summonPos.x, summonPos.y, summonPos.z, player.getYRot(), player.getXRot());
+      player.level().tryAddFreshEntityWithPassengers(newMount);
       if(profile.getMountHealth(this.ability) != 0) newMount.setHealth(profile.getMountHealth(this.ability));
-      newMount.addCommandTag(getSpiritMountTag());
-      newMount.setYaw(player.getYaw());
-      newMount.setPitch(player.getPitch());
-      profile.setMountEntity(this.ability,newMount.getUuid());
+      newMount.addTag(getSpiritMountTag());
+      newMount.setYRot(player.getYRot());
+      newMount.setXRot(player.getXRot());
+      profile.setMountEntity(this.ability,newMount.getUUID());
       player.startRiding(newMount,true,true);
-      player.networkHandler.sendPacket(new PlayerRotationS2CPacket(y,false,p,false));
-      SoundUtils.playSongToPlayer(player,SoundEvents.ENTITY_HORSE_GALLOP,0.3f,1);
+      player.connection.send(new ClientboundPlayerRotationPacket(y,false,p,false));
+      SoundUtils.playSongToPlayer(player, SoundEvents.HORSE_GALLOP,0.3f,1);
    }
    
-   protected abstract LivingEntity getMountEntity(ServerPlayerEntity player);
+   protected abstract LivingEntity getMountEntity(ServerPlayer player);
    
    public  String getSpiritMountTag(){
-      return "$"+MOD_ID+".spirit_mount."+this.ability.getId();
+      return "$"+MOD_ID+".spirit_mount."+this.ability.id();
    }
 }

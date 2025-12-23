@@ -1,7 +1,12 @@
 {
   "sources": [
     {
-      "type": "paletted_permutations",
+      "type": "minecraft:directory",
+      "prefix": "item/",
+      "source": "item"
+    },
+    {
+      "type": "minecraft:paletted_permutations",
       "textures": [
         "ancestralarchetypes:trims/items/wing_glider",
         "ancestralarchetypes:trims/items/end_glider",

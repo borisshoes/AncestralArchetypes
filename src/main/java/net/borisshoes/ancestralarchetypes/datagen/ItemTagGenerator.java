@@ -4,21 +4,21 @@ import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
-import net.minecraft.data.tag.ProvidedTagBuilder;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.data.tags.TagAppender;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 
 import java.util.concurrent.CompletableFuture;
 
 public class ItemTagGenerator extends FabricTagProvider.ItemTagProvider {
-   public ItemTagGenerator(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
+   public ItemTagGenerator(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
       super(output, registriesFuture);
    }
    
    @Override
-   protected void configure(RegistryWrapper.WrapperLookup lookup) {
+   protected void addTags(HolderLookup.Provider lookup) {
       valueLookupBuilder(ArchetypeRegistry.CARNIVORE_FOODS)
             .add(Items.BEEF)
             .add(Items.COOKED_BEEF)
@@ -46,7 +46,7 @@ public class ItemTagGenerator extends FabricTagProvider.ItemTagProvider {
       valueLookupBuilder(ArchetypeRegistry.MAGMA_CUBE_GROW_ITEMS)
             .add(Items.MAGMA_CREAM);
       
-      ProvidedTagBuilder<Item,Item> abilityItemBuilder = valueLookupBuilder(ArchetypeRegistry.ABILITY_ITEMS);
+      TagAppender<Item, Item> abilityItemBuilder = valueLookupBuilder(ArchetypeRegistry.ABILITY_ITEMS);
       for(Item item : ArchetypeRegistry.ITEMS){
          if(item instanceof AbilityItem){
             abilityItemBuilder.add(item);

@@ -1,8 +1,8 @@
 package net.borisshoes.ancestralarchetypes;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.item.ItemStack;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 
@@ -20,12 +20,12 @@ public class Archetype {
       this.displayItem = displayItem;
    }
    
-   public MutableText getName(){
-      return Text.translatable(MOD_ID+".archetype.name."+id);
+   public MutableComponent getName(){
+      return Component.translatable(MOD_ID+".archetype.name."+id);
    }
    
-   public MutableText getDescription(){
-      return Text.translatable(MOD_ID+".archetype.description."+id);
+   public MutableComponent getDescription(){
+      return Component.translatable(MOD_ID+".archetype.description."+id);
    }
    
    public String getId(){

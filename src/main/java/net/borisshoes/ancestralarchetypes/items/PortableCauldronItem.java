@@ -2,34 +2,34 @@ package net.borisshoes.ancestralarchetypes.items;
 
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
-import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
+import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.ancestralarchetypes.gui.PotionSelectionGui;
 import net.borisshoes.borislib.utils.SoundUtils;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ConsumableComponents;
-import net.minecraft.component.type.PotionContentsComponent;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.entity.projectile.thrown.LingeringPotionEntity;
-import net.minecraft.entity.projectile.thrown.SplashPotionEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.consume.UseAction;
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
-import net.minecraft.potion.Potion;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownLingeringPotion;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownSplashPotion;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.level.Level;
 import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -38,7 +38,7 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 
 public class PortableCauldronItem extends AbilityItem{
    
-   public PortableCauldronItem(Settings settings){
+   public PortableCauldronItem(Properties settings){
       super(ArchetypeRegistry.POTION_BREWER, "\uD83E\uDDEA", settings);
    }
    
@@ -52,39 +52,39 @@ public class PortableCauldronItem extends AbilityItem{
    }
    
    @Override
-   public ActionResult use(World world, PlayerEntity user, Hand hand){
-      if(!(user instanceof ServerPlayerEntity player)) return ActionResult.PASS;
-      IArchetypeProfile profile = profile(player);
+   public InteractionResult use(Level world, Player user, InteractionHand hand){
+      if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
+      PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendMessage(Text.translatable("text.ancestralarchetypes.ability_on_cooldown").formatted(Formatting.RED,Formatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.BLOCK_FIRE_EXTINGUISH,0.25f,0.8f);
-         return ActionResult.PASS;
+         player.displayClientMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         return InteractionResult.PASS;
       }
       
-      if(player.isSneaking()){
+      if(player.isShiftKeyDown()){
          profile.setPotionType(null);
          PotionSelectionGui gui = new PotionSelectionGui(player);
          gui.open();
       }else{
          ItemStack potionStack = profile.getPotionStack();
-         if(potionStack.isEmpty() || (potionStack.contains(DataComponentTypes.POTION_CONTENTS) && !PotionSelectionGui.isUnlocked(player, potionStack.get(DataComponentTypes.POTION_CONTENTS).potion().orElse(null)))){
+         if(potionStack.isEmpty() || (potionStack.has(DataComponents.POTION_CONTENTS) && !PotionSelectionGui.isUnlocked(player, potionStack.get(DataComponents.POTION_CONTENTS).potion().orElse(null)))){
             profile.setPotionType(null);
             PotionSelectionGui gui = new PotionSelectionGui(player);
             gui.open();
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
          }
          
-         ItemStack stack = user.getStackInHand(hand);
-         boolean hasConsumable = stack.contains(DataComponentTypes.CONSUMABLE);
+         ItemStack stack = user.getItemInHand(hand);
+         boolean hasConsumable = stack.has(DataComponents.CONSUMABLE);
          if(hasConsumable){
-            player.setCurrentHand(hand);
+            player.startUsingItem(hand);
          }else{
-            if(potionStack.isOf(Items.SPLASH_POTION)){
-               ProjectileEntity.spawnWithVelocity(SplashPotionEntity::new, player.getEntityWorld(), potionStack, user, -20.0f, 0.7f, 0.25f);
-            }else if(potionStack.isOf(Items.LINGERING_POTION)){
-               ProjectileEntity.spawnWithVelocity(LingeringPotionEntity::new, player.getEntityWorld(), potionStack, user, -20.0f, 0.7f, 0.25f);
+            if(potionStack.is(Items.SPLASH_POTION)){
+               Projectile.spawnProjectileFromRotation(ThrownSplashPotion::new, player.level(), potionStack, user, -20.0f, 0.7f, 0.25f);
+            }else if(potionStack.is(Items.LINGERING_POTION)){
+               Projectile.spawnProjectileFromRotation(ThrownLingeringPotion::new, player.level(), potionStack, user, -20.0f, 0.7f, 0.25f);
             }
-            PotionContentsComponent potionComp = potionStack.get(DataComponentTypes.POTION_CONTENTS);
+            PotionContents potionComp = potionStack.get(DataComponents.POTION_CONTENTS);
             AtomicInteger totalDuration = new AtomicInteger();
             potionComp.forEachEffect(effect -> {
                totalDuration.addAndGet(effect.getDuration());
@@ -93,66 +93,66 @@ public class PortableCauldronItem extends AbilityItem{
          }
       }
       
-      return ActionResult.SUCCESS;
+      return InteractionResult.SUCCESS;
    }
    
    @Override
-   public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user){
-      if(!(user instanceof ServerPlayerEntity player)) return stack;
-      IArchetypeProfile profile = profile(player);
+   public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity user){
+      if(!(user instanceof ServerPlayer player)) return stack;
+      PlayerArchetypeData profile = profile(player);
       ItemStack potionStack = profile.getPotionStack();
-      PotionContentsComponent potionComp = potionStack.get(DataComponentTypes.POTION_CONTENTS);
-      if (potionStack.isOf(Items.POTION) && potionComp != null) {
+      PotionContents potionComp = potionStack.get(DataComponents.POTION_CONTENTS);
+      if (potionStack.is(Items.POTION) && potionComp != null) {
          AtomicInteger totalDuration = new AtomicInteger();
          potionComp.forEachEffect(effect -> {
             totalDuration.addAndGet(effect.getDuration());
-            player.addStatusEffect(effect);
+            player.addEffect(effect);
          }, 1);
          profile.setAbilityCooldown(this.ability, (int) Math.max(CONFIG.getInt(ArchetypeRegistry.CAULDRON_INSTANT_EFFECT_COOLDOWN),totalDuration.get()*CONFIG.getDouble(ArchetypeRegistry.CAULDRON_DRINKABLE_COOLDOWN_MODIFIER)));
       }
       
-      player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(player.playerScreenHandler.syncId, player.playerScreenHandler.nextRevision(), player.getActiveHand() == Hand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, stack));
+      player.connection.send(new ClientboundContainerSetSlotPacket(player.inventoryMenu.containerId, player.inventoryMenu.incrementStateId(), player.getUsedItemHand() == InteractionHand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, stack));
       return stack;
    }
    
    @Override
-   public UseAction getUseAction(ItemStack stack){
-      if(stack.contains(DataComponentTypes.CONSUMABLE)){
-         return UseAction.DRINK;
+   public ItemUseAnimation getUseAnimation(ItemStack stack){
+      if(stack.has(DataComponents.CONSUMABLE)){
+         return ItemUseAnimation.DRINK;
       }
-      return UseAction.NONE;
+      return ItemUseAnimation.NONE;
    }
    
    @Override
-   public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot){
+   public void inventoryTick(ItemStack stack, ServerLevel world, Entity entity, EquipmentSlot slot){
       super.inventoryTick(stack, world, entity, slot);
-      if(!(entity instanceof ServerPlayerEntity player)) return;
-      IArchetypeProfile profile = profile(player);
+      if(!(entity instanceof ServerPlayer player)) return;
+      PlayerArchetypeData profile = profile(player);
       ItemStack potionStack = profile.getPotionStack();
-      boolean hasConsumable = stack.contains(DataComponentTypes.CONSUMABLE);
-      boolean hasPotion = stack.contains(DataComponentTypes.POTION_CONTENTS);
+      boolean hasConsumable = stack.has(DataComponents.CONSUMABLE);
+      boolean hasPotion = stack.has(DataComponents.POTION_CONTENTS);
       
       try{
          if(potionStack.isEmpty()){
             if(hasConsumable || hasPotion){
-               stack.remove(DataComponentTypes.CONSUMABLE);
-               stack.remove(DataComponentTypes.POTION_CONTENTS);
+               stack.remove(DataComponents.CONSUMABLE);
+               stack.remove(DataComponents.POTION_CONTENTS);
             }
          }else{
-            boolean shouldHaveConsumable = potionStack.isOf(Items.POTION);
+            boolean shouldHaveConsumable = potionStack.is(Items.POTION);
             if(shouldHaveConsumable && !hasConsumable){
-               stack.set(DataComponentTypes.CONSUMABLE, ConsumableComponents.DRINK);
+               stack.set(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK);
             }else if(!shouldHaveConsumable && hasConsumable){
-               stack.remove(DataComponentTypes.CONSUMABLE);
+               stack.remove(DataComponents.CONSUMABLE);
             }
             
             if(!hasPotion){
-               stack.set(DataComponentTypes.POTION_CONTENTS,potionStack.get(DataComponentTypes.POTION_CONTENTS));
+               stack.set(DataComponents.POTION_CONTENTS,potionStack.get(DataComponents.POTION_CONTENTS));
             }else{
-               RegistryEntry<Potion> profilePotion = potionStack.get(DataComponentTypes.POTION_CONTENTS).potion().get();
-               RegistryEntry<Potion> stackPotion = stack.get(DataComponentTypes.POTION_CONTENTS).potion().get();
+               Holder<Potion> profilePotion = potionStack.get(DataComponents.POTION_CONTENTS).potion().get();
+               Holder<Potion> stackPotion = stack.get(DataComponents.POTION_CONTENTS).potion().get();
                if(profilePotion.value() != stackPotion.value()){
-                  stack.set(DataComponentTypes.POTION_CONTENTS,potionStack.get(DataComponentTypes.POTION_CONTENTS));
+                  stack.set(DataComponents.POTION_CONTENTS,potionStack.get(DataComponents.POTION_CONTENTS));
                }
             }
          }

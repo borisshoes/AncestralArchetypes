@@ -4,28 +4,28 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.borisshoes.ancestralarchetypes.AncestralArchetypes;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.borislib.utils.MinecraftUtils;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.network.ServerPlayerInteractionManager;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerPlayerGameMode;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(ServerPlayerInteractionManager.class)
-public class ServerPlayerInteractionManagerMixin {
+@Mixin(ServerPlayerGameMode.class)
+public class ServerPlayerGameModeMixin {
    
    @Final
    @Shadow
-   protected ServerPlayerEntity player;
+   protected ServerPlayer player;
    
-   @ModifyExpressionValue(method = "tryBreakBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;getMainHandStack()Lnet/minecraft/item/ItemStack;", ordinal = 1))
+   @ModifyExpressionValue(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;getMainHandItem()Lnet/minecraft/world/item/ItemStack;", ordinal = 1))
    private ItemStack archetypes$silkTouch(ItemStack original){
       if(original.isEmpty() && AncestralArchetypes.profile(player).hasAbility(ArchetypeRegistry.SILK_TOUCH)){
          ItemStack silkStack = new ItemStack(Items.WOODEN_PICKAXE);
-         silkStack.addEnchantment(MinecraftUtils.getEnchantment(Enchantments.SILK_TOUCH),1);
+         silkStack.enchant(MinecraftUtils.getEnchantment(Enchantments.SILK_TOUCH),1);
          return silkStack;
       }
       return original;
