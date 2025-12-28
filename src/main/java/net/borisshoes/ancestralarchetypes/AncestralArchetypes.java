@@ -2,8 +2,10 @@ package net.borisshoes.ancestralarchetypes;
 
 import net.borisshoes.ancestralarchetypes.callbacks.*;
 import net.borisshoes.ancestralarchetypes.misc.SpyglassRevealEvent;
+import net.borisshoes.borislib.BorisLib;
 import net.borisshoes.borislib.config.ConfigManager;
 import net.borisshoes.borislib.datastorage.DataAccess;
+import net.borisshoes.borislib.utils.AlgoUtils;
 import net.borisshoes.borislib.utils.ItemModDataHandler;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
@@ -16,6 +18,7 @@ import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,7 +30,7 @@ import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.CONFIG_SETTIN
 
 public class AncestralArchetypes implements ModInitializer, ClientModInitializer {
    
-   private static final Logger LOGGER = LogManager.getLogger("Ancestral Archetypes");
+   static final Logger LOGGER = LogManager.getLogger("Ancestral Archetypes");
    private static final String CONFIG_NAME = "AncestralArchetypes.properties";
    public static final String MOD_ID = "ancestralarchetypes";
    
@@ -72,27 +75,33 @@ public class AncestralArchetypes implements ModInitializer, ClientModInitializer
       return ArchetypeRegistry.ABILITIES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,tag.substring(lastDotIndex + 1)));
    }
    
-   public static PlayerArchetypeData profile(Player player){
-      if(player == null){
-         return null;
-      }
+   public static PlayerArchetypeData profile(ServerPlayer player){
       try{
          return profile(player.getUUID());
       }catch(Exception e){
          log(3,"Failed to get Archetype Profile for "+player.getScoreboardName() + " ("+player.getStringUUID()+")");
          log(3,e.toString());
       }
-      return null;
+      return new PlayerArchetypeData(AlgoUtils.getUUID(BorisLib.BLANK_UUID));
    }
    
    public static PlayerArchetypeData profile(UUID playerId){
       try{
-         return DataAccess.getPlayer(playerId, PlayerArchetypeData.KEY);
+         if(playerId == null){
+            log(3,"Tried to get Archetype Profile for null UUID, returning default entry");
+            return new PlayerArchetypeData(AlgoUtils.getUUID(BorisLib.BLANK_UUID));
+         }
+         PlayerArchetypeData profile = DataAccess.getPlayer(playerId, PlayerArchetypeData.KEY);
+         if(profile == null){
+            log(3,"Returned Archetype Profile was somehow null for playerId: "+playerId+" returning default entry");
+            return new PlayerArchetypeData(AlgoUtils.getUUID(BorisLib.BLANK_UUID));
+         }
+         return profile;
       }catch(Exception e){
          log(3,"Failed to get Archetype Profile for ("+playerId+")");
          log(3,e.toString());
       }
-      return null;
+      return new PlayerArchetypeData(AlgoUtils.getUUID(BorisLib.BLANK_UUID));
    }
    
    /**

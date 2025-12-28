@@ -186,13 +186,25 @@ public class PlayerArchetypeData {
       this.helmetColor = part1.helmetColor();
       
       // Resolve trim materials from registry (requires server to be available)
-      if(BorisLib.SERVER != null && !part1.gliderTrimMaterial().isEmpty()){
-         this.gliderTrimMaterial = BorisLib.SERVER.registryAccess().lookupOrThrow(Registries.TRIM_MATERIAL)
-               .get(Identifier.parse(part1.gliderTrimMaterial())).orElse(null);
+      // Wrapped in try-catch to prevent codec failures from registry lookups
+      try{
+         if(BorisLib.SERVER != null && !part1.gliderTrimMaterial().isEmpty()){
+            this.gliderTrimMaterial = BorisLib.SERVER.registryAccess().lookupOrThrow(Registries.TRIM_MATERIAL)
+                  .get(Identifier.parse(part1.gliderTrimMaterial())).orElse(null);
+         }
+      }catch(Exception e){
+         AncestralArchetypes.LOGGER.warn("Failed to resolve glider trim material '{}' for player {}: {}", part1.gliderTrimMaterial(), part1.playerID(), e.getMessage());
+         this.gliderTrimMaterial = null;
       }
-      if(BorisLib.SERVER != null && !part1.helmetTrimMaterial().isEmpty()){
-         this.helmetTrimMaterial = BorisLib.SERVER.registryAccess().lookupOrThrow(Registries.TRIM_MATERIAL)
-               .get(Identifier.parse(part1.helmetTrimMaterial())).orElse(null);
+      
+      try{
+         if(BorisLib.SERVER != null && !part1.helmetTrimMaterial().isEmpty()){
+            this.helmetTrimMaterial = BorisLib.SERVER.registryAccess().lookupOrThrow(Registries.TRIM_MATERIAL)
+                  .get(Identifier.parse(part1.helmetTrimMaterial())).orElse(null);
+         }
+      }catch(Exception e){
+         AncestralArchetypes.LOGGER.warn("Failed to resolve helmet trim material '{}' for player {}: {}", part1.helmetTrimMaterial(), part1.playerID(), e.getMessage());
+         this.helmetTrimMaterial = null;
       }
       
       this.archetypeChangesAllowed = part2.archetypeChangesAllowed();
@@ -204,39 +216,69 @@ public class PlayerArchetypeData {
       this.mountName = part2.mountName().isEmpty() ? null : part2.mountName();
       
       // Resolve subarchetype from registry
-      if(!part2.subArchetype().isEmpty()){
-         this.subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(Identifier.fromNamespaceAndPath(MOD_ID, part2.subArchetype()));
+      // Wrapped in try-catch to prevent codec failures from invalid identifiers
+      try{
+         if(!part2.subArchetype().isEmpty()){
+            this.subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(Identifier.fromNamespaceAndPath(MOD_ID, part2.subArchetype()));
+         }
+      }catch(Exception e){
+         AncestralArchetypes.LOGGER.warn("Failed to resolve subarchetype '{}' for player {}: {}", part2.subArchetype(), part1.playerID(), e.getMessage());
+         this.subArchetype = null;
       }
       this.calculateAbilities();
       
       // Parse cooldowns from map
+      // Wrapped in try-catch to prevent codec failures from invalid ability identifiers
       part2.cooldowns().forEach((key, entry) -> {
-         ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.getValue(Identifier.fromNamespaceAndPath(MOD_ID, key));
-         if(ability != null){
-            this.abilityCooldowns.put(ability, entry);
+         try{
+            ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.getValue(Identifier.fromNamespaceAndPath(MOD_ID, key));
+            if(ability != null){
+               this.abilityCooldowns.put(ability, entry);
+            }else{
+               AncestralArchetypes.LOGGER.warn("Failed to find ability '{}' when loading cooldowns for player {}", key, part1.playerID());
+            }
+         }catch(Exception e){
+            AncestralArchetypes.LOGGER.warn("Failed to parse ability '{}' when loading cooldowns for player {}: {}", key, part1.playerID(), e.getMessage());
          }
       });
       
       // Parse mount data from map
+      // Wrapped in try-catch to prevent codec failures from invalid ability identifiers
       part2.mountData().forEach((key, entry) -> {
-         ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.getValue(Identifier.fromNamespaceAndPath(MOD_ID, key));
-         if(ability != null){
-            this.mountData.put(ability, entry);
+         try{
+            ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.getValue(Identifier.fromNamespaceAndPath(MOD_ID, key));
+            if(ability != null){
+               this.mountData.put(ability, entry);
+            }else{
+               AncestralArchetypes.LOGGER.warn("Failed to find ability '{}' when loading mount data for player {}", key, part1.playerID());
+            }
+         }catch(Exception e){
+            AncestralArchetypes.LOGGER.warn("Failed to parse ability '{}' when loading mount data for player {}: {}", key, part1.playerID(), e.getMessage());
          }
       });
       
       // Parse mount inventory
-      for(ItemStackWithSlot stackWithSlot : part2.mountInventory()){
-         if(stackWithSlot.isValidInContainer(this.mountInventory.getItems().size())){
-            this.mountInventory.getItems().set(stackWithSlot.slot(), stackWithSlot.stack());
+      // Wrapped in try-catch to prevent codec failures from corrupted inventory data
+      try{
+         for(ItemStackWithSlot stackWithSlot : part2.mountInventory()){
+            if(stackWithSlot.isValidInContainer(this.mountInventory.getItems().size())){
+               this.mountInventory.getItems().set(stackWithSlot.slot(), stackWithSlot.stack());
+            }
          }
+      }catch(Exception e){
+         AncestralArchetypes.LOGGER.warn("Failed to load mount inventory for player {}: {}", part1.playerID(), e.getMessage());
       }
       
       // Parse backpack inventory
-      for(ItemStackWithSlot stackWithSlot : part2.backpackInventory()){
-         if(stackWithSlot.isValidInContainer(this.backpackInventory.getItems().size())){
-            this.backpackInventory.getItems().set(stackWithSlot.slot(), stackWithSlot.stack());
+      // Wrapped in try-catch to prevent codec failures from corrupted inventory data
+      try{
+         for(ItemStackWithSlot stackWithSlot : part2.backpackInventory()){
+            if(stackWithSlot.isValidInContainer(this.backpackInventory.getItems().size())){
+               this.backpackInventory.getItems().set(stackWithSlot.slot(), stackWithSlot.stack());
+            }
          }
+      }catch(Exception e){
+         AncestralArchetypes.LOGGER.warn("Failed to load backpack inventory for player {}: {}", part1.playerID(), e.getMessage());
       }
    }
    

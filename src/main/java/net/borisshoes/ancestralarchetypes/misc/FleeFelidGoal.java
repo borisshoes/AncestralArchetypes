@@ -11,7 +11,6 @@ import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Objects;
@@ -43,7 +42,7 @@ public class FleeFelidGoal<T extends LivingEntity> extends AvoidEntityGoal<T> {
          }else{
             this.path = this.pathNav.createPath(vec3d.x, vec3d.y, vec3d.z, 0);
             if(this.path != null){
-               if(this.toAvoid instanceof Player player){
+               if(this.toAvoid instanceof ServerPlayer player){
                   PlayerArchetypeData profile = profile(player);
                   if(profile.hasAbility(ArchetypeRegistry.CAT_SCARE)){
                      return true;

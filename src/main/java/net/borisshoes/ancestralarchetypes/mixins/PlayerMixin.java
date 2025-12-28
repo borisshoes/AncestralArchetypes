@@ -32,7 +32,8 @@ public abstract class PlayerMixin {
    private boolean archetypes$canFoodHeal(boolean original){
       if(!original) return false;
       Player player = (Player) (Object) this;
-      PlayerArchetypeData profile = profile(player);
+      if(player.level().isClientSide() || !(player instanceof ServerPlayer serverPlayer)) return original;
+      PlayerArchetypeData profile = profile(serverPlayer);
       if(profile.hasAbility(ArchetypeRegistry.NO_REGEN)) return false;
       return original;
    }
@@ -40,7 +41,8 @@ public abstract class PlayerMixin {
    @ModifyExpressionValue(method = "getDestroySpeed", at = @At(value = "CONSTANT", args = "floatValue=5.0"))
    private float archetypes$offGroundBlockBreakingSpeed(float constant){
       Player player = (Player) (Object) this;
-      PlayerArchetypeData profile = profile(player);
+      if(player.level().isClientSide() || !(player instanceof ServerPlayer serverPlayer)) return constant;
+      PlayerArchetypeData profile = profile(serverPlayer);
       boolean canBreakQuickly =  (profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER) && player.isUnderWater())
             || (player.getVehicle() != null && !player.getVehicle().getTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList().isEmpty());
       return canBreakQuickly ? Math.min(constant, 1) : constant;
@@ -49,7 +51,8 @@ public abstract class PlayerMixin {
    @ModifyExpressionValue(method = "getDestroySpeed", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/ai/attributes/AttributeInstance;getValue()D"))
    private double archetypes$underwaterBlockBreakingSpeed(double original){
       Player player = (Player) (Object) this;
-      PlayerArchetypeData profile = profile(player);
+      if(player.level().isClientSide() || !(player instanceof ServerPlayer serverPlayer)) return original;
+      PlayerArchetypeData profile = profile(serverPlayer);
       double newValue = original;
       if(profile.hasAbility(ArchetypeRegistry.GOOD_SWIMMER)) newValue = 0.5;
       if(profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER)) newValue = 1.5;
@@ -59,7 +62,8 @@ public abstract class PlayerMixin {
    @ModifyReturnValue(method = "getDestroySpeed", at = @At("RETURN"))
    private float archetypes$overallBlockBreakingSpeed(float original){
       Player player = (Player) (Object) this;
-      PlayerArchetypeData profile = profile(player);
+      if(player.level().isClientSide() || !(player instanceof ServerPlayer serverPlayer)) return original;
+      PlayerArchetypeData profile = profile(serverPlayer);
       double newValue = original;
       if(profile.hasAbility(ArchetypeRegistry.HASTY)) newValue *= CONFIG.getDouble(ArchetypeRegistry.HASTY_MINING_MODIFIER);
       return (float) newValue;
@@ -100,7 +104,8 @@ public abstract class PlayerMixin {
    private boolean archetypes$isClimbing(boolean original){
       Player player = (Player) (Object) this;
       if(original) return true;
-      if(player.horizontalCollision && AncestralArchetypes.profile(player).hasAbility(ArchetypeRegistry.CLIMBING)){
+      if(player.level().isClientSide() || !(player instanceof ServerPlayer serverPlayer)) return original;
+      if(player.horizontalCollision && AncestralArchetypes.profile(serverPlayer).hasAbility(ArchetypeRegistry.CLIMBING)){
          return true;
       }
       return original;
