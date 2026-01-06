@@ -64,7 +64,7 @@ public class PlayerArchetypeData {
    
    // Second part of the data
    private record CodecPart2(int archetypeChangesAllowed, int giveItemsCooldown, float healthUpdate, ItemStack potionBrewerStack, int horseMarking, int horseColor, String mountName,
-         String subArchetype, Map<String, CooldownEntry> cooldowns, Map<String, Tuple<UUID, Float>> mountData, List<ItemStackWithSlot> mountInventory, List<ItemStackWithSlot> backpackInventory
+         String subArchetype, long ticksSinceArchetypeChange, Map<String, CooldownEntry> cooldowns, Map<String, Tuple<UUID, Float>> mountData, List<ItemStackWithSlot> mountInventory, List<ItemStackWithSlot> backpackInventory
    ){}
    
    private static final MapCodec<CodecPart1> CODEC_PART1 = RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -95,6 +95,7 @@ public class PlayerArchetypeData {
          Codec.INT.optionalFieldOf("horseColor", 0).forGetter(CodecPart2::horseColor),
          Codec.STRING.optionalFieldOf("mountName", "").forGetter(CodecPart2::mountName),
          Codec.STRING.optionalFieldOf("subArchetype", "").forGetter(CodecPart2::subArchetype),
+         Codec.LONG.optionalFieldOf("ticksSinceArchetypeChange", (long) CONFIG.getInt(ArchetypeRegistry.ARCHETYPE_CHANGE_COOLDOWN)).forGetter(CodecPart2::ticksSinceArchetypeChange),
          Codec.unboundedMap(Codec.STRING, COOLDOWN_ENTRY_CODEC).optionalFieldOf("cooldowns", Collections.emptyMap()).forGetter(CodecPart2::cooldowns),
          Codec.unboundedMap(Codec.STRING, MOUNT_DATA_ENTRY_CODEC).optionalFieldOf("mountData", Collections.emptyMap()).forGetter(CodecPart2::mountData),
          ItemStackWithSlot.CODEC.listOf().optionalFieldOf("mountInventory", Collections.emptyList()).forGetter(CodecPart2::mountInventory),
@@ -125,7 +126,7 @@ public class PlayerArchetypeData {
          if(!itemStack.isEmpty()) backpackInvList.add(new ItemStackWithSlot(i, itemStack));
       }
       
-      return new CodecPart2(archetypeChangesAllowed, giveItemsCooldown, healthUpdate, potionBrewerStack, horseMarking.getId(), horseColor.getId(), mountName == null ? "" : mountName, subArchetype != null ? subArchetype.getId() : "", cooldownMap, mountDataMap, mountInvList, backpackInvList);
+      return new CodecPart2(archetypeChangesAllowed, giveItemsCooldown, healthUpdate, potionBrewerStack, horseMarking.getId(), horseColor.getId(), mountName == null ? "" : mountName, subArchetype != null ? subArchetype.getId() : "", ticksSinceArchetypeChange, cooldownMap, mountDataMap, mountInvList, backpackInvList);
    }
    
    public static final Codec<PlayerArchetypeData> CODEC = RecordCodecBuilder.<PlayerArchetypeData>mapCodec(instance -> instance.group(
@@ -149,6 +150,7 @@ public class PlayerArchetypeData {
    private int fungusBoostTime;
    private int gliderColor = 0xFFFFFF;
    private int helmetColor = 0xA06540;
+   private long ticksSinceArchetypeChange = CONFIG.getInt(ArchetypeRegistry.ARCHETYPE_CHANGE_COOLDOWN);
    private Holder<TrimMaterial> gliderTrimMaterial;
    private Holder<TrimMaterial> helmetTrimMaterial;
    private int archetypeChangesAllowed = CONFIG.getInt(ArchetypeRegistry.STARTING_ARCHETYPE_CHANGES);
@@ -214,6 +216,7 @@ public class PlayerArchetypeData {
       this.horseMarking = Markings.byId(part2.horseMarking());
       this.horseColor = Variant.byId(part2.horseColor());
       this.mountName = part2.mountName().isEmpty() ? null : part2.mountName();
+      this.ticksSinceArchetypeChange = part2.ticksSinceArchetypeChange();
       
       // Resolve subarchetype from registry
       // Wrapped in try-catch to prevent codec failures from invalid identifiers
@@ -509,11 +512,15 @@ public class PlayerArchetypeData {
    }
    
    public boolean canChangeArchetype(){
-      return this.archetypeChangesAllowed > 0;
+      return this.archetypeChangesAllowed > 0 && this.ticksSinceArchetypeChange > CONFIG.getInt(ArchetypeRegistry.ARCHETYPE_CHANGE_COOLDOWN);
    }
    
    public boolean giveReminders(){
       return this.giveReminders;
+   }
+   
+   public long getTicksSinceArchetypeChange(){
+      return this.ticksSinceArchetypeChange;
    }
    
    public void setSubarchetype(ServerPlayer player, SubArchetype subarchetype){
@@ -578,6 +585,8 @@ public class PlayerArchetypeData {
       if(CONFIG.getBoolean(ArchetypeRegistry.CAN_ALWAYS_CHANGE_ARCHETYPE) && !this.canChangeArchetype()){
          this.archetypeChangesAllowed++;
       }
+      
+      ticksSinceArchetypeChange++;
    }
    
    private void handleFortify(ServerPlayer player){
@@ -667,6 +676,7 @@ public class PlayerArchetypeData {
       this.glideTime = getMaxGlideTime();
       this.hoverTime = getMaxHoverTime();
       this.fortifyTime = getMaxFortifyTime();
+      this.ticksSinceArchetypeChange = CONFIG.getInt(ArchetypeRegistry.ARCHETYPE_CHANGE_COOLDOWN);
    }
    
    public void setPotionType(Tuple<Item, Holder<Potion>> pair){
@@ -722,6 +732,7 @@ public class PlayerArchetypeData {
       this.giveItemsCooldown = 0;
       giveAbilityItems(player, true);
       this.archetypeChangesAllowed = Math.max(0, this.archetypeChangesAllowed - 1);
+      this.ticksSinceArchetypeChange = 0;
    }
    
    public void increaseAllowedChanges(int num){

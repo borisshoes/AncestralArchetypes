@@ -452,6 +452,12 @@ public class ArchetypeCommands {
          ServerPlayer player = context.getSource().getPlayerOrException();
          PlayerArchetypeData profile = profile(player);
          
+         long tickDiff = profile.getTicksSinceArchetypeChange() - CONFIG.getInt(ArchetypeRegistry.ARCHETYPE_CHANGE_COOLDOWN);
+         if(tickDiff < 0){
+            source.sendFailure(Component.translatable("command.ancestralarchetypes.change_archetype_cooldown",-tickDiff/20));
+            return -1;
+         }
+         
          if(!profile.canChangeArchetype()){
             source.sendFailure(Component.translatable("command.ancestralarchetypes.change_archetype_error"));
             return -1;

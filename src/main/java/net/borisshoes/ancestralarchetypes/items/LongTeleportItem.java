@@ -70,7 +70,7 @@ public class LongTeleportItem extends AbilityItem{
       }
       
       if(teleport(player.level(),player)){
-         profile(player).setAbilityCooldown(this.ability, CONFIG.getInt(ArchetypeRegistry.RANDOM_TELEPORT_COOLDOWN));
+         profile(player).setAbilityCooldown(this.ability, CONFIG.getInt(ArchetypeRegistry.LONG_TELEPORT_COOLDOWN));
          player.connection.send(new ClientboundContainerSetSlotPacket(player.inventoryMenu.containerId, player.inventoryMenu.incrementStateId(), player.getUsedItemHand() == InteractionHand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, player.getItemInHand(hand)));
          return InteractionResult.SUCCESS;
       }else{

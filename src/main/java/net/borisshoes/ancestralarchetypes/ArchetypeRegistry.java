@@ -114,6 +114,9 @@ public class ArchetypeRegistry {
    public static final IConfigSetting<?> CHANGES_PER_CHANGE_ITEM = registerConfigSetting(new ConfigSetting<>(
          new IntConfigValue("changesPerChangeItem", 1, new IntConfigValue.IntLimits(0,1000))));
    
+   public static final IConfigSetting<?> ARCHETYPE_CHANGE_COOLDOWN = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("archetypeChangeCooldown", 0, new IntConfigValue.IntLimits(0))));
+   
    public static final IConfigSetting<?> STARTING_ARCHETYPE_CHANGES = registerConfigSetting(new ConfigSetting<>(
          new IntConfigValue("startingArchetypeChanges", 1, new IntConfigValue.IntLimits(0,1000))));
    
