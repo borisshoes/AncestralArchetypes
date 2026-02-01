@@ -6,6 +6,8 @@
   "mixins": [
     "AbstractHorseDonkeyMixin",
     "AbstractHorseMixin",
+    "AbstractThrownPotionMixin",
+    "ArcanaItemUtilsMixin",
     "CreeperMixin",
     "EntityAccessor",
     "EntityMixin",
@@ -20,11 +22,10 @@
     "PhantomSwoopGoalMixin",
     "PlayerMixin",
     "PolymerBlockUtilsMixin",
-    "AbstractThrownPotionMixin",
     "PowderSnowBlockMixin",
-    "ServerPlayerMixin",
-    "ServerPlayerGameModeMixin",
     "ServerGamePacketListenerImplMixin",
+    "ServerPlayerGameModeMixin",
+    "ServerPlayerMixin",
     "SnowballMixin",
     "ThrowableItemProjectileAccessor"
   ],

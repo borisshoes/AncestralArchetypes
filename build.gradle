@@ -74,7 +74,8 @@ dependencies {
 
     modImplementation include("io.github.ladysnake:PlayerAbilityLib:${pal_version}")
 
-    modCompileOnly("maven.modrinth:arcana-novum:${project.arcana_version}")
+    modCompileOnly("com.github.borisshoes:arcananovum:dev-SNAPSHOT")
+    //modCompileOnly("maven.modrinth:arcana-novum:${project.arcana_version}")
 }
 
 processResources {
