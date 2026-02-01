@@ -6,41 +6,26 @@ import net.minecraft.world.item.ItemStack;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 
-public class Archetype {
-   
-   private final String id;
-   private final ArchetypeAbility[] abilities;
-   private final ItemStack displayItem;
-   private final int color;
-   
-   public Archetype(String id, ItemStack displayItem, int color, ArchetypeAbility... abilities){
-      this.id = id;
-      this.color = color;
-      this.abilities = abilities;
-      this.displayItem = displayItem;
-   }
+public record Archetype(String id, ItemStack displayItem, int color) {
    
    public MutableComponent getName(){
-      return Component.translatable(MOD_ID+".archetype.name."+id);
+      return Component.translatable(MOD_ID + ".archetype.name." + id);
    }
    
    public MutableComponent getDescription(){
-      return Component.translatable(MOD_ID+".archetype.description."+id);
+      return Component.translatable(MOD_ID + ".archetype.description." + id);
    }
    
-   public String getId(){
-      return id;
+   @Override
+   public boolean equals(Object o){
+      if(this == o) return true;
+      if(o == null || getClass() != o.getClass()) return false;
+      Archetype that = (Archetype) o;
+      return id.equals(that.id);
    }
    
-   public ItemStack getDisplayItem(){
-      return displayItem;
-   }
-   
-   public int getColor(){
-      return color;
-   }
-   
-   public ArchetypeAbility[] getAbilities(){
-      return abilities;
+   @Override
+   public int hashCode(){
+      return id.hashCode();
    }
 }

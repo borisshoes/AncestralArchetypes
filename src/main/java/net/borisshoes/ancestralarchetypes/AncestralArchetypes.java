@@ -12,6 +12,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
@@ -56,6 +57,7 @@ public class AncestralArchetypes implements ModInitializer, ClientModInitializer
       ServerPlayConnectionEvents.JOIN.register(PlayerConnectionCallback::onPlayerJoin);
       ServerPlayerEvents.AFTER_RESPAWN.register(PlayerRespawnCallback::onRespawn);
       AttackEntityCallback.EVENT.register(EntityAttackedCallback::attackedEntity);
+      ServerLifecycleEvents.SERVER_STARTED.register(ArchetypeAbilityStorage::loadAbilities);
       
       ArchetypeRegistry.initialize();
       

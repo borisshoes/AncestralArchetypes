@@ -141,7 +141,6 @@ public class ArchetypeProfile implements IArchetypeProfile {
       this.subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(Identifier.fromNamespaceAndPath(MOD_ID, view.getStringOr("subArchetype","")));
       this.giveItemsCooldown = view.getIntOr("giveItemsCooldown",0);
       this.healthUpdate = view.getFloatOr("loginHealth",20f);
-      this.calculateAbilities();
       
       abilityCooldowns.clear();
       CompoundTag cooldownTag = view.read("cooldowns", CompoundTag.CODEC).orElse(new CompoundTag());
@@ -246,14 +245,6 @@ public class ArchetypeProfile implements IArchetypeProfile {
       listAppender.isEmpty();
    }
    
-   private void calculateAbilities(){
-      this.abilities.clear();
-      if(this.subArchetype == null) return;
-      abilities.addAll(Arrays.asList(this.subArchetype.getAbilities()));
-      abilities.addAll(Arrays.asList(this.subArchetype.getArchetype().getAbilities()));
-      abilities.removeIf(a1 -> abilities.stream().anyMatch(a2 -> a2.overrides(a1)));
-   }
-   
    @Override
    public List<ArchetypeAbility> getAbilities(){
       return new ArrayList<>(this.abilities);
@@ -262,11 +253,6 @@ public class ArchetypeProfile implements IArchetypeProfile {
    @Override
    public int getAbilityCooldown(ArchetypeAbility ability){
       return abilityCooldowns.getOrDefault(ability, new CooldownEntry(0)).getCooldown();
-   }
-   
-   @Override
-   public float getAbilityCooldownPercent(ArchetypeAbility ability){
-      return abilityCooldowns.getOrDefault(ability, new CooldownEntry(0)).getPercentage();
    }
    
    @Override
@@ -280,18 +266,8 @@ public class ArchetypeProfile implements IArchetypeProfile {
    }
    
    @Override
-   public int getMaxGlideTime(){
-      return CONFIG.getInt(ArchetypeRegistry.GLIDER_DURATION);
-   }
-   
-   @Override
    public float getHoverTime(){
       return this.hoverTime;
-   }
-   
-   @Override
-   public int getMaxHoverTime(){
-      return CONFIG.getInt(ArchetypeRegistry.SLOW_HOVER_FLIGHT_DURATION);
    }
    
    @Override
@@ -300,28 +276,8 @@ public class ArchetypeProfile implements IArchetypeProfile {
    }
    
    @Override
-   public int getMaxFortifyTime(){
-      return CONFIG.getInt(ArchetypeRegistry.FORTIFY_DURATION);
-   }
-   
-   @Override
    public boolean isFortifyActive(){
       return this.fortifyActive;
-   }
-   
-   @Override
-   public void setFortifyActive(boolean fortifyActive){
-      this.fortifyActive = fortifyActive;
-   }
-   
-   @Override
-   public boolean isFungusBoosted(){
-      return this.fungusBoostTime > 0;
-   }
-   
-   @Override
-   public void fungusBoost(){
-      this.fungusBoostTime = CONFIG.getInt(ArchetypeRegistry.FUNGUS_SPEED_BOOST_DURATION);
    }
    
    @Override
@@ -419,257 +375,6 @@ public class ArchetypeProfile implements IArchetypeProfile {
    @Override
    public boolean giveReminders(){
       return this.giveReminders;
-   }
-   
-   @Override
-   public void setSubarchetype(SubArchetype subarchetype){
-      this.subArchetype = subarchetype;
-      this.calculateAbilities();
-      resetDeathReductionSizeLevel();
-   }
-   
-   @Override
-   public void changeDeathReductionSizeLevel(boolean decrease){
-      if(this.deathReductionSizeLevel > 0 && decrease){
-         this.deathReductionSizeLevel--;
-      }else if(!decrease){
-         this.deathReductionSizeLevel++;
-      }else{
-         return;
-      }
-      
-      MinecraftUtils.attributeEffect(player, Attributes.MAX_HEALTH,0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.fromNamespaceAndPath(MOD_ID,"death_reduction_size_level"),true);
-      MinecraftUtils.attributeEffect(player, Attributes.SCALE,0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.fromNamespaceAndPath(MOD_ID,"death_reduction_size_level"),true);
-      
-      double scale = -(1 - Math.pow(0.5,this.deathReductionSizeLevel));
-      MinecraftUtils.attributeEffect(player, Attributes.MAX_HEALTH,scale, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.fromNamespaceAndPath(MOD_ID,"death_reduction_size_level"),false);
-      MinecraftUtils.attributeEffect(player, Attributes.SCALE,scale, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.fromNamespaceAndPath(MOD_ID,"death_reduction_size_level"),false);
-      player.setHealth(player.getMaxHealth());
-   }
-   
-   
-   @Override
-   public void resetDeathReductionSizeLevel(){
-      this.deathReductionSizeLevel = 0;
-      MinecraftUtils.attributeEffect(player, Attributes.MAX_HEALTH,0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.fromNamespaceAndPath(MOD_ID,"death_reduction_size_level"),true);
-      MinecraftUtils.attributeEffect(player, Attributes.SCALE,0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, Identifier.fromNamespaceAndPath(MOD_ID,"death_reduction_size_level"),true);
-   }
-   
-   @Override
-   public void setAbilityCooldown(ArchetypeAbility ability, int ticks){
-      this.abilityCooldowns.put(ability, new CooldownEntry(ticks));
-   }
-   
-   @Override
-   public void tick(){
-      abilityCooldowns.forEach((ability, cooldown) -> cooldown.tick());
-      
-      handleGlider();
-      handleHover();
-      handleFortify();
-      
-      if(this.fungusBoostTime > 0){
-         this.fungusBoostTime--;
-         ((ServerLevel)player.level()).sendParticles(new DustParticleOptions(0x20c7b1,0.75f),player.position().x(),player.position().y()+player.getBbHeight()/2.0,player.position().z(),1,player.getBbWidth()*0.65,player.getBbHeight()/2.0,player.getBbWidth()*0.65,1);
-      }
-      if(this.giveItemsCooldown > 0) this.giveItemsCooldown--;
-      
-      if(CONFIG.getBoolean(ArchetypeRegistry.CAN_ALWAYS_CHANGE_ARCHETYPE) && !this.canChangeArchetype()){
-         this.archetypeChangesAllowed++;
-      }
-   }
-   
-   private void handleFortify(){
-      if(!this.fortifyActive){
-         this.fortifyTime = (float) Math.min(CONFIG.getInt(ArchetypeRegistry.FORTIFY_DURATION),this.fortifyTime + CONFIG.getDouble(ArchetypeRegistry.FORTIFY_RECOVERY_TIME));
-      }else{
-         this.fortifyTime--;
-         if((int)this.fortifyTime % 2 == 0){
-            double height = player.getBbHeight()/2*(Math.sin(Math.PI*2.0/60.0*fortifyTime)+1);
-            ParticleEffectUtils.circle((ServerLevel) player.level(),null,player.position().add(0,height,0), ParticleTypes.END_ROD,player.getBbWidth(),(int)(player.getBbWidth()*12),1,0,0);
-         }
-      }
-   }
-   
-   private void handleGlider(){
-      boolean wasGliderActive = this.gliderActive;
-      boolean gliderEquipped = player.getItemBySlot(EquipmentSlot.CHEST).is(ArchetypeRegistry.GLIDER_ITEM) || player.getItemBySlot(EquipmentSlot.CHEST).is(ArchetypeRegistry.END_GLIDER_ITEM);
-      if(gliderEquipped && player.isFallFlying()){
-         if(!wasGliderActive) this.gliderActive = true;
-         this.glideTime--;
-      }else{
-         if(wasGliderActive){
-            this.gliderActive = false;
-            setAbilityCooldown(ArchetypeRegistry.WING_GLIDER,CONFIG.getInt(ArchetypeRegistry.GLIDER_COOLDOWN));
-            setAbilityCooldown(ArchetypeRegistry.ENDER_GLIDER,CONFIG.getInt(ArchetypeRegistry.GLIDER_COOLDOWN));
-         }
-         if(getAbilityCooldown(ArchetypeRegistry.WING_GLIDER) + getAbilityCooldown(ArchetypeRegistry.ENDER_GLIDER) == 0){
-            this.glideTime = (float) Math.min(CONFIG.getInt(ArchetypeRegistry.GLIDER_DURATION),this.glideTime + CONFIG.getDouble(ArchetypeRegistry.GLIDER_RECOVERY_TIME));
-         }
-      }
-      
-      if(this.glideTime < 0){
-         this.glideTime = 0;
-         setAbilityCooldown(ArchetypeRegistry.WING_GLIDER,CONFIG.getInt(ArchetypeRegistry.GLIDER_COOLDOWN));
-         setAbilityCooldown(ArchetypeRegistry.ENDER_GLIDER,CONFIG.getInt(ArchetypeRegistry.GLIDER_COOLDOWN));
-      }
-   }
-   
-   private void handleHover(){
-      boolean canHover = !player.isCreative() && player.getItemBySlot(EquipmentSlot.HEAD).is(ArchetypeRegistry.SLOW_HOVER_ITEM) && getAbilityCooldown(ArchetypeRegistry.SLOW_HOVER) == 0 && this.hoverTime > 0;
-      if(SLOW_HOVER_ABILITY.grants(player, VanillaAbilities.ALLOW_FLYING) && !canHover){
-         SLOW_HOVER_ABILITY.revokeFrom(player, VanillaAbilities.ALLOW_FLYING);
-      }else if(!SLOW_HOVER_ABILITY.grants(player, VanillaAbilities.ALLOW_FLYING) && canHover){
-         SLOW_HOVER_ABILITY.grantTo(player, VanillaAbilities.ALLOW_FLYING);
-      }
-      boolean hovering = !player.isCreative() && VanillaAbilities.ALLOW_FLYING.getTracker(player).isEnabled() &&
-            VanillaAbilities.ALLOW_FLYING.getTracker(player).isGrantedBy(SLOW_HOVER_ABILITY) &&
-            VanillaAbilities.FLYING.isEnabledFor(player);
-      boolean wasHovering = this.hoverActive;
-      if(hovering){
-         if(!wasHovering){
-            this.hoverActive = true;
-            SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS,0.5f,1.25f);
-            SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.HARNESS_GOGGLES_DOWN, SoundSource.PLAYERS,0.5f,0.8f);
-            this.savedFlySpeed = player.getAbilities().getFlyingSpeed();
-            player.getAbilities().setFlyingSpeed((float) (CONFIG.getDouble(ArchetypeRegistry.SLOW_HOVER_FLIGHT_SPEED)));
-            ((ServerPlayer)player).connection.send(new ClientboundPlayerAbilitiesPacket(player.getAbilities()));
-         }
-         this.hoverTime--;
-         if(player.getRandom().nextDouble() < 0.4) ((ServerPlayer)player).level().sendParticles(ParticleTypes.POOF,player.getX(),player.getY()-0.5,player.getZ(),1,0.2,0.2,0.2,0.01);
-      }else{
-         if(wasHovering){
-            this.hoverActive = false;
-            setAbilityCooldown(ArchetypeRegistry.SLOW_HOVER,CONFIG.getInt(ArchetypeRegistry.SLOW_HOVER_FLIGHT_COOLDOWN));
-            SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS,0.5f,0.85f);
-            SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.HARNESS_GOGGLES_UP, SoundSource.PLAYERS,0.5f,0.8f);
-            player.getAbilities().setFlyingSpeed(this.savedFlySpeed);
-            ((ServerPlayer)player).connection.send(new ClientboundPlayerAbilitiesPacket(player.getAbilities()));
-         }
-         if(getAbilityCooldown(ArchetypeRegistry.SLOW_HOVER) == 0){
-            this.hoverTime = (float) Math.min(CONFIG.getInt(ArchetypeRegistry.SLOW_HOVER_FLIGHT_DURATION),this.hoverTime + CONFIG.getDouble(ArchetypeRegistry.SLOW_HOVER_FLIGHT_RECOVERY_TIME));
-         }
-      }
-      
-      if(this.hoverTime < 0){
-         this.hoverTime = 0;
-         setAbilityCooldown(ArchetypeRegistry.SLOW_HOVER,CONFIG.getInt(ArchetypeRegistry.SLOW_HOVER_FLIGHT_COOLDOWN));
-      }
-   }
-   
-   @Override
-   public void resetAbilityCooldowns(){
-      abilityCooldowns.forEach((ability, cooldown) -> abilityCooldowns.put(ability, new CooldownEntry(0)));
-      this.glideTime = getMaxGlideTime();
-      this.hoverTime = getMaxHoverTime();
-      this.fortifyTime = getMaxFortifyTime();
-   }
-   
-   @Override
-   public void setPotionType(Tuple<Item, Holder<Potion>> pair){
-      this.potionBrewerStack = pair == null ? ItemStack.EMPTY : PotionContents.createItemStack(pair.getA(),pair.getB());
-   }
-   
-   @Override
-   public void setMountEntity(ArchetypeAbility ability, UUID uuid){
-      Tuple<UUID,Float> prev = this.mountData.get(ability);
-      if(prev != null){
-         this.mountData.put(ability, new Tuple<>(uuid,prev.getB()));
-      }else{
-         this.mountData.put(ability, new Tuple<>(uuid,0f));
-      }
-   }
-   
-   @Override
-   public void setMountHealth(ArchetypeAbility ability, float health){
-      Tuple<UUID,Float> prev = this.mountData.get(ability);
-      if(prev != null){
-         this.mountData.put(ability, new Tuple<>(prev.getA(),health));
-      }else{
-         this.mountData.put(ability, new Tuple<>(null,health));
-      }
-   }
-   
-   @Override
-   public void setMountName(String name){
-      this.mountName = name;
-   }
-   
-   @Override
-   public void setHorseVariant(Variant color, Markings marking){
-      this.horseMarking = marking;
-      this.horseColor = color;
-   }
-   
-   @Override
-   public void setGliderColor(int color){
-      this.gliderColor = color;
-   }
-   
-   @Override
-   public void setHelmetColor(int color){
-      this.helmetColor = color;
-   }
-   
-   public void setGliderTrimMaterial(Holder<TrimMaterial> material){
-      this.gliderTrimMaterial = material;
-   }
-   
-   public void setHelmetTrimMaterial(Holder<TrimMaterial> material){
-      this.helmetTrimMaterial = material;
-   }
-   
-   @Override
-   public void changeArchetype(SubArchetype archetype){
-      setSubarchetype(archetype);
-      this.giveItemsCooldown = 0;
-      giveAbilityItems(true);
-      this.archetypeChangesAllowed = Math.max(0,this.archetypeChangesAllowed-1);
-   }
-   
-   @Override
-   public void increaseAllowedChanges(int num){
-      this.archetypeChangesAllowed = Math.max(0, this.archetypeChangesAllowed + num);
-   }
-   
-   @Override
-   public void setReminders(boolean reminders){
-      this.giveReminders = reminders;
-   }
-   
-   @Override
-   public void setHealthUpdate(float health){
-      if(health >= 0) this.healthUpdate = health;
-   }
-   
-   @Override
-   public boolean giveAbilityItems(boolean shortCooldown){
-      if(this.giveItemsCooldown > 0) return false;
-      
-      List<ArchetypeAbility> abilities = getAbilities();
-      Inventory inv = player.getInventory();
-      for(ArchetypeAbility ability : abilities){
-         if(!ability.active()) continue;
-         for(Item item : ITEMS){
-            if(item instanceof AbilityItem abilityItem && ability.equals(abilityItem.ability)){
-               boolean found = false;
-               for(int i = 0; i < inv.getContainerSize(); i++){
-                  ItemStack stack = inv.getItem(i);
-                  if(stack.is(abilityItem)){
-                     found = true;
-                     break;
-                  }
-               }
-               if(!found){
-                  MinecraftUtils.giveStacks(player, new ItemStack(item));
-                  break;
-               }
-            }
-         }
-      }
-      this.giveItemsCooldown = shortCooldown ? 100 : 1200;
-      
-      return true;
    }
    
    @Override

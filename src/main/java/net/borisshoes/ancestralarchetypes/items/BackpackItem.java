@@ -83,14 +83,14 @@ public class BackpackItem extends AbilityItem{
             
             if(count > item.getDefaultMaxStackSize()){
                lore.add(Component.translatable("text.ancestralarchetypes.backpack_contents_stack",
-                     Component.literal(count+"").withColor(profile.getArchetype().getColor()),
-                     Component.translatable("text.ancestralarchetypes.stacks",stacks).withColor(profile.getArchetype().getColor()),
-                     Component.literal(leftover+"").withColor(profile.getArchetype().getColor()),
+                     Component.literal(count+"").withColor(profile.getArchetype().color()),
+                     Component.translatable("text.ancestralarchetypes.stacks",stacks).withColor(profile.getArchetype().color()),
+                     Component.literal(leftover+"").withColor(profile.getArchetype().color()),
                      item.getName().copy().withColor(profile.getSubArchetype().getColor())
                      ).withStyle(ChatFormatting.DARK_PURPLE));
             }else{
                lore.add(Component.translatable("text.ancestralarchetypes.backpack_contents_item",
-                     Component.literal(count+"").withColor(profile.getArchetype().getColor()),
+                     Component.literal(count+"").withColor(profile.getArchetype().color()),
                      item.getName().copy().withColor(profile.getSubArchetype().getColor())
                ).withStyle(ChatFormatting.DARK_PURPLE));
             }
@@ -98,8 +98,8 @@ public class BackpackItem extends AbilityItem{
          
          if(leftOverCount > 0){
             lore.add(Component.translatable("text.ancestralarchetypes.backpack_contents_more",
-                  Component.literal(leftOverCount+"").withColor(profile.getArchetype().getColor()),
-                  Component.literal((cargo.size()-numDisplayed)+"").withColor(profile.getArchetype().getColor())
+                  Component.literal(leftOverCount+"").withColor(profile.getArchetype().color()),
+                  Component.literal((cargo.size()-numDisplayed)+"").withColor(profile.getArchetype().color())
             ).withStyle(ChatFormatting.LIGHT_PURPLE));
          }
       }

@@ -74,6 +74,8 @@ The following commands can be used to adjust configurable settings in the Ancest
 * `/archetypes config cauldronInstantEffectCooldown` The effective duration of instant potion effects for determining the cooldown of the Witch's active ability. (default: 900)
 * `/archetypes config cauldronThrowableCooldownModifier` The time modifier multiplied against the cumulative effect duration of throwable potions to determine the cooldown of the Witch's active ability. (default: 1.5)
 * `/archetypes config changesPerChangeItem` The number of allowed Archetype changes given for consuming a Change Item. (default: 1)
+* `/archetypes config chocolateAllergyAmplifier` The amplifier of the poison effect applied by Chocolate Allergy. (default: 2)
+* `/archetypes config chocolateAllergyDuration` The duration, in ticks, of the poison effect applied by Chocolate Allergy. (default: 100)
 * `/archetypes config coldDamageModifier` The modifier multiplied to cold damage dealt to Infernals. (default: 2.0)
 * `/archetypes config copperFoodDurationModifier` The modifier applied to the consume duration of foods for Copper Eater. (default: 1.0)
 * `/archetypes config copperFoodHealthModifier` The modifier applied to the health regained by Copper Eater. (default: 1.0)

@@ -10,7 +10,8 @@ import net.minecraft.world.item.component.TooltipDisplay;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 
-public record ArchetypeAbility(String id, boolean active, ItemStack displayStack, IConfigSetting<?>[] reliantConfigs, ArchetypeAbility... overrides) {
+public record ArchetypeAbility(String id, boolean active, ItemStack displayStack, IConfigSetting<?>[] reliantConfigs,
+                               ArchetypeAbility... overrides) {
    
    public ArchetypeAbility(String id, boolean active, ItemStack displayStack, IConfigSetting<?>[] reliantConfigs, ArchetypeAbility... overrides){
       this.id = id;
@@ -39,6 +40,19 @@ public record ArchetypeAbility(String id, boolean active, ItemStack displayStack
          if(other == override) return true;
       }
       return false;
+   }
+   
+   @Override
+   public boolean equals(Object o){
+      if(this == o) return true;
+      if(o == null || getClass() != o.getClass()) return false;
+      ArchetypeAbility that = (ArchetypeAbility) o;
+      return id.equals(that.id);
+   }
+   
+   @Override
+   public int hashCode(){
+      return id.hashCode();
    }
    
    public static class ArchetypeAbilityBuilder {

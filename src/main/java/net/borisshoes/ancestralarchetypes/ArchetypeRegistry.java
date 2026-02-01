@@ -230,6 +230,12 @@ public class ArchetypeRegistry {
    
    public static final IConfigSetting<?> WAX_SHIELD_CONSUME_DURATION = registerConfigSetting(new ConfigSetting<>(
          new IntConfigValue("waxShieldConsumeDuration", 20, new IntConfigValue.IntLimits(1))));
+   
+   public static final IConfigSetting<?> CHOCOLATE_ALLERGY_DURATION = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("chocolateAllergyDuration", 100, new IntConfigValue.IntLimits(0))));
+   
+   public static final IConfigSetting<?> CHOCOLATE_ALLERGY_AMPLIFIER = registerConfigSetting(new ConfigSetting<>(
+         new IntConfigValue("chocolateAllergyAmplifier", 2, new IntConfigValue.IntLimits(0, 255))));
 
    public static final IConfigSetting<?> JUMPY_JUMP_BOOST = registerConfigSetting(new ConfigSetting<>(
          new DoubleConfigValue("jumpyJumpBoost", 0.35, new DoubleConfigValue.DoubleLimits(-100,100))));
@@ -506,40 +512,41 @@ public class ArchetypeRegistry {
    public static final ArchetypeAbility LAVA_WALKER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("lava_walker").setReliantConfigs(LAVA_WALKER_SPEED_MULTIPLIER).setDisplayStack(new ItemStack(Items.NETHERITE_BOOTS)).build());
    public static final ArchetypeAbility FUNGUS_SPEED_BOOST = register(new ArchetypeAbility.ArchetypeAbilityBuilder("fungus_speed_boost").setReliantConfigs(FUNGUS_SPEED_BOOST_DURATION,FUNGUS_SPEED_BOOST_CONSUME_DURATION,FUNGUS_SPEED_BOOST_MULTIPLIER).setDisplayStack(new ItemStack(Items.WARPED_FUNGUS)).build());
    public static final ArchetypeAbility WAX_SHIELD = register(new ArchetypeAbility.ArchetypeAbilityBuilder("wax_shield").setReliantConfigs(WAX_SHIELD_HEALTH,WAX_SHIELD_MAX_HEALTH,WAX_SHIELD_CONSUME_DURATION,WAX_SHIELD_DURATION).setDisplayStack(new ItemStack(Items.HONEYCOMB)).build());
+   public static final ArchetypeAbility CHOCOLATE_ALLERGY = register(new ArchetypeAbility.ArchetypeAbilityBuilder("chocolate_allergy").setReliantConfigs(CHOCOLATE_ALLERGY_AMPLIFIER,CHOCOLATE_ALLERGY_DURATION).setDisplayStack(new ItemStack(Items.COOKIE)).build());
    
-   public static final Archetype AQUARIAN = register(new Archetype("aquarian", new ItemStack(Items.TROPICAL_FISH), 0x0f89f0, GOOD_SWIMMER, DRIES_OUT, IMPALE_VULNERABLE, SLIPPERY));
-   public static final Archetype CENTAUR = register(new Archetype("centaur", new ItemStack(Items.SADDLE), 0xbd8918, STUNNED_BY_DAMAGE, MOUNTED));
-   public static final Archetype ENDERIAN = register(new Archetype("enderian", new ItemStack(Items.END_CRYSTAL), 0xc30ff0, HURT_BY_WATER));
-   public static final Archetype FELID = register(new Archetype("felid", new ItemStack(Items.STRING), 0xc6c55c, HALVED_FALL_DAMAGE, CARNIVORE, SPEEDY));
-   public static final Archetype GOLEM = register(new Archetype("golem", new ItemStack(Items.CHISELED_STONE_BRICKS), 0xa0a0ab, NO_REGEN, HEALTH_BASED_SPRINT, PROJECTILE_RESISTANT));
-   public static final Archetype INFERNAL = register(new Archetype("infernal", new ItemStack(Items.CRIMSON_NYLIUM), 0xe03f24, FIRE_IMMUNE, DAMAGED_BY_COLD));
-   public static final Archetype SWAMPER = register(new Archetype("swamper", new ItemStack(Items.SLIME_BLOCK), 0x4dca70, ANTIVENOM));
-   public static final Archetype WINDSWEPT = register(new Archetype("windswept", new ItemStack(Items.FEATHER), 0x98c9c6, SLOW_FALLER));
+   public static final Archetype AQUARIAN = register(new Archetype("aquarian", new ItemStack(Items.TROPICAL_FISH), 0x0f89f0));
+   public static final Archetype CENTAUR = register(new Archetype("centaur", new ItemStack(Items.SADDLE), 0xbd8918));
+   public static final Archetype ENDERIAN = register(new Archetype("enderian", new ItemStack(Items.END_CRYSTAL), 0xc30ff0));
+   public static final Archetype FELID = register(new Archetype("felid", new ItemStack(Items.STRING), 0xc6c55c));
+   public static final Archetype GOLEM = register(new Archetype("golem", new ItemStack(Items.CHISELED_STONE_BRICKS), 0xa0a0ab));
+   public static final Archetype INFERNAL = register(new Archetype("infernal", new ItemStack(Items.CRIMSON_NYLIUM), 0xe03f24));
+   public static final Archetype SWAMPER = register(new Archetype("swamper", new ItemStack(Items.SLIME_BLOCK), 0x4dca70));
+   public static final Archetype WINDSWEPT = register(new Archetype("windswept", new ItemStack(Items.FEATHER), 0x98c9c6));
    
-   public static final SubArchetype AXOLOTL = register(new SubArchetype("axolotl", EntityType.AXOLOTL, new ItemStack(Items.AXOLOTL_BUCKET), 0xe070ed, AQUARIAN, REGEN_WHEN_LOW));
-   public static final SubArchetype SALMON = register(new SubArchetype("salmon", EntityType.SALMON, new ItemStack(Items.SALMON), 0x8f1f63, AQUARIAN, GREAT_SWIMMER));
-   public static final SubArchetype GUARDIAN = register(new SubArchetype("guardian", EntityType.GUARDIAN, new ItemStack(Items.PRISMARINE_BRICKS), 0x449e92, AQUARIAN, GUARDIAN_RAY, THORNY));
-   public static final SubArchetype HORSE = register(new SubArchetype("horse", EntityType.HORSE, new ItemStack(Items.GOLDEN_HORSE_ARMOR), 0xbda329, CENTAUR, HORSE_SPIRIT_MOUNT));
-   public static final SubArchetype DONKEY = register(new SubArchetype("donkey", EntityType.DONKEY, new ItemStack(Items.CHEST), 0x9c6d11, CENTAUR, DONKEY_SPIRIT_MOUNT));
-   public static final SubArchetype CAMEL = register(new SubArchetype("camel", EntityType.CAMEL, new ItemStack(Items.SAND), 0xffc163, CENTAUR, CAMEL_SPIRIT_MOUNT));
-   public static final SubArchetype ENDERMAN = register(new SubArchetype("enderman", EntityType.ENDERMAN, new ItemStack(Items.ENDER_EYE), 0xca00e2, ENDERIAN, SHY, TALL_SIZED, LONG_ARMS, SILK_TOUCH, LONG_TELEPORT, PROJECTILE_RESISTANT));
-   public static final SubArchetype SHULKER = register(new SubArchetype("shulker", EntityType.SHULKER, new ItemStack(Items.SHULKER_SHELL), 0x7e597f, ENDERIAN, FORTIFY, LEVITATION_BULLET, BACKPACK, RANDOM_TELEPORT));
-   public static final SubArchetype ENDER_DRAGON = register(new SubArchetype("ender_dragon", EntityType.ENDER_DRAGON, new ItemStack(Items.DRAGON_EGG), 0x762f9f, ENDERIAN, MASSIVE_SIZED, ENDER_GLIDER, ENDERFLAME, REDUCED_KNOCKBACK, LONG_ARMS, RIDEABLE));
-   public static final SubArchetype CAT = register(new SubArchetype("cat", EntityType.CAT, new ItemStack(Items.PHANTOM_MEMBRANE), 0xf1ce8a, FELID, CAT_SCARE, NO_FALL_DAMAGE, SNEAKY));
-   public static final SubArchetype OCELOT = register(new SubArchetype("ocelot", EntityType.OCELOT, new ItemStack(Items.CHICKEN), 0xc5b900, FELID, SNEAK_ATTACK));
-   public static final SubArchetype COPPER_GOLEM = register(new SubArchetype("copper_golem", null, new ItemStack(Items.COPPER_BLOCK), 0xbc814d, GOLEM, COPPER_EATER, HALF_SIZED, LIGHTWEIGHT, SOFT_HITTER, RESILIENT_JOINTS, WAX_SHIELD));
-   public static final SubArchetype TUFF_GOLEM = register(new SubArchetype("tuff_golem", null, new ItemStack(Items.CHISELED_TUFF_BRICKS), 0x648076, GOLEM, TUFF_EATER, HASTY));
-   public static final SubArchetype IRON_GOLEM = register(new SubArchetype("iron_golem", EntityType.IRON_GOLEM, new ItemStack(Items.IRON_BLOCK), 0xbebebe, GOLEM, IRON_EATER, GIANT_SIZED, REDUCED_KNOCKBACK, LONG_ARMS, HARD_HITTER));
-   public static final SubArchetype BLAZE = register(new SubArchetype("blaze", EntityType.BLAZE, new ItemStack(Items.BLAZE_ROD), 0xe88a0f, INFERNAL, FIREBALL_VOLLEY, SLOW_FALLER, BLAZING_STRIKE));
-   public static final SubArchetype WITHER_SKELETON = register(new SubArchetype("wither_skeleton", EntityType.WITHER_SKELETON, new ItemStack(Items.WITHER_SKELETON_SKULL), 0x423c3c, INFERNAL, WITHERING, TALL_SIZED));
-   public static final SubArchetype STRIDER = register(new SubArchetype("strider", EntityType.STRIDER, new ItemStack(Items.STRING), 0x943019, INFERNAL, RIDEABLE, LAVA_WALKER, FUNGUS_SPEED_BOOST));
-   //public static final SubArchetype MAGMA_CUBE = register(new SubArchetype("magma_cube", EntityType.MAGMA_CUBE, new ItemStack(Items.MAGMA_BLOCK), 0x943019, INFERNAL, BOUNCY, JUMPY, MAGMA_TOTEM, INSATIABLE));
-   public static final SubArchetype WITCH = register(new SubArchetype("witch", EntityType.WITCH, new ItemStack(Items.CAULDRON), 0x7a0fe8, SWAMPER, POTION_BREWER, MOONLIT_WITCH));
-   public static final SubArchetype SLIME = register(new SubArchetype("slime", EntityType.SLIME, new ItemStack(Items.SLIME_BLOCK), 0x05f905, SWAMPER, BOUNCY, JUMPY, SLIME_TOTEM, INSATIABLE, MOONLIT_SLIME));
-   public static final SubArchetype CAVE_SPIDER = register(new SubArchetype("cave_spider", EntityType.CAVE_SPIDER, new ItemStack(Items.COBWEB), 0x1a7264, SWAMPER, HALF_SIZED, SOFT_HITTER, CLIMBING, VENOMOUS, LIGHTWEIGHT, MOONLIT_CAVE_SPIDER, WEAVING, RESILIENT_JOINTS));
-   public static final SubArchetype BREEZE = register(new SubArchetype("breeze", EntityType.BREEZE, new ItemStack(Items.WIND_CHARGE), 0x6ac1e6, WINDSWEPT, PROJECTILE_RESISTANT, SOFT_HITTER, JUMPY, WIND_CHARGE_VOLLEY));
-   public static final SubArchetype PARROT = register(new SubArchetype("parrot", EntityType.PARROT, new ItemStack(Items.ELYTRA), 0xb7d3df, WINDSWEPT, WING_GLIDER, LIGHTWEIGHT));
-   public static final SubArchetype GHASTLING = register(new SubArchetype("ghastling", EntityType.HAPPY_GHAST, new ItemStack(Items.GRAY_HARNESS), 0xa9e5e7, WINDSWEPT, SLOW_HOVER, DRIES_OUT, SNOW_BLAST, RIDEABLE));
+   public static final SubArchetype AXOLOTL = register(new SubArchetype("axolotl", EntityType.AXOLOTL, new ItemStack(Items.AXOLOTL_BUCKET), 0xe070ed, AQUARIAN, REGEN_WHEN_LOW, GOOD_SWIMMER, DRIES_OUT, IMPALE_VULNERABLE, SLIPPERY));
+   public static final SubArchetype SALMON = register(new SubArchetype("salmon", EntityType.SALMON, new ItemStack(Items.SALMON), 0x8f1f63, AQUARIAN, GREAT_SWIMMER, GOOD_SWIMMER, DRIES_OUT, IMPALE_VULNERABLE, SLIPPERY));
+   public static final SubArchetype GUARDIAN = register(new SubArchetype("guardian", EntityType.GUARDIAN, new ItemStack(Items.PRISMARINE_BRICKS), 0x449e92, AQUARIAN, GUARDIAN_RAY, THORNY, GOOD_SWIMMER, DRIES_OUT, IMPALE_VULNERABLE, SLIPPERY));
+   public static final SubArchetype HORSE = register(new SubArchetype("horse", EntityType.HORSE, new ItemStack(Items.GOLDEN_HORSE_ARMOR), 0xbda329, CENTAUR, HORSE_SPIRIT_MOUNT, STUNNED_BY_DAMAGE, MOUNTED));
+   public static final SubArchetype DONKEY = register(new SubArchetype("donkey", EntityType.DONKEY, new ItemStack(Items.CHEST), 0x9c6d11, CENTAUR, DONKEY_SPIRIT_MOUNT, STUNNED_BY_DAMAGE, MOUNTED));
+   public static final SubArchetype CAMEL = register(new SubArchetype("camel", EntityType.CAMEL, new ItemStack(Items.SAND), 0xffc163, CENTAUR, CAMEL_SPIRIT_MOUNT, STUNNED_BY_DAMAGE, MOUNTED));
+   public static final SubArchetype ENDERMAN = register(new SubArchetype("enderman", EntityType.ENDERMAN, new ItemStack(Items.ENDER_EYE), 0xca00e2, ENDERIAN, SHY, TALL_SIZED, LONG_ARMS, SILK_TOUCH, LONG_TELEPORT, PROJECTILE_RESISTANT, HURT_BY_WATER));
+   public static final SubArchetype SHULKER = register(new SubArchetype("shulker", EntityType.SHULKER, new ItemStack(Items.SHULKER_SHELL), 0x7e597f, ENDERIAN, FORTIFY, LEVITATION_BULLET, BACKPACK, RANDOM_TELEPORT, HURT_BY_WATER));
+   public static final SubArchetype ENDER_DRAGON = register(new SubArchetype("ender_dragon", EntityType.ENDER_DRAGON, new ItemStack(Items.DRAGON_EGG), 0x762f9f, ENDERIAN, MASSIVE_SIZED, ENDER_GLIDER, ENDERFLAME, REDUCED_KNOCKBACK, LONG_ARMS, RIDEABLE, HURT_BY_WATER));
+   public static final SubArchetype CAT = register(new SubArchetype("cat", EntityType.CAT, new ItemStack(Items.PHANTOM_MEMBRANE), 0xf1ce8a, FELID, CAT_SCARE, NO_FALL_DAMAGE, SNEAKY, CARNIVORE, SPEEDY));
+   public static final SubArchetype OCELOT = register(new SubArchetype("ocelot", EntityType.OCELOT, new ItemStack(Items.CHICKEN), 0xc5b900, FELID, SNEAK_ATTACK, HALVED_FALL_DAMAGE, CARNIVORE, SPEEDY));
+   public static final SubArchetype COPPER_GOLEM = register(new SubArchetype("copper_golem", null, new ItemStack(Items.COPPER_BLOCK), 0xbc814d, GOLEM, COPPER_EATER, HALF_SIZED, LIGHTWEIGHT, SOFT_HITTER, RESILIENT_JOINTS, WAX_SHIELD, NO_REGEN, HEALTH_BASED_SPRINT, PROJECTILE_RESISTANT));
+   public static final SubArchetype TUFF_GOLEM = register(new SubArchetype("tuff_golem", null, new ItemStack(Items.CHISELED_TUFF_BRICKS), 0x648076, GOLEM, TUFF_EATER, HASTY, NO_REGEN, HEALTH_BASED_SPRINT, PROJECTILE_RESISTANT));
+   public static final SubArchetype IRON_GOLEM = register(new SubArchetype("iron_golem", EntityType.IRON_GOLEM, new ItemStack(Items.IRON_BLOCK), 0xbebebe, GOLEM, IRON_EATER, GIANT_SIZED, REDUCED_KNOCKBACK, LONG_ARMS, HARD_HITTER, NO_REGEN, HEALTH_BASED_SPRINT, PROJECTILE_RESISTANT));
+   public static final SubArchetype BLAZE = register(new SubArchetype("blaze", EntityType.BLAZE, new ItemStack(Items.BLAZE_ROD), 0xe88a0f, INFERNAL, FIREBALL_VOLLEY, SLOW_FALLER, BLAZING_STRIKE, FIRE_IMMUNE, DAMAGED_BY_COLD));
+   public static final SubArchetype WITHER_SKELETON = register(new SubArchetype("wither_skeleton", EntityType.WITHER_SKELETON, new ItemStack(Items.WITHER_SKELETON_SKULL), 0x423c3c, INFERNAL, WITHERING, TALL_SIZED, FIRE_IMMUNE, DAMAGED_BY_COLD));
+   public static final SubArchetype STRIDER = register(new SubArchetype("strider", EntityType.STRIDER, new ItemStack(Items.STRING), 0x943019, INFERNAL, RIDEABLE, LAVA_WALKER, FUNGUS_SPEED_BOOST, FIRE_IMMUNE, DAMAGED_BY_COLD));
+   //public static final SubArchetype MAGMA_CUBE = register(new SubArchetype("magma_cube", EntityType.MAGMA_CUBE, new ItemStack(Items.MAGMA_BLOCK), 0x943019, INFERNAL, BOUNCY, JUMPY, MAGMA_TOTEM, INSATIABLE, FIRE_IMMUNE, DAMAGED_BY_COLD));
+   public static final SubArchetype WITCH = register(new SubArchetype("witch", EntityType.WITCH, new ItemStack(Items.CAULDRON), 0x7a0fe8, SWAMPER, POTION_BREWER, MOONLIT_WITCH, ANTIVENOM));
+   public static final SubArchetype SLIME = register(new SubArchetype("slime", EntityType.SLIME, new ItemStack(Items.SLIME_BLOCK), 0x05f905, SWAMPER, BOUNCY, JUMPY, SLIME_TOTEM, INSATIABLE, MOONLIT_SLIME, ANTIVENOM));
+   public static final SubArchetype CAVE_SPIDER = register(new SubArchetype("cave_spider", EntityType.CAVE_SPIDER, new ItemStack(Items.COBWEB), 0x1a7264, SWAMPER, HALF_SIZED, SOFT_HITTER, CLIMBING, VENOMOUS, LIGHTWEIGHT, MOONLIT_CAVE_SPIDER, WEAVING, RESILIENT_JOINTS, ANTIVENOM));
+   public static final SubArchetype BREEZE = register(new SubArchetype("breeze", EntityType.BREEZE, new ItemStack(Items.WIND_CHARGE), 0x6ac1e6, WINDSWEPT, PROJECTILE_RESISTANT, SOFT_HITTER, JUMPY, WIND_CHARGE_VOLLEY, SLOW_FALLER));
+   public static final SubArchetype PARROT = register(new SubArchetype("parrot", EntityType.PARROT, new ItemStack(Items.ELYTRA), 0xb7d3df, WINDSWEPT, WING_GLIDER, LIGHTWEIGHT, CHOCOLATE_ALLERGY, SLOW_FALLER));
+   public static final SubArchetype GHASTLING = register(new SubArchetype("ghastling", EntityType.HAPPY_GHAST, new ItemStack(Items.GRAY_HARNESS), 0xa9e5e7, WINDSWEPT, SLOW_HOVER, DRIES_OUT, SNOW_BLAST, RIDEABLE, SLOW_FALLER));
    
    public static final ResourceKey<? extends Registry<EquipmentAsset>> EQUIPMENT_ASSET_REGISTRY_KEY = ResourceKey.createRegistryKey(Identifier.withDefaultNamespace("equipment_asset"));
    
@@ -795,7 +802,7 @@ public class ArchetypeRegistry {
    }
    
    private static Archetype register(Archetype archetype){
-      Registry.register(ARCHETYPES, Identifier.fromNamespaceAndPath(MOD_ID, archetype.getId()), archetype);
+      Registry.register(ARCHETYPES, Identifier.fromNamespaceAndPath(MOD_ID, archetype.id()), archetype);
       return archetype;
    }
    

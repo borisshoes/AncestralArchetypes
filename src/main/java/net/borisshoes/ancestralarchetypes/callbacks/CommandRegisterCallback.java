@@ -3,6 +3,7 @@ package net.borisshoes.ancestralarchetypes.callbacks;
 import com.mojang.brigadier.CommandDispatcher;
 import net.borisshoes.ancestralarchetypes.AncestralArchetypes;
 import net.borisshoes.ancestralarchetypes.ArchetypeCommands;
+import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -58,8 +59,19 @@ public class CommandRegisterCallback {
                         .executes(context -> ArchetypeCommands.getPlayersOfArchetype(context, getString(context, "archetype_id")))))
             .then(literal("getAllPlayerArchetypes").requires(Commands.hasPermission(Commands.LEVEL_ADMINS)).executes(ArchetypeCommands::getAllPlayerArchetypes))
             .then(literal("getArchetype").requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
-                  .then(argument("target",word()).suggests(ArchetypeCommands::getPlayerSuggestions)
+                  .then(argument("target",word()).suggests(MinecraftUtils::getPlayerSuggestions)
                         .executes(context -> ArchetypeCommands.getArchetype(context, getString(context, "target")))))
+            .then(literal("resetArchetypeAbilities")
+                  .then(argument("archetype_id", word()).suggests(ArchetypeCommands::getSubArchetypeSuggestions)
+                        .executes(context -> ArchetypeCommands.resetAbilities(context, getString(context,"archetype_id")))))
+            .then(literal("addArchetypeAbility")
+                  .then(argument("archetype_id", word()).suggests(ArchetypeCommands::getSubArchetypeSuggestions)
+                        .then(argument("ability_id",word()).suggests((context, builder) -> ArchetypeCommands.getAbilitySuggestions(context,builder,getString(context,"archetype_id"),true,true))
+                              .executes(context -> ArchetypeCommands.addAbility(context, getString(context,"archetype_id"), getString(context,"ability_id"))))))
+            .then(literal("removeArchetypeAbility")
+                  .then(argument("archetype_id", word()).suggests(ArchetypeCommands::getSubArchetypeSuggestions)
+                        .then(argument("ability_id",word()).suggests((context, builder) -> ArchetypeCommands.getAbilitySuggestions(context,builder,getString(context,"archetype_id"),true,false))
+                              .executes(context -> ArchetypeCommands.removeAbility(context, getString(context,"archetype_id"), getString(context,"ability_id"))))))
       );
       
       dispatcher.register(AncestralArchetypes.CONFIG.generateCommand("archetypes","config"));

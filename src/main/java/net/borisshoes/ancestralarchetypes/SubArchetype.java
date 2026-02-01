@@ -5,15 +5,15 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 
 public class SubArchetype {
    private final String id;
    private final Archetype parent;
-   private final ArchetypeAbility[] abilities;
+   private final Set<ArchetypeAbility> abilities = new HashSet<>();
+   private final Set<ArchetypeAbility> defaultAbilities = new HashSet<>();
    private final ItemStack displayItem;
    private final int color;
    private final EntityType<?> entityType;
@@ -23,7 +23,8 @@ public class SubArchetype {
       this.entityType = entityType;
       this.parent = parent;
       this.color = color;
-      this.abilities = abilities;
+      this.abilities.addAll(List.of(abilities));
+      this.defaultAbilities.addAll(List.of(abilities));
       this.displayItem = displayItem;
    }
    
@@ -51,19 +52,58 @@ public class SubArchetype {
       return parent;
    }
    
-   public ArchetypeAbility[] getAbilities(){
+   public Set<ArchetypeAbility> getRawAbilities(){
       return abilities;
+   }
+   
+   public Set<ArchetypeAbility> getDefaultAbilities(){
+      return defaultAbilities;
+   }
+   
+   public void setAbilities(Set<ArchetypeAbility> archetypeAbilities){
+      this.abilities.clear();
+      this.abilities.addAll(archetypeAbilities);
+   }
+   
+   public void resetAbilities(){
+      this.abilities.clear();
+      this.abilities.addAll(this.defaultAbilities);
+   }
+   
+   public boolean addAbility(ArchetypeAbility ability){
+      return this.abilities.add(ability);
+   }
+   
+   public boolean removeAbility(ArchetypeAbility ability){
+      return this.abilities.remove(ability);
    }
    
    public EntityType<?> getEntityType(){
       return entityType;
    }
    
-   public ArrayList<ArchetypeAbility> getActualAbilities(){
-      ArrayList<ArchetypeAbility> list = new ArrayList<>();
-      list.addAll(Arrays.asList(getAbilities()));
-      list.addAll(Arrays.asList(getArchetype().getAbilities()));
-      list.removeIf(a1 -> list.stream().anyMatch(a2 -> a2.overrides(a1)));
-      return list;
+   public Set<ArchetypeAbility> getActualAbilities(){
+      HashSet<ArchetypeAbility> actualAbilities = new HashSet<>();
+      for(ArchetypeAbility ability : abilities){
+         if(actualAbilities.stream().anyMatch(current -> current.overrides(ability))){
+            continue;
+         }
+         actualAbilities.removeIf(ability::overrides);
+         actualAbilities.add(ability);
+      }
+      return actualAbilities;
+   }
+   
+   @Override
+   public boolean equals(Object o){
+      if(this == o) return true;
+      if(o == null || getClass() != o.getClass()) return false;
+      SubArchetype that = (SubArchetype) o;
+      return id.equals(that.id);
+   }
+   
+   @Override
+   public int hashCode(){
+      return id.hashCode();
    }
 }

@@ -1,15 +1,12 @@
 package net.borisshoes.ancestralarchetypes;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.gui.ArchetypeSelectionGui;
 import net.borisshoes.borislib.config.ConfigValue;
 import net.borisshoes.borislib.config.IConfigSetting;
 import net.borisshoes.borislib.datastorage.DataAccess;
-import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
@@ -21,9 +18,7 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.CachedUserNameToIdResolver;
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.server.players.UserNameToIdResolver;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.animal.equine.Markings;
 import net.minecraft.world.entity.animal.equine.Variant;
@@ -37,10 +32,19 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 
 public class ArchetypeCommands {
    
-   public static CompletableFuture<Suggestions> getPlayerSuggestions(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
+   public static CompletableFuture<Suggestions> getAbilitySuggestions(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder, String archetypeId, boolean curAbilities, boolean invert){
       String start = builder.getRemaining().toLowerCase(Locale.ROOT);
       Set<String> items = new HashSet<>();
-      context.getSource().getOnlinePlayerNames().forEach(name -> items.add(name.toLowerCase(Locale.ROOT)));
+      SubArchetype subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,archetypeId));
+      if(subArchetype != null && curAbilities){
+         if(invert){
+            ArchetypeRegistry.ABILITIES.stream().filter(key -> !subArchetype.getRawAbilities().contains(key)).forEach(key -> items.add(key.id().toLowerCase(Locale.ROOT)));
+         }else{
+            subArchetype.getRawAbilities().forEach(key -> items.add(key.id().toLowerCase(Locale.ROOT)));
+         }
+      }else{
+         ArchetypeRegistry.ABILITIES.registryKeySet().forEach(key -> items.add(key.identifier().getPath().toLowerCase(Locale.ROOT)));
+      }
       items.stream().filter(s -> s.startsWith(start)).forEach(builder::suggest);
       return builder.buildFuture();
    }
@@ -85,9 +89,9 @@ public class ArchetypeCommands {
          for(ServerPlayer target : targets){
             PlayerArchetypeData profile = profile(target);
             if(archetypeId.equals("none")){
-               profile.changeArchetype(target,null);
+               profile.changeArchetype(target,null,true);
             }else{
-               profile.changeArchetype(target,subArchetype);
+               profile.changeArchetype(target,subArchetype,true);
             }
          }
          
@@ -147,11 +151,11 @@ public class ArchetypeCommands {
          if(personal){
             feedback.append(Component.translatable("command.ancestralarchetypes.abilities_get_personal",
                   subArchetype.getName().withColor(subArchetype.getColor()).withStyle(ChatFormatting.BOLD),
-                  subArchetype.getArchetype().getName().withColor(subArchetype.getArchetype().getColor()).withStyle(ChatFormatting.BOLD)).withStyle(ChatFormatting.AQUA)).append(Component.literal("\n"));
+                  subArchetype.getArchetype().getName().withColor(subArchetype.getArchetype().color()).withStyle(ChatFormatting.BOLD)).withStyle(ChatFormatting.AQUA)).append(Component.literal("\n"));
          }else{
             feedback.append(Component.translatable("command.ancestralarchetypes.archetype_get",
                   subArchetype.getName().withColor(subArchetype.getColor()).withStyle(ChatFormatting.BOLD),
-                  subArchetype.getArchetype().getName().withColor(subArchetype.getArchetype().getColor()).withStyle(ChatFormatting.BOLD)).withStyle(ChatFormatting.AQUA)).append(Component.literal("\n"));
+                  subArchetype.getArchetype().getName().withColor(subArchetype.getArchetype().color()).withStyle(ChatFormatting.BOLD)).withStyle(ChatFormatting.AQUA)).append(Component.literal("\n"));
          }
          for(ArchetypeAbility ability : subArchetype.getActualAbilities()){
             feedback.append(ability.getName().withStyle(ChatFormatting.DARK_AQUA)).append(Component.literal("\n"));
@@ -615,6 +619,85 @@ public class ArchetypeCommands {
          source.sendSuccess(() -> Component.translatable("text.ancestralarchetypes.archetype_player_get", profile.getUsername(),subName,name).withColor(color),false);
          
          return 1;
+      }catch(Exception e){
+         log(2,e.toString());
+         return -1;
+      }
+   }
+   
+   public static int resetAbilities(CommandContext<CommandSourceStack> context, String archetypeId){
+      try{
+         CommandSourceStack src = context.getSource();
+         
+         SubArchetype subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,archetypeId));
+         if(subArchetype == null){
+            src.sendFailure(Component.translatable("command.ancestralarchetypes.invalid_archetype",archetypeId));
+            return 0;
+         }
+         MutableComponent subName = subArchetype.getName();
+         ArchetypeAbilityStorage.resetAbilities(src.getServer(),subArchetype);
+         src.sendSuccess(() -> Component.translatable("command.ancestralarchetypes.reset_abilities",subName),true);
+         return 1;
+      }catch(Exception e){
+         log(2,e.toString());
+         return -1;
+      }
+   }
+   
+   public static int addAbility(CommandContext<CommandSourceStack> context, String archetypeId, String abilityId){
+      try{
+         CommandSourceStack src = context.getSource();
+         
+         SubArchetype subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,archetypeId));
+         if(subArchetype == null){
+            src.sendFailure(Component.translatable("command.ancestralarchetypes.invalid_archetype",archetypeId));
+            return 0;
+         }
+         ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,abilityId));
+         if(ability == null){
+            src.sendFailure(Component.translatable("command.ancestralarchetypes.invalid_ability",abilityId));
+            return 0;
+         }
+         MutableComponent subName = subArchetype.getName();
+         MutableComponent abilityName = ability.getName();
+         boolean succ = ArchetypeAbilityStorage.addAbility(src.getServer(),subArchetype,ability);
+         if(succ){
+            src.sendSuccess(() -> Component.translatable("command.ancestralarchetypes.add_ability_succ",abilityName,subName),true);
+            return 1;
+         }else{
+            src.sendFailure(Component.translatable("command.ancestralarchetypes.add_ability_fail",abilityName,subName));
+            return 0;
+         }
+      }catch(Exception e){
+         log(2,e.toString());
+         return -1;
+      }
+   }
+   
+   public static int removeAbility(CommandContext<CommandSourceStack> context, String archetypeId, String abilityId){
+      try{
+         CommandSourceStack src = context.getSource();
+         
+         SubArchetype subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,archetypeId));
+         if(subArchetype == null){
+            src.sendFailure(Component.translatable("command.ancestralarchetypes.invalid_archetype",archetypeId));
+            return 0;
+         }
+         ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,abilityId));
+         if(ability == null){
+            src.sendFailure(Component.translatable("command.ancestralarchetypes.invalid_ability",abilityId));
+            return 0;
+         }
+         MutableComponent subName = subArchetype.getName();
+         MutableComponent abilityName = ability.getName();
+         boolean succ = ArchetypeAbilityStorage.removeAbility(src.getServer(),subArchetype,ability);
+         if(succ){
+            src.sendSuccess(() -> Component.translatable("command.ancestralarchetypes.remove_ability_succ",abilityName,subName),true);
+            return 1;
+         }else{
+            src.sendFailure(Component.translatable("command.ancestralarchetypes.remove_ability_fail",abilityName,subName));
+            return 0;
+         }
       }catch(Exception e){
          log(2,e.toString());
          return -1;

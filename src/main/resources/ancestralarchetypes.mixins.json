@@ -8,6 +8,7 @@
     "AbstractHorseMixin",
     "AbstractThrownPotionMixin",
     "ArcanaItemUtilsMixin",
+    "CakeBlockMixin",
     "CreeperMixin",
     "EntityAccessor",
     "EntityMixin",

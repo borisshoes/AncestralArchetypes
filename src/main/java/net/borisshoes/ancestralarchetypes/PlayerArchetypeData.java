@@ -41,6 +41,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.equipment.trim.TrimMaterial;
+import net.minecraft.world.level.block.CakeBlock;
 import net.minecraft.world.level.storage.ValueInput;
 
 import java.util.*;
@@ -79,7 +80,7 @@ public class PlayerArchetypeData implements StorableData {
    private Variant horseColor = Variant.CHESTNUT;
    private String mountName = null;
    private SubArchetype subArchetype;
-   private final ArrayList<ArchetypeAbility> abilities = new ArrayList<>();
+   private final Set<ArchetypeAbility> abilities = new HashSet<>();
    private final HashMap<ArchetypeAbility, CooldownEntry> abilityCooldowns = new HashMap<>();
    private final HashMap<ArchetypeAbility, Tuple<UUID, Float>> mountData = new HashMap<>();
    private final SimpleContainer mountInventory = new SimpleContainer(54);
@@ -308,9 +309,7 @@ public class PlayerArchetypeData implements StorableData {
    private void calculateAbilities(){
       this.abilities.clear();
       if(this.subArchetype == null) return;
-      abilities.addAll(Arrays.asList(this.subArchetype.getAbilities()));
-      abilities.addAll(Arrays.asList(this.subArchetype.getArchetype().getAbilities()));
-      abilities.removeIf(a1 -> abilities.stream().anyMatch(a2 -> a2.overrides(a1)));
+      abilities.addAll(subArchetype.getActualAbilities());
    }
    
    /**
@@ -390,8 +389,8 @@ public class PlayerArchetypeData implements StorableData {
       }
    }
    
-   public List<ArchetypeAbility> getAbilities(){
-      return new ArrayList<>(this.abilities);
+   public Set<ArchetypeAbility> getAbilities(){
+      return this.abilities;
    }
    
    public int getAbilityCooldown(ArchetypeAbility ability){
@@ -584,6 +583,7 @@ public class PlayerArchetypeData implements StorableData {
    
    public void playerJoin(ServerPlayer player){
       this.username = player.getScoreboardName();
+      calculateAbilities();
    }
    
    public void tick(ServerPlayer player){
@@ -747,13 +747,13 @@ public class PlayerArchetypeData implements StorableData {
       this.helmetTrimMaterial = material;
    }
    
-   public void changeArchetype(ServerPlayer player, SubArchetype archetype){
+   public void changeArchetype(ServerPlayer player, SubArchetype archetype, boolean admin){
       if(!player.getUUID().equals(playerID)) return;
       setSubarchetype(player, archetype);
       this.giveItemsCooldown = 0;
       giveAbilityItems(player, true);
-      this.archetypeChangesAllowed = Math.max(0, this.archetypeChangesAllowed - 1);
-      this.ticksSinceArchetypeChange = 0;
+      if(!admin) this.archetypeChangesAllowed = Math.max(0, this.archetypeChangesAllowed - 1);
+      if(!admin) this.ticksSinceArchetypeChange = 0;
    }
    
    public void increaseAllowedChanges(int num){
@@ -772,7 +772,7 @@ public class PlayerArchetypeData implements StorableData {
       if(!player.getUUID().equals(playerID)) return false;
       if(this.giveItemsCooldown > 0) return false;
       
-      List<ArchetypeAbility> abilities = getAbilities();
+      Set<ArchetypeAbility> abilities = getAbilities();
       Inventory inv = player.getInventory();
       for(ArchetypeAbility ability : abilities){
          if(!ability.active()) continue;

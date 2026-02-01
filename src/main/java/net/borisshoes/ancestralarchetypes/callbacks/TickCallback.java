@@ -48,6 +48,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
@@ -227,7 +228,7 @@ public class TickCallback {
                      .withColor(ChatFormatting.AQUA)));
       }
       
-      List<ArchetypeAbility> abilities = profile.getAbilities();
+      Set<ArchetypeAbility> abilities = profile.getAbilities();
       boolean giveWarning = false;
       block: {
          for(ArchetypeAbility ability : abilities){
