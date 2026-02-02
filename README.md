@@ -62,6 +62,9 @@ If everything is done correctly, then players will automatically load into the s
 * ```/archetypes distribution``` Gets the distribution of all players' selected Archetypes.
 * ```/archetypes getPlayersOfArchetype <archetype>``` Lists all players of a given Archetype.
 * ```/archetypes getAllPlayerArchetypes``` Lists all players and their Archetype.
+* ```/archetypes resetArchetypeAbilities <subarchetype>``` Resets an Archetype's ability list to their defaults.
+* ```/archetypes addArchetypeAbility <subarchetype> <ability>``` Adds an ability to an Archetype.
+* ```/archetypes removeArchetypeAbility <subarchetype> <ability>``` Removes an ability from an Archetype.
 
 ### Admin Configuration Commands
 The following commands can be used to adjust configurable settings in the AncestralArchetypes.properties file without a server reboot. These commands can be suffixed with "get" or "set" followed by a value to get or set the current setting. 
