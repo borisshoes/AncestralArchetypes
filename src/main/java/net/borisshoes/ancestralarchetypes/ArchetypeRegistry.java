@@ -67,6 +67,7 @@ public class ArchetypeRegistry {
    public static final HashMap<Item, Tuple<Float,Integer>> COPPER_FOODS = new HashMap<>();
    public static final HashMap<Item, Tuple<Float,Integer>> IRON_FOODS = new HashMap<>();
    
+   public static final TagKey<Item> CHOCOLATE_ALLERGY_FOODS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MOD_ID,"chocolate_allergy_foods"));
    public static final TagKey<Item> CARNIVORE_FOODS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MOD_ID,"carnivore_foods"));
    public static final TagKey<Item> SLIME_GROW_ITEMS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MOD_ID,"slime_grow_items"));
    public static final TagKey<Item> MAGMA_CUBE_GROW_ITEMS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MOD_ID,"magma_cube_grow_items"));

@@ -46,6 +46,9 @@ public class ItemTagGenerator extends FabricTagProvider.ItemTagProvider {
       valueLookupBuilder(ArchetypeRegistry.MAGMA_CUBE_GROW_ITEMS)
             .add(Items.MAGMA_CREAM);
       
+      valueLookupBuilder(ArchetypeRegistry.CHOCOLATE_ALLERGY_FOODS)
+            .add(Items.COOKIE);
+      
       TagAppender<Item, Item> abilityItemBuilder = valueLookupBuilder(ArchetypeRegistry.ABILITY_ITEMS);
       for(Item item : ArchetypeRegistry.ITEMS){
          if(item instanceof AbilityItem){

@@ -18,6 +18,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
 @Pseudo
@@ -42,8 +43,8 @@ public class FeastingCharmItemMixin {
    private void archetypes$eatEffects(ItemStack stack, ServerLevel world, Entity entity, EquipmentSlot slot, CallbackInfo ci){
       if(entity instanceof ServerPlayer player){
          PlayerArchetypeData profile = profile(player);
-         if(profile.getSubArchetype() == ArchetypeRegistry.PARROT && stack.is(Items.COOKIE)){
-            player.addEffect(new MobEffectInstance(MobEffects.POISON,100,2,true,true,true),player);
+         if(profile.hasAbility(ArchetypeRegistry.CHOCOLATE_ALLERGY) && stack.is(ArchetypeRegistry.CHOCOLATE_ALLERGY_FOODS)){
+            player.addEffect(new MobEffectInstance(MobEffects.POISON, CONFIG.getInt(ArchetypeRegistry.CHOCOLATE_ALLERGY_DURATION),CONFIG.getInt(ArchetypeRegistry.CHOCOLATE_ALLERGY_AMPLIFIER),true,true,true),player);
          }
       }
    }

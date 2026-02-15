@@ -10,13 +10,18 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.CakeBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 
 @Mixin(CakeBlock.class)
 public class CakeBlockMixin {
@@ -31,6 +36,9 @@ public class CakeBlockMixin {
       }else if(data.hasAbility(ArchetypeRegistry.CARNIVORE) && !Items.CAKE.getDefaultInstance().is(ArchetypeRegistry.CARNIVORE_FOODS)){
          serverPlayer.connection.send(new ClientboundSetHealthPacket(serverPlayer.getHealth(), serverPlayer.getFoodData().getFoodLevel(), serverPlayer.getFoodData().getSaturationLevel()));
          return false;
+      }
+      if(data.hasAbility(ArchetypeRegistry.CHOCOLATE_ALLERGY) && new ItemStack(Items.CAKE).is(ArchetypeRegistry.CHOCOLATE_ALLERGY_FOODS)){
+         player.addEffect(new MobEffectInstance(MobEffects.POISON, CONFIG.getInt(ArchetypeRegistry.CHOCOLATE_ALLERGY_DURATION),CONFIG.getInt(ArchetypeRegistry.CHOCOLATE_ALLERGY_AMPLIFIER),true,true,true),player);
       }
       return true;
    }

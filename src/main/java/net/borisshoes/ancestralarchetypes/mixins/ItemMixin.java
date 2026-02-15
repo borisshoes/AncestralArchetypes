@@ -100,8 +100,8 @@ public class ItemMixin {
             playerEntity.setAbsorptionAmount((curAbs + addedAbs));
          }
          
-         if(profile.getSubArchetype() == ArchetypeRegistry.PARROT && stack.is(Items.COOKIE)){
-            playerEntity.addEffect(new MobEffectInstance(MobEffects.POISON,100,2,true,true,true),playerEntity);
+         if(profile.hasAbility(ArchetypeRegistry.CHOCOLATE_ALLERGY) && stack.is(ArchetypeRegistry.CHOCOLATE_ALLERGY_FOODS)){
+            playerEntity.addEffect(new MobEffectInstance(MobEffects.POISON, CONFIG.getInt(ArchetypeRegistry.CHOCOLATE_ALLERGY_DURATION),CONFIG.getInt(ArchetypeRegistry.CHOCOLATE_ALLERGY_AMPLIFIER),true,true,true),playerEntity);
          }
          
          if(profile.hasAbility(ArchetypeRegistry.HURT_BY_WATER) && stack.has(DataComponents.POTION_CONTENTS) && !playerEntity.hasEffect(MobEffects.WATER_BREATHING)){
