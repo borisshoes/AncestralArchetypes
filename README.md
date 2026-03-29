@@ -128,6 +128,7 @@ The following commands can be used to adjust configurable settings in the Ancest
 * `/archetypes config levitationBulletDuration` The duration of levitation applied by a Levitation Bullet, in ticks. (default: 200)
 * `/archetypes config levitationBulletLevel` The level of levitation applied by a Levitation Bullet. (default: 1)
 * `/archetypes config lightweightIncreasedKnockback` The modifier multiplied against the attack knockback dealt by those with Lightweight. (default: 2.0)
+* `/archetypes config logCommandUsage` Whether to log admin command usage to the server console. (default: false)
 * `/archetypes config longArmsRange` The additional reach granted by Long Arms. (default: 0.5)
 * `/archetypes config longTeleportCooldown` The cooldown of Long Teleport, in ticks. (default: 600)
 * `/archetypes config longTeleportDistance` The distance teleported by Long Teleport, in blocks. (default: 16.0)
@@ -144,6 +145,7 @@ The following commands can be used to adjust configurable settings in the Ancest
 * `/archetypes config regenerationRate` The amount of health restored to those with Regenerate When Low per tick when below half health. (default: 0.05)
 * `/archetypes config remindersOnByDefault` Whether new players receive reminders about missing an Archetype or Ability Item. (default: true)
 * `/archetypes config resilientJointsExtraFallBlocks` The additional blocks that can be fallen before taking fall damage for those with Resilient Joints. (default: 4.0)
+* `/archetypes config rideableTeamOnly` Whether the Rideable ability only allows teammates to ride the player. (default: true)
 * `/archetypes config shyNoticingAngle` The cone angle for Shy where presence is detected, in degrees. (default: 90.0)
 * `/archetypes config shyViewingAngle` The viewing cone angle for Shy where direct looking is detected, in degrees. (default: 12.5)
 * `/archetypes config slipperyDamageModifier` The modifier multiplied against damage to those in water with Slippery (default: 0.9)
@@ -181,6 +183,51 @@ The following commands can be used to adjust configurable settings in the Ancest
 * `/archetypes config weavingWebCooldown` The cooldown between uses of Weaving's Webbing, in ticks. (default: 100)
 * `/archetypes config windChargeCooldown` The cooldown duration of the Breeze's volley ability. (default: 200)
 * `/archetypes config witheringEffectDuration` The duration of the wither effect applied by those with Withering in ticks. (default: 150)
+
+## Permission Nodes
+This mod integrates with permission management mods like LuckPerms via the Fabric Permissions API. Below are all available permission nodes.
+
+### Player Command Permissions
+These permissions default to being available to all players.
+
+| Permission Node | Description |
+|----------------|-------------|
+| `ancestralarchetypes.abilities` | View abilities of archetypes |
+| `ancestralarchetypes.changearchetype` | Open the archetype selection GUI |
+| `ancestralarchetypes.items` | Receive ability items for your archetype |
+| `ancestralarchetypes.list` | View the list of all archetypes |
+| `ancestralarchetypes.setglidercolor` | Set the color of your glider |
+| `ancestralarchetypes.sethelmetcolor` | Set the color of your helmet |
+| `ancestralarchetypes.sethorsevariant` | Set the variant of your spirit horse |
+| `ancestralarchetypes.setmountname` | Set the name of your spirit mount |
+| `ancestralarchetypes.togglereminders` | Toggle ability reminder messages |
+
+### Admin Command Permissions
+These permissions default to requiring operator level 2 (gamemaster).
+
+| Permission Node | Description |
+|----------------|-------------|
+| `ancestralarchetypes.addarchetypeability` | Add an ability to an archetype |
+| `ancestralarchetypes.addchanges` | Grant archetype change tokens to players |
+| `ancestralarchetypes.distribution` | View the distribution of archetypes on the server |
+| `ancestralarchetypes.getallplayerarchetypes` | View all players and their archetypes |
+| `ancestralarchetypes.getarchetype` | View a specific player's archetype |
+| `ancestralarchetypes.getplayersofarchetype` | View all players with a specific archetype |
+| `ancestralarchetypes.removearchetypeability` | Remove an ability from an archetype |
+| `ancestralarchetypes.resetarchetypeabilities` | Reset an archetype's abilities to default |
+| `ancestralarchetypes.resetcooldowns` | Reset ability cooldowns for players |
+| `ancestralarchetypes.setarchetype` | Set a player's archetype |
+
+### Config Command Permissions
+Config command permissions are generated dynamically for each config value. These permissions default to requiring operator level 2 (gamemaster).
+
+| Permission Node | Description |
+|----------------|-------------|
+| `ancestralarchetypes.config` | List all config values |
+| `ancestralarchetypes.config.<name>.get` | Read a specific config value |
+| `ancestralarchetypes.config.<name>.set` | Change a specific config value |
+
+For example, the permission nodes for the `biomeDamage` config would be `ancestralarchetypes.config.biomedamage.get` and `ancestralarchetypes.config.biomedamage.set`.
 
 
 ### LICENSE NOTICE

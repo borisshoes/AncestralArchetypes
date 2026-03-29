@@ -20,9 +20,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.StringUtil;
+import net.minecraft.world.entity.Shearable;
 import net.minecraft.world.entity.animal.equine.Markings;
 import net.minecraft.world.entity.animal.equine.Variant;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.item.equipment.trim.TrimMaterial;
 
 import java.util.*;
@@ -31,6 +33,14 @@ import java.util.concurrent.CompletableFuture;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 
 public class ArchetypeCommands {
+   
+   private static void logCommandSuccess(CommandContext<CommandSourceStack> context){
+      if(CONFIG.getBoolean(ArchetypeRegistry.LOG_COMMAND_USAGE)){
+         String executor = context.getSource().getTextName();
+         String command = context.getInput();
+         log(0, "[Command] " + executor + " executed: /" + command);
+      }
+   }
    
    public static CompletableFuture<Suggestions> getAbilitySuggestions(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder, String archetypeId, boolean curAbilities, boolean invert){
       String start = builder.getRemaining().toLowerCase(Locale.ROOT);
@@ -97,6 +107,7 @@ public class ArchetypeCommands {
          
          source.sendSuccess(()-> Component.translatable("command.ancestralarchetypes.changed_archetypes",targets.size(), archetypeId).withStyle(ChatFormatting.AQUA), true);
          
+         logCommandSuccess(context);
          return 1;
       }catch(Exception e){
          log(2,e.toString());
@@ -112,6 +123,7 @@ public class ArchetypeCommands {
             profile.increaseAllowedChanges(changes);
          }
          source.sendSuccess(()-> Component.translatable("command.ancestralarchetypes.added_changes",changes,targets.size()).withStyle(ChatFormatting.AQUA), true);
+         logCommandSuccess(context);
          return 1;
       }catch(Exception e){
          log(2,e.toString());
@@ -171,6 +183,7 @@ public class ArchetypeCommands {
          }
          source.sendSuccess(() -> feedback,false);
          
+         logCommandSuccess(context);
          return 1;
       }catch(Exception e){
          log(2,e.toString());
@@ -204,6 +217,7 @@ public class ArchetypeCommands {
          
          source.sendSuccess(()-> Component.translatable("command.ancestralarchetypes.reset_cooldowns",targets.size()).withStyle(ChatFormatting.AQUA), false);
          
+         logCommandSuccess(context);
          return 1;
       }catch(Exception e){
          log(2,e.toString());
@@ -275,6 +289,7 @@ public class ArchetypeCommands {
             
             profile.setGliderColor(parsedColor);
             source.sendSuccess(()-> Component.translatable("command.ancestralarchetypes.glider_success", String.format("%06X", parsedColor), trimColor.isEmpty() ? "none" : trimColor), false);
+            logCommandSuccess(context);
             return 1;
          }catch(Exception e){
             source.sendFailure(Component.translatable("command.ancestralarchetypes.glider_error"));
@@ -325,6 +340,7 @@ public class ArchetypeCommands {
             
             profile.setHelmetColor(parsedColor);
             source.sendSuccess(()-> Component.translatable("command.ancestralarchetypes.helmet_success", String.format("%06X", parsedColor), trimColor.isEmpty() ? "none" : trimColor), false);
+            logCommandSuccess(context);
             return 1;
          }catch(Exception e){
             source.sendFailure(Component.translatable("command.ancestralarchetypes.helmet_error"));
@@ -358,6 +374,7 @@ public class ArchetypeCommands {
          profile.setHorseVariant(horseColor,marking);
          source.sendSuccess(()-> Component.translatable("command.ancestralarchetypes.horse_success",(horseColor.name()+" "+marking.name())), false);
          
+         logCommandSuccess(context);
          return 1;
       }catch(Exception e){
          log(2,e.toString());
@@ -393,6 +410,7 @@ public class ArchetypeCommands {
             source.sendSuccess(()-> Component.translatable("command.ancestralarchetypes.mount_name_reset"), false);
          }
          
+         logCommandSuccess(context);
          return 1;
       }catch(Exception e){
          log(2,e.toString());
@@ -416,6 +434,7 @@ public class ArchetypeCommands {
             return -1;
          }else{
             source.sendSuccess(()-> Component.translatable("command.ancestralarchetypes.ability_items_success"), false);
+            logCommandSuccess(context);
             return 1;
          }
       }catch(Exception e){
@@ -438,6 +457,7 @@ public class ArchetypeCommands {
          boolean giveReminders = !profile.giveReminders();
          profile.setReminders(giveReminders);
          source.sendSuccess(()-> Component.translatable("command.ancestralarchetypes.reminders",giveReminders ? "true": "false"), false);
+         logCommandSuccess(context);
          return 1;
       }catch(Exception e){
          log(2,e.toString());
@@ -470,6 +490,7 @@ public class ArchetypeCommands {
          ArchetypeSelectionGui selectionGui = new ArchetypeSelectionGui(player, null, false);
          selectionGui.open();
          
+         logCommandSuccess(context);
          return 1;
       }catch(Exception e){
          log(2,e.toString());
@@ -491,6 +512,7 @@ public class ArchetypeCommands {
          ArchetypeSelectionGui selectionGui = new ArchetypeSelectionGui(player, null, true);
          selectionGui.open();
          
+         logCommandSuccess(context);
          return 1;
       }catch(Exception e){
          log(2,e.toString());
@@ -498,6 +520,7 @@ public class ArchetypeCommands {
       }
    }
    
+
    public static int getDistribution(CommandContext<CommandSourceStack> context){
       try{
          CommandSourceStack src = context.getSource();
@@ -528,6 +551,7 @@ public class ArchetypeCommands {
          });
          src.sendSuccess(() -> Component.translatable("text.ancestralarchetypes.dump_copy").withStyle(s -> s.withClickEvent(new ClickEvent.CopyToClipboard(masterString.toString()))),false);
          
+         logCommandSuccess(context);
          return 1;
       }catch(Exception e){
          log(2,e.toString());

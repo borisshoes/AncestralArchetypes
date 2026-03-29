@@ -362,6 +362,8 @@
   "command.ancestralarchetypes.levitation_bullet_speed.getter_setter": "Levitation Bullet speed: %sx",
   "command.ancestralarchetypes.lightweight_increased_knockback.comment": "The modifier multiplied against the attack knockback dealt by those with Lightweight.",
   "command.ancestralarchetypes.lightweight_increased_knockback.getter_setter": "Lightweight increased knockback modifier: %s",
+  "command.ancestralarchetypes.log_command_usage.comment": "Whether to log successful command usage to the server console.",
+  "command.ancestralarchetypes.log_command_usage.getter_setter": "Log command usage: %s",
   "command.ancestralarchetypes.long_arms_range.comment": "The additional reach granted by Long Arms.",
   "command.ancestralarchetypes.long_arms_range.getter_setter": "Long arms additional reach: %s blocks",
   "command.ancestralarchetypes.long_teleport_cooldown.comment": "The cooldown of Long Teleport, in ticks.",
@@ -595,5 +597,6 @@
   "command.ancestralarchetypes.add_ability_fail": "Failed to add ability %1$s to %2$s (could already be present).",
   "command.ancestralarchetypes.add_ability_succ": "Added ability %1$s to %2$s",
   "command.ancestralarchetypes.remove_ability_fail": "Failed to remove ability %1$s from %2$s (could already be removed)",
-  "command.ancestralarchetypes.remove_ability_succ": "Removed ability %1$s from %2$s"
+  "command.ancestralarchetypes.remove_ability_succ": "Removed ability %1$s from %2$s",
+  "text.ancestralarchetypes.changed_archetype": "%s changed their Archetype to %s"
 }

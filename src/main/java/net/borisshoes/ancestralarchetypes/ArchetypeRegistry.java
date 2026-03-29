@@ -109,6 +109,9 @@ public class ArchetypeRegistry {
    public static final IConfigSetting<?> RIDEABLE_TEAM_ONLY = registerConfigSetting(new ConfigSetting<>(
          new BooleanConfigValue("rideableTeamOnly", true)));
    
+   public static final IConfigSetting<?> LOG_COMMAND_USAGE = registerConfigSetting(new ConfigSetting<>(
+         new BooleanConfigValue("logCommandUsage", false)));
+   
    public static final IConfigSetting<?> SPYGLASS_INVESTIGATE_DURATION = registerConfigSetting(new ConfigSetting<>(
          new IntConfigValue("spyglassInvestigateDuration", 150, new IntConfigValue.IntLimits(1))));
    

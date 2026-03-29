@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 
 public class ArchetypeSelectionGui extends SimpleGui {
    
@@ -63,6 +63,9 @@ public class ArchetypeSelectionGui extends SimpleGui {
             gui.open();
          }else if(index == 4 && profile.getSubArchetype() != null && !showOnly){
             profile.changeArchetype(player,null,false);
+            if(CONFIG.getBoolean(ArchetypeRegistry.LOG_COMMAND_USAGE)){
+               log(0,Component.translatable("text.ancestralarchetypes.changed_archetype",player.getPlainTextName(),Component.translatable("text.ancestralarchetypes.none")).getString());
+            }
             this.close();
          }
       }else{
@@ -70,6 +73,9 @@ public class ArchetypeSelectionGui extends SimpleGui {
             this.close();
          }else if(index == (getSize()-5) && profile.getSubArchetype() != subArchetype && !showOnly){
             profile.changeArchetype(player,subArchetype,false);
+            if(CONFIG.getBoolean(ArchetypeRegistry.LOG_COMMAND_USAGE)){
+               log(0,Component.translatable("text.ancestralarchetypes.changed_archetype",player.getPlainTextName(),Component.translatable("text.ancestralarchetypes.none")).getString());
+            }
             this.menuOnClose = false;
             this.close();
          }

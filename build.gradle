@@ -27,6 +27,7 @@ repositories {
     // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
     // See https://docs.gradle.org/current/userguide/declaring_repositories.html
     // for more information about repositories.
+    mavenCentral()
 
     maven {
         name = "Ladysnake Mods"
@@ -43,6 +44,13 @@ repositories {
         content {
             includeGroup "maven.modrinth"
         }
+    }
+}
+
+configurations.all {
+    resolutionStrategy {
+        // Allow JitPack dev builds with mismatched metadata versions
+        cacheChangingModulesFor 0, 'seconds'
     }
 }
 
@@ -67,14 +75,17 @@ dependencies {
     modImplementation include("eu.pb4:polymer-networking:${project.polymer_version}")
     modImplementation include("eu.pb4:polymer-autohost:${project.polymer_version}")
     modImplementation include("xyz.nucleoid:server-translations-api:${project.translation_version}")
+    modImplementation include("io.github.ladysnake:PlayerAbilityLib:${pal_version}")
+    modImplementation include("me.lucko:fabric-permissions-api:${project.fabric_permissions_api_version}")
 
     modImplementation include("org.ladysnake.cardinal-components-api:cardinal-components-base:${project.cca_version}")
     modImplementation include("org.ladysnake.cardinal-components-api:cardinal-components-entity:${project.cca_version}")
     modImplementation include("org.ladysnake.cardinal-components-api:cardinal-components-world:${project.cca_version}")
 
-    modImplementation include("io.github.ladysnake:PlayerAbilityLib:${pal_version}")
-
-    modCompileOnly("com.github.borisshoes:arcananovum:dev-SNAPSHOT")
+    // Use dev-SNAPSHOT to match what JitPack actually publishes in the metadata
+    modCompileOnly("com.github.borisshoes:arcananovum:dev-SNAPSHOT") {
+        changing = true
+    }
     //modCompileOnly("maven.modrinth:arcana-novum:${project.arcana_version}")
 }
 

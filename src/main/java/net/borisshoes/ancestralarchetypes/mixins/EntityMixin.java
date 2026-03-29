@@ -11,10 +11,13 @@ import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -24,11 +27,21 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.List;
+
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 import static net.borisshoes.borislib.BorisLib.PLAYER_MOVEMENT_TRACKER;
 
 @Mixin(Entity.class)
 public class EntityMixin {
+   
+   @Inject(method = "attemptToShearEquipment", at = @At("HEAD"), cancellable = true)
+   private void archetypes$stopMountShear(Player player, InteractionHand interactionHand, ItemStack itemStack, Mob mob, CallbackInfoReturnable<Boolean> cir){
+      Entity entity = (Entity)(Object) this;
+      List<String> tags = entity.getTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
+      if(!tags.isEmpty()) cir.setReturnValue(false);
+   }
    
    @ModifyReturnValue(method = "isSteppingCarefully", at = @At("RETURN"))
    private boolean archetypes$lightweightBypass(boolean original){
