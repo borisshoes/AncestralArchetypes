@@ -39,7 +39,7 @@ public class EntityMixin {
    @Inject(method = "attemptToShearEquipment", at = @At("HEAD"), cancellable = true)
    private void archetypes$stopMountShear(Player player, InteractionHand interactionHand, ItemStack itemStack, Mob mob, CallbackInfoReturnable<Boolean> cir){
       Entity entity = (Entity)(Object) this;
-      List<String> tags = entity.getTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
+      List<String> tags = entity.entityTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
       if(!tags.isEmpty()) cir.setReturnValue(false);
    }
    
@@ -100,10 +100,4 @@ public class EntityMixin {
          return original.call(instance);
       }
    }
-   
-//   @ModifyVariable(method = "updatePassengerPosition(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/Entity$PositionUpdater;)V", at = @At(value = "STORE"), ordinal = 0, require = 0)
-//   private double archetypes$offsetPassengersClientSide(double d, Entity passenger) {
-//      Entity entity = (Entity) (Object) this;
-//      return entity.getWorld().isClient && passenger instanceof PlayerEntity ? d-getRidingOffset(passenger) : d;
-//   }
 }

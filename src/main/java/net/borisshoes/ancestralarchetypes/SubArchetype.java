@@ -4,6 +4,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 
 import java.util.*;
 
@@ -14,11 +15,11 @@ public class SubArchetype {
    private final Archetype parent;
    private final Set<ArchetypeAbility> abilities = new HashSet<>();
    private final Set<ArchetypeAbility> defaultAbilities = new HashSet<>();
-   private final ItemStack displayItem;
+   private final ItemStackTemplate displayItem;
    private final int color;
    private final EntityType<?> entityType;
    
-   public SubArchetype(String id, EntityType<?> entityType, ItemStack displayItem, int color, Archetype parent, ArchetypeAbility... abilities){
+   public SubArchetype(String id, EntityType<?> entityType, ItemStackTemplate displayItem, int color, Archetype parent, ArchetypeAbility... abilities){
       this.id = id;
       this.entityType = entityType;
       this.parent = parent;
@@ -40,7 +41,7 @@ public class SubArchetype {
       return id;
    }
    
-   public ItemStack getDisplayItem(){
+   public ItemStackTemplate getDisplayItem(){
       return displayItem;
    }
    

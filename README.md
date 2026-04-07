@@ -41,6 +41,14 @@ The server has the ability to automatically generate and serve the mod's texture
 
 If everything is done correctly, then players will automatically load into the server with the resource pack installed.
 
+### Variant Abilities
+There are a few variants of abilities that are not used by any archetypes by default, but can be added through the admin commands listed below. These are:
+* ```Short-Legged``` Reduces player step height by 0.5 blocks.
+* ```Long-Legged``` Increases player step height by 1 block.
+* ```Vulnerable in Water``` You take 50% extra damage when in water and rain.
+* ```Vulnerable when Dry``` You take 50% extra damage when in hot biomes without a Turtle Shell or Fire Resistance.
+* ```Vulnerable when Cold``` You take 50% extra damage when in cold biomes without Water Breathing.
+
 ## Commands
 ### Player Commands
 * ```/archetypes changeArchetype``` Opens a GUI for a user to change their Archetype.
@@ -130,6 +138,7 @@ The following commands can be used to adjust configurable settings in the Ancest
 * `/archetypes config lightweightIncreasedKnockback` The modifier multiplied against the attack knockback dealt by those with Lightweight. (default: 2.0)
 * `/archetypes config logCommandUsage` Whether to log admin command usage to the server console. (default: false)
 * `/archetypes config longArmsRange` The additional reach granted by Long Arms. (default: 0.5)
+* `/archetypes config longLeggedStepIncrease` The additional step height granted by Long-Legged. (default: 1.0)
 * `/archetypes config longTeleportCooldown` The cooldown of Long Teleport, in ticks. (default: 600)
 * `/archetypes config longTeleportDistance` The distance teleported by Long Teleport, in blocks. (default: 16.0)
 * `/archetypes config mobSneakAttackModifier` The damage modifier applied to damage dealt to mobs the first time by those with Sneak Attack (default: 2.0)
@@ -148,6 +157,7 @@ The following commands can be used to adjust configurable settings in the Ancest
 * `/archetypes config rideableTeamOnly` Whether the Rideable ability only allows teammates to ride the player. (default: true)
 * `/archetypes config shyNoticingAngle` The cone angle for Shy where presence is detected, in degrees. (default: 90.0)
 * `/archetypes config shyViewingAngle` The viewing cone angle for Shy where direct looking is detected, in degrees. (default: 12.5)
+* `/archetypes config shortLeggedStepReduction` The step height reduction applied by Short-Legged. (default: 0.5)
 * `/archetypes config slipperyDamageModifier` The modifier multiplied against damage to those in water with Slippery (default: 0.9)
 * `/archetypes config slowFallerTriggerSpeed` The minimum downwards speed to trigger the Slow Faller ability in blocks per tick. (default: 0.3)
 * `/archetypes config slowHoverFlightCooldown` The cooldown between uses of Slow Hover Flight, in ticks. (default: 100)
@@ -176,6 +186,9 @@ The following commands can be used to adjust configurable settings in the Ancest
 * `/archetypes config tuffFoodHealthModifier` The modifier applied to the health regained by Tuff Eater. (default: 1.0)
 * `/archetypes config venomousPoisonDuration` The duration of poison applied by Venomous, in ticks. (default: 100)
 * `/archetypes config venomousPoisonStrength` The effect level of poison applied by Venomous. (default: 1)
+* `/archetypes config vulnerableInColdVulnerability` The extra damage modifier for those with Vulnerable in Cold in cold biomes. (default: 0.5)
+* `/archetypes config vulnerableInWaterVulnerability` The extra damage modifier for those with Vulnerable in Water in water or rain. (default: 0.5)
+* `/archetypes config vulnerableWhenDryVulnerability` The extra damage modifier for those with Vulnerable when Dry in hot biomes. (default: 0.5)
 * `/archetypes config waxShieldConsumeDuration` The duration of consumption for a Wax Shield Honeycomb in ticks. (default: 20)
 * `/archetypes config waxShieldDuration` The duration of each Wax Shield in ticks. (default: 300)
 * `/archetypes config waxShieldHealth` The amount of absorption HP granted from eating a Honeycomb with Wax Shield. (default: 2.0)

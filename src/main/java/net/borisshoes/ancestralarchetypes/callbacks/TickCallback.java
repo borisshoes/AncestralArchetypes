@@ -123,8 +123,8 @@ public class TickCallback {
             if(profile.hasAbility(ArchetypeRegistry.SHY)){
                if(!world.getPlayers(p ->
                      p.distanceTo(player) < 255 && !player.getStringUUID().equals(p.getStringUUID()) &&
-                           LivingEntity.PLAYER_NOT_WEARING_DISGUISE_ITEM.test(player) && player.isLookingAtMe(p, 1-Math.cos(CONFIG.getDouble(ArchetypeRegistry.SHY_VIEWING_ANGLE)), true, false, player.getEyeY()) &&
-                           LivingEntity.PLAYER_NOT_WEARING_DISGUISE_ITEM.test(p) && p.isLookingAtMe(player, 1-Math.cos(CONFIG.getDouble(ArchetypeRegistry.SHY_NOTICING_ANGLE)), true, false, p.getEyeY())
+                           LivingEntity.PLAYER_NOT_WEARING_DISGUISE_ITEM.test(player) && player.isLookingAtMe(p, 1-Math.cos(Math.toRadians(CONFIG.getDouble(ArchetypeRegistry.SHY_VIEWING_ANGLE) / 2.0)), true, false, player.getEyeY()) &&
+                           LivingEntity.PLAYER_NOT_WEARING_DISGUISE_ITEM.test(p) && p.isLookingAtMe(player, 1-Math.cos(Math.toRadians(CONFIG.getDouble(ArchetypeRegistry.SHY_NOTICING_ANGLE) / 2.0)), false, false, p.getEyeY())
                ).isEmpty()){
                   player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 6, 9, false, false, true));
                }
@@ -206,7 +206,7 @@ public class TickCallback {
             profile.hasAbility(ArchetypeRegistry.DAMAGED_BY_COLD) && !player.hasEffect(MobEffects.WATER_BREATHING) && !(player.isCreative() || player.isSpectator());
       if(shouldFreeze){
          player.hurtServer(world, world.damageSources().freeze(), (float) CONFIG.getDouble(ArchetypeRegistry.BIOME_DAMAGE));
-         player.displayClientMessage(Component.translatable("text.ancestralarchetypes.freeze_warning").withStyle(ChatFormatting.AQUA, ChatFormatting.ITALIC),true);
+         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.freeze_warning").withStyle(ChatFormatting.AQUA, ChatFormatting.ITALIC),true);
          SoundUtils.playSongToPlayer(player, SoundEvents.PLAYER_HURT_FREEZE,1,1f);
       }
       
@@ -215,7 +215,7 @@ public class TickCallback {
             !(player.isCreative() || player.isSpectator()) && !player.getItemBySlot(EquipmentSlot.HEAD).is(Items.TURTLE_HELMET);
       if(shouldDryOut){
          player.hurtServer(world, world.damageSources().dryOut(), (float) CONFIG.getDouble(ArchetypeRegistry.BIOME_DAMAGE));
-         player.displayClientMessage(Component.translatable("text.ancestralarchetypes.dry_out_warning").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
+         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.dry_out_warning").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
          SoundUtils.playSongToPlayer(player, SoundEvents.FIRECHARGE_USE,1,1f);
       }
    }
@@ -300,13 +300,13 @@ public class TickCallback {
             }
             message.append(" \uD83D\uDD0D");
             if(inspector.getUseItem() != null && inspector.getUseItem().is(Items.SPYGLASS))
-               inspector.displayClientMessage(Component.literal(message.toString()).withStyle(ChatFormatting.GOLD),true);
+               inspector.sendSystemMessage(Component.literal(message.toString()).withStyle(ChatFormatting.GOLD),true);
             if(percentage > 1.0){
                SubArchetype subArchetype = profile.getSubArchetype();
                if(subArchetype == null){
-                  inspector.displayClientMessage(Component.translatable("text.ancestralarchetypes.inspect_no_archetype",player.getFeedbackDisplayName()).withStyle(ChatFormatting.AQUA),false);
+                  inspector.sendSystemMessage(Component.translatable("text.ancestralarchetypes.inspect_no_archetype",player.getFeedbackDisplayName()).withStyle(ChatFormatting.AQUA),false);
                }else{
-                  inspector.displayClientMessage(Component.translatable("text.ancestralarchetypes.inspect_results",player.getFeedbackDisplayName(),subArchetype.getName().withStyle(TextUtils.getClosestFormatting(subArchetype.getColor()))).withStyle(ChatFormatting.AQUA),false);
+                  inspector.sendSystemMessage(Component.translatable("text.ancestralarchetypes.inspect_results",player.getFeedbackDisplayName(),subArchetype.getName().withStyle(TextUtils.getClosestFormatting(subArchetype.getColor()))).withStyle(ChatFormatting.AQUA),false);
                }
                if(alert) player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.inspected").withStyle(ChatFormatting.RED));
                
@@ -325,7 +325,7 @@ public class TickCallback {
                   message.append("¦");
                }
             }
-            player.displayClientMessage(Component.translatable("text.ancestralarchetypes.inspection_in_progress",message.toString()).withStyle(ChatFormatting.GOLD),true);
+            player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.inspection_in_progress",message.toString()).withStyle(ChatFormatting.GOLD),true);
          }
       }
    }
@@ -347,7 +347,7 @@ public class TickCallback {
       }
       
       if(profile.hasAbility(ArchetypeRegistry.MOONLIT_CAVE_SPIDER) && player.level().dimension().equals(ServerLevel.OVERWORLD)){
-         long timeOfDay = player.level().getDayTime();
+         long timeOfDay = player.level().getGameTime();
          int day = (int) (timeOfDay/24000L % Integer.MAX_VALUE);
          int curPhase = day % 8;
          int moonLevel = Math.abs(-curPhase+4); // 0 - new moon, 4 - full moon
@@ -387,7 +387,7 @@ public class TickCallback {
       Entity vehicle = player.getVehicle();
       boolean gaveReach = false;
       if(vehicle != null){
-         if(!vehicle.getTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList().isEmpty()){
+         if(!vehicle.entityTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList().isEmpty()){
             MinecraftUtils.attributeEffect(player, Attributes.BLOCK_INTERACTION_RANGE, CONFIG.getDouble(ArchetypeRegistry.MOUNTED_RANGE), AttributeModifier.Operation.ADD_VALUE, Identifier.fromNamespaceAndPath(MOD_ID,"mounted_reach"),false);
             MinecraftUtils.attributeEffect(player, Attributes.ENTITY_INTERACTION_RANGE, CONFIG.getDouble(ArchetypeRegistry.MOUNTED_RANGE), AttributeModifier.Operation.ADD_VALUE, Identifier.fromNamespaceAndPath(MOD_ID,"mounted_reach"),false);
             MinecraftUtils.attributeEffect(player, Attributes.SAFE_FALL_DISTANCE, 10, AttributeModifier.Operation.ADD_VALUE, Identifier.fromNamespaceAndPath(MOD_ID,"mounted_fall"),false);
@@ -429,7 +429,10 @@ public class TickCallback {
       
       MinecraftUtils.attributeEffect(player, Attributes.SAFE_FALL_DISTANCE, CONFIG.getDouble(ArchetypeRegistry.RESILIENT_JOINTS_EXTRA_FALL_BLOCKS), AttributeModifier.Operation.ADD_VALUE, Identifier.fromNamespaceAndPath(MOD_ID,"resilient_joints"),!profile.hasAbility(ArchetypeRegistry.RESILIENT_JOINTS));
       
-      long timeOfDay = player.level().getDayTime();
+      MinecraftUtils.attributeEffect(player, Attributes.STEP_HEIGHT, -CONFIG.getDouble(ArchetypeRegistry.SHORT_LEGGED_STEP_REDUCTION), AttributeModifier.Operation.ADD_VALUE, Identifier.fromNamespaceAndPath(MOD_ID,"short_legged"),!profile.hasAbility(ArchetypeRegistry.SHORT_LEGGED));
+      MinecraftUtils.attributeEffect(player, Attributes.STEP_HEIGHT, CONFIG.getDouble(ArchetypeRegistry.LONG_LEGGED_STEP_INCREASE), AttributeModifier.Operation.ADD_VALUE, Identifier.fromNamespaceAndPath(MOD_ID,"long_legged"),!profile.hasAbility(ArchetypeRegistry.LONG_LEGGED));
+      
+      long timeOfDay = player.level().getGameTime();
       int day = (int) (timeOfDay/24000L % Integer.MAX_VALUE);
       int curPhase = day % 8;
       int moonLevel = Math.abs(-curPhase+4); // 0 - new moon, 4 - full moon
@@ -531,7 +534,7 @@ public class TickCallback {
             if(stopUsing){
                player.getCooldowns().addCooldown(player.getUseItem(),20);
                player.releaseUsingItem();
-               player.displayClientMessage(Component.translatable("text.ancestralarchetypes.cannot_eat").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
+               player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.cannot_eat").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
                SoundUtils.playSongToPlayer(player, SoundEvents.PLAYER_BURP,1,0.5f);
             }
          }

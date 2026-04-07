@@ -1,5 +1,7 @@
 package net.borisshoes.ancestralarchetypes.items;
 
+import eu.pb4.polymer.common.api.PolymerCommonUtils;
+import eu.pb4.polymer.core.api.utils.PolymerUtils;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
@@ -8,6 +10,7 @@ import net.borisshoes.ancestralarchetypes.gui.BackpackSlot;
 import net.borisshoes.borislib.utils.SoundUtils;
 import net.borisshoes.borislib.utils.TextUtils;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -29,7 +32,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.Level;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,10 +55,11 @@ public class BackpackItem extends AbilityItem{
    }
    
    @Override
-   public ItemStack getPolymerItemStack(ItemStack itemStack, TooltipFlag tooltipType, PacketContext context){
-      ItemStack superStack = super.getPolymerItemStack(itemStack, tooltipType, context);
+   public ItemStack getPolymerItemStack(ItemStack itemStack, TooltipFlag tooltipType, PacketContext context, HolderLookup.Provider lookup){
+      ItemStack superStack = super.getPolymerItemStack(itemStack, tooltipType, context, lookup);
       
-      if(!(context.getPlayer() instanceof ServerPlayer player)) return superStack;
+      ServerPlayer player = PolymerCommonUtils.getPlayer(context);
+      if(player == null) return superStack;
       PlayerArchetypeData profile = profile(player);
       if(!profile.hasAbility(this.ability)) return superStack;
       
@@ -86,12 +90,12 @@ public class BackpackItem extends AbilityItem{
                      Component.literal(count+"").withColor(profile.getArchetype().color()),
                      Component.translatable("text.ancestralarchetypes.stacks",stacks).withColor(profile.getArchetype().color()),
                      Component.literal(leftover+"").withColor(profile.getArchetype().color()),
-                     item.getName().copy().withColor(profile.getSubArchetype().getColor())
+                     item.getName(new ItemStack(item)).copy().withColor(profile.getSubArchetype().getColor())
                      ).withStyle(ChatFormatting.DARK_PURPLE));
             }else{
                lore.add(Component.translatable("text.ancestralarchetypes.backpack_contents_item",
                      Component.literal(count+"").withColor(profile.getArchetype().color()),
-                     item.getName().copy().withColor(profile.getSubArchetype().getColor())
+                     item.getName(new ItemStack(item)).copy().withColor(profile.getSubArchetype().getColor())
                ).withStyle(ChatFormatting.DARK_PURPLE));
             }
          }
@@ -113,7 +117,7 @@ public class BackpackItem extends AbilityItem{
       if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
       PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.displayClientMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
+         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
          SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
          return InteractionResult.PASS;
       }

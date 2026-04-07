@@ -20,14 +20,14 @@ public class AbstractHorseMixin {
    @Inject(method = "handleEating", at = @At("HEAD"), cancellable = true)
    private void archetypes$stopHorseFeed(Player player, ItemStack item, CallbackInfoReturnable<Boolean> cir){
       LivingEntity entity = (LivingEntity) (Object) this;
-      List<String> tags = entity.getTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
+      List<String> tags = entity.entityTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
       if(!tags.isEmpty()) cir.setReturnValue(false);
    }
    
    @ModifyExpressionValue(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;nextInt(I)I"))
    private int archetypes$modifyHorseAnger(int original){
       LivingEntity entity = (LivingEntity) (Object) this;
-      List<String> tags = entity.getTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
+      List<String> tags = entity.entityTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
       if(!tags.isEmpty()) return entity.getRandom().nextInt(5) == 0 ? 1 : 0;
       return original;
    }

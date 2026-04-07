@@ -3,6 +3,8 @@ package net.borisshoes.ancestralarchetypes.misc;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.borislib.utils.SoundUtils;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntitySelector;
@@ -59,7 +61,8 @@ public class FleeFelidGoal<T extends LivingEntity> extends AvoidEntityGoal<T> {
       super.start();
       this.mob.playSound(SoundEvents.CREEPER_HURT, 1, 1);
       if(this.toAvoid instanceof ServerPlayer player){
-         SoundUtils.playSongToPlayer(player, SoundEvents.CAT_HISS, .1f, 1);
+         // TODO wtf sound registry?
+         SoundUtils.playSongToPlayer(player, BuiltInRegistries.SOUND_EVENT.get(Identifier.withDefaultNamespace("entity.cat_royal.hiss")).get(), .1f, 1);
       }
    }
 }

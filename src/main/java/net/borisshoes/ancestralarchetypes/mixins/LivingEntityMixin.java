@@ -13,6 +13,7 @@ import net.borisshoes.borislib.gui.GraphicalItem;
 import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.borisshoes.borislib.utils.SoundUtils;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.DustColorTransitionOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -35,8 +36,10 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.inventory.HorseInventoryMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -55,11 +58,13 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 @Mixin(value = LivingEntity.class)
 public abstract class LivingEntityMixin {
    
-   @Shadow public abstract void makeSound(@Nullable SoundEvent sound);
+   @Shadow
+   public abstract void makeSound(@Nullable SoundEvent sound);
    
-   @Shadow public abstract void remove(Entity.RemovalReason reason);
+   @Shadow
+   public abstract void remove(Entity.RemovalReason reason);
    
-   @Inject(method= "onEquipItem", at=@At("HEAD"), cancellable = true)
+   @Inject(method = "onEquipItem", at = @At("HEAD"), cancellable = true)
    private void archetypes$equipSoundSpam(EquipmentSlot slot, ItemStack oldStack, ItemStack newStack, CallbackInfo ci){
       if(oldStack.getItem() instanceof AbilityItem && newStack.getItem() instanceof AbilityItem){
          ci.cancel();
@@ -70,7 +75,7 @@ public abstract class LivingEntityMixin {
    private boolean archetypes$mountDropsXP(boolean original){
       if(!original) return false;
       LivingEntity entity = (LivingEntity) (Object) this;
-      List<String> tags = entity.getTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
+      List<String> tags = entity.entityTags().stream().filter(s -> s.contains("$" + MOD_ID + ".spirit_mount")).toList();
       if(!tags.isEmpty()) return false;
       return original;
    }
@@ -79,7 +84,7 @@ public abstract class LivingEntityMixin {
    private boolean archetypes$mountDropsLoot(boolean original){
       if(!original) return false;
       LivingEntity entity = (LivingEntity) (Object) this;
-      List<String> tags = entity.getTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
+      List<String> tags = entity.entityTags().stream().filter(s -> s.contains("$" + MOD_ID + ".spirit_mount")).toList();
       if(!tags.isEmpty()) return false;
       return original;
    }
@@ -87,7 +92,7 @@ public abstract class LivingEntityMixin {
    @Inject(method = "remove", at = @At("HEAD"))
    private void archetypes$removeMount(Entity.RemovalReason reason, CallbackInfo ci){
       LivingEntity entity = (LivingEntity) (Object) this;
-      List<String> tags = entity.getTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
+      List<String> tags = entity.entityTags().stream().filter(s -> s.contains("$" + MOD_ID + ".spirit_mount")).toList();
       if(tags.isEmpty()) return;
       
       if(entity instanceof OwnableEntity tameable && tameable.getOwner() instanceof ServerPlayer player && entity.level() instanceof ServerLevel entityWorld){
@@ -101,7 +106,7 @@ public abstract class LivingEntityMixin {
                   profile.setMountHealth(ability, 0);
                   profile.setAbilityCooldown(ability, CONFIG.getInt(ArchetypeRegistry.SPIRIT_MOUNT_KILL_COOLDOWN));
                }
-               player.displayClientMessage(Component.translatable("text.ancestralarchetypes.spirit_mount_unsummon").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
+               player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.spirit_mount_unsummon").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC), true);
             }
          }
       }
@@ -110,7 +115,7 @@ public abstract class LivingEntityMixin {
    @Inject(method = "tick", at = @At("HEAD"))
    private void archetypes$tickMount(CallbackInfo ci){
       LivingEntity entity = (LivingEntity) (Object) this;
-      List<String> tags = entity.getTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
+      List<String> tags = entity.entityTags().stream().filter(s -> s.contains("$" + MOD_ID + ".spirit_mount")).toList();
       if(tags.isEmpty()) return;
       if(entity instanceof Animal animal){
          if(animal.getInLoveTime() > 0){
@@ -119,7 +124,8 @@ public abstract class LivingEntityMixin {
       }
       
       boolean remove = false;
-      block: {
+      block:
+      {
          if(!(entity instanceof OwnableEntity tameable) || !(tameable.getOwner() instanceof ServerPlayer player) || !(entity.level() instanceof ServerLevel entityWorld)){
             remove = true;
             break block;
@@ -132,7 +138,8 @@ public abstract class LivingEntityMixin {
             remove = true;
             break block;
          }
-         if(entity.getControllingPassenger() != null && !entity.getControllingPassenger().equals(tameable.getOwner())) entity.ejectPassengers();
+         if(entity.getControllingPassenger() != null && !entity.getControllingPassenger().equals(tameable.getOwner()))
+            entity.ejectPassengers();
          List<Entity> passengers = entity.getPassengers();
          for(Entity passenger : passengers){
             if(passenger instanceof ServerPlayer otherPlayer){
@@ -142,7 +149,7 @@ public abstract class LivingEntityMixin {
                      MountInventoryGui gui = new MountInventoryGui(player, profile.getMountInventory());
                      gui.open();
                   }else{
-                     SimpleGui gui = new SimpleGui(MenuType.HOPPER,player,false);
+                     SimpleGui gui = new SimpleGui(MenuType.HOPPER, player, false);
                      for(int i = 0; i < gui.getSize(); i++){
                         gui.setSlot(i, GuiElementBuilder.from(GraphicalItem.with(GraphicalItem.BLACK)).hideTooltip());
                      }
@@ -179,13 +186,13 @@ public abstract class LivingEntityMixin {
       if(entity instanceof ServerPlayer player){
          PlayerArchetypeData profile = profile(player);
          if(profile.hasAbility(ArchetypeRegistry.MAGMA_TOTEM) && profile.getDeathReductionSizeLevel() <= 1){
-            profile.changeDeathReductionSizeLevel(player,false);
-            player.level().sendParticles(ParticleTypes.TOTEM_OF_UNDYING,player.getX(), player.getY()+player.getBbHeight()/2, player.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
+            profile.changeDeathReductionSizeLevel(player, false);
+            player.level().sendParticles(ParticleTypes.TOTEM_OF_UNDYING, player.getX(), player.getY() + player.getBbHeight() / 2, player.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
             makeSound(SoundEvents.ZOMBIE_VILLAGER_CURE);
             return true;
          }else if(profile.hasAbility(ArchetypeRegistry.SLIME_TOTEM) && profile.getDeathReductionSizeLevel() <= 1){
-            profile.changeDeathReductionSizeLevel(player,false);
-            player.level().sendParticles(ParticleTypes.TOTEM_OF_UNDYING,player.getX(), player.getY()+player.getBbHeight()/2, player.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
+            profile.changeDeathReductionSizeLevel(player, false);
+            player.level().sendParticles(ParticleTypes.TOTEM_OF_UNDYING, player.getX(), player.getY() + player.getBbHeight() / 2, player.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
             makeSound(SoundEvents.ZOMBIE_VILLAGER_CURE);
             return true;
          }
@@ -269,8 +276,8 @@ public abstract class LivingEntityMixin {
                boolean behind = dp >= thresh;
                if(behind){
                   newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.PLAYER_SNEAK_ATTACK_MODIFIER);
-                  DustColorTransitionOptions particle = new DustColorTransitionOptions(0xee1c1c,0x621313,1.0f);
-                  player.level().sendParticles(particle,entity.getX(), entity.getY()+entity.getBbHeight()/2, entity.getZ(), 25, 0.25, 0.25, 0.25, 0.5);
+                  DustColorTransitionOptions particle = new DustColorTransitionOptions(0xee1c1c, 0x621313, 1.0f);
+                  player.level().sendParticles(particle, entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(), 25, 0.25, 0.25, 0.25, 0.5);
                }
             }else{
                boolean foundAttacker = false;
@@ -282,8 +289,8 @@ public abstract class LivingEntityMixin {
                }
                if(!foundAttacker){
                   newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.MOB_SNEAK_ATTACK_MODIFIER);
-                  DustColorTransitionOptions particle = new DustColorTransitionOptions(0xee1c1c,0x621313,1.0f);
-                  player.level().sendParticles(particle,entity.getX(), entity.getY()+entity.getBbHeight()/2, entity.getZ(), 25, 0.25, 0.25, 0.25, 0.5);
+                  DustColorTransitionOptions particle = new DustColorTransitionOptions(0xee1c1c, 0x621313, 1.0f);
+                  player.level().sendParticles(particle, entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(), 25, 0.25, 0.25, 0.25, 0.5);
                }
             }
          }
@@ -313,14 +320,33 @@ public abstract class LivingEntityMixin {
                newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.SLIPPERY_DAMAGE_MODIFIER);
             }
          }
+         if(profile.hasAbility(ArchetypeRegistry.VULNERABLE_IN_WATER) && player.isInWaterOrRain()){
+            newReturn *= (float) (1.0 + CONFIG.getDouble(ArchetypeRegistry.VULNERABLE_IN_WATER_VULNERABILITY));
+         }
+         if(profile.hasAbility(ArchetypeRegistry.VULNERABLE_IN_COLD) && !player.hasEffect(MobEffects.WATER_BREATHING)){
+            Holder<Biome> biome = player.level().getBiome(player.blockPosition());
+            float temp = biome.value().getBaseTemperature();
+            boolean shouldFreeze = (biome.is(ArchetypeRegistry.COLD_DAMAGE_INCLUDE_BIOMES) ||
+                  (temp < 0.1 && !biome.is(ArchetypeRegistry.COLD_DAMAGE_EXCEPTION_BIOMES))) && !(player.isCreative() || player.isSpectator());
+            if(shouldFreeze){
+               newReturn *= (float) (1.0 + CONFIG.getDouble(ArchetypeRegistry.VULNERABLE_IN_COLD_VULNERABILITY));
+            }
+         }
+         if(profile.hasAbility(ArchetypeRegistry.VULNERABLE_WHEN_DRY) && !player.hasEffect(MobEffects.FIRE_RESISTANCE)){
+            Holder<Biome> biome = player.level().getBiome(player.blockPosition());
+            boolean shouldDryOut = (biome.is(ArchetypeRegistry.DRY_OUT_INCLUDE_BIOMES) || (!biome.value().hasPrecipitation() && !biome.is(ArchetypeRegistry.DRY_OUT_EXCEPTION_BIOMES))) &&
+                  !player.isInWater() && !(player.isCreative() || player.isSpectator()) && !player.getItemBySlot(EquipmentSlot.HEAD).is(Items.TURTLE_HELMET);
+            if(shouldDryOut){
+               newReturn *= (float) (1.0 + CONFIG.getDouble(ArchetypeRegistry.VULNERABLE_WHEN_DRY_VULNERABILITY));
+            }
+         }
          if(profile.hasAbility(ArchetypeRegistry.FORTIFY) && profile.isFortifyActive() && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)){
             newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.FORTIFY_DAMAGE_MODIFIER);
-            SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.HEAVY_CORE_STEP, SoundSource.PLAYERS,2f,player.getRandom().nextFloat() + 0.5F);
+            SoundUtils.playSound(player.level(), player.blockPosition(), SoundEvents.HEAVY_CORE_STEP, SoundSource.PLAYERS, 2f, player.getRandom().nextFloat() + 0.5F);
          }
          if(profile.hasAbility(ArchetypeRegistry.INSATIABLE) && source.is(DamageTypes.STARVE)){
             newReturn += (float) CONFIG.getDouble(ArchetypeRegistry.ADDED_STARVE_DAMAGE);
          }
-         
          if(profile.hasAbility(ArchetypeRegistry.STUNNED_BY_DAMAGE) && amount > CONFIG.getDouble(ArchetypeRegistry.STARTLE_MIN_DAMAGE) && !source.is(ArchetypeRegistry.NO_STARTLE)){
             MobEffectInstance slowness = new MobEffectInstance(MobEffects.SLOWNESS, CONFIG.getInt(ArchetypeRegistry.DAMAGE_STUN_DURATION), 9, false, false, true);
             player.addEffect(slowness);
@@ -331,7 +357,7 @@ public abstract class LivingEntityMixin {
    }
    
    
-   @ModifyReturnValue(method= "getVisibilityPercent", at=@At("RETURN"))
+   @ModifyReturnValue(method = "getVisibilityPercent", at = @At("RETURN"))
    private double archetypes$attackRangeScale(double original, Entity attacker){
       LivingEntity livingEntity = (LivingEntity) (Object) this;
       if(!CONFIG.getBoolean(ArchetypeRegistry.IGNORED_BY_MOB_TYPE)) return original;
@@ -344,7 +370,7 @@ public abstract class LivingEntityMixin {
       return original;
    }
    
-   @ModifyReturnValue(method= "canAttack(Lnet/minecraft/world/entity/LivingEntity;)Z", at=@At("RETURN"))
+   @ModifyReturnValue(method = "canAttack(Lnet/minecraft/world/entity/LivingEntity;)Z", at = @At("RETURN"))
    private boolean archetypes$canTarget(boolean original, LivingEntity target){
       LivingEntity livingEntity = (LivingEntity) (Object) this;
       if(!CONFIG.getBoolean(ArchetypeRegistry.IGNORED_BY_MOB_TYPE)) return original;

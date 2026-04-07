@@ -123,3 +123,7 @@ run/
 
 # External Resources
 /external-resources/
+/libs/
+
+# Coding Agent Instructions
+Agents.md

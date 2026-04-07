@@ -22,7 +22,7 @@ import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
@@ -46,27 +46,26 @@ public class FortifyItem extends AbilityItem{
       super.inventoryTick(stack, world, entity, slot);
       if(!(entity instanceof ServerPlayer player)) return;
       PlayerArchetypeData profile = profile(player);
-      if(profile.getAbilityCooldown(this.ability) > 0){
-         return;
-      }
-      double fortifyPercentage = ((double)profile.getFortifyTime() / profile.getMaxFortifyTime());
-      if(fortifyPercentage >= 1.0) return;
-      int fortifyValue = (int) (fortifyPercentage * 100);
-      char[] unicodeChars = {'▁', '▂', '▃', '▅', '▆', '▇', '▌'};
-      StringBuilder message = new StringBuilder("\uD83D\uDEE1 ");
-      for (int i = 0; i < 10; i++) {
-         int segmentValue = fortifyValue - (i * 10);
-         if (segmentValue <= 0) {
-            message.append(unicodeChars[0]);
-         } else if (segmentValue >= 10) {
-            message.append(unicodeChars[unicodeChars.length - 1]);
-         } else {
-            int charIndex = (int) ((double) segmentValue / 10 * (unicodeChars.length - 1));
-            message.append(unicodeChars[charIndex]);
+      if(profile.getAbilityCooldown(this.ability) <= 0 && (slot == EquipmentSlot.MAINHAND || slot == EquipmentSlot.OFFHAND)){
+         double fortifyPercentage = ((double) profile.getFortifyTime() / profile.getMaxFortifyTime());
+         if(fortifyPercentage >= 1.0) return;
+         int fortifyValue = (int) (fortifyPercentage * 100);
+         char[] unicodeChars = {'▁', '▂', '▃', '▅', '▆', '▇', '▌'};
+         StringBuilder message = new StringBuilder("\uD83D\uDEE1 ");
+         for(int i = 0; i < 10; i++){
+            int segmentValue = fortifyValue - (i * 10);
+            if(segmentValue <= 0){
+               message.append(unicodeChars[0]);
+            }else if(segmentValue >= 10){
+               message.append(unicodeChars[unicodeChars.length - 1]);
+            }else{
+               int charIndex = (int) ((double) segmentValue / 10 * (unicodeChars.length - 1));
+               message.append(unicodeChars[charIndex]);
+            }
          }
+         message.append(" \uD83D\uDEE1");
+         player.sendSystemMessage(Component.literal(message.toString()).withColor(profile.getSubArchetype().getColor()), true);
       }
-      message.append(" \uD83D\uDEE1");
-      player.displayClientMessage(Component.literal(message.toString()).withColor(profile.getSubArchetype().getColor()), true);
    }
    
    @Override
@@ -74,7 +73,7 @@ public class FortifyItem extends AbilityItem{
       if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
       PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.displayClientMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
+         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
          SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
          return InteractionResult.PASS;
       }
@@ -106,7 +105,7 @@ public class FortifyItem extends AbilityItem{
          }
       }
       message.append(" \uD83D\uDEE1");
-      player.displayClientMessage(Component.literal(message.toString()).withColor(profile.getSubArchetype().getColor()), true);
+      player.sendSystemMessage(Component.literal(message.toString()).withColor(profile.getSubArchetype().getColor()), true);
       
       if(remainingTime < 1 || profile.getAbilityCooldown(this.ability) > 0){
          player.releaseUsingItem();

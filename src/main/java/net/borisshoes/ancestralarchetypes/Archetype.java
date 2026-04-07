@@ -3,10 +3,11 @@ package net.borisshoes.ancestralarchetypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 
-public record Archetype(String id, ItemStack displayItem, int color) {
+public record Archetype(String id, ItemStackTemplate displayItem, int color) {
    
    public MutableComponent getName(){
       return Component.translatable(MOD_ID + ".archetype.name." + id);

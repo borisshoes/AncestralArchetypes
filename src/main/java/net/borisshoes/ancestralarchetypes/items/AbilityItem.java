@@ -4,6 +4,7 @@ import eu.pb4.polymer.core.api.item.PolymerItem;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -16,7 +17,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
@@ -69,7 +70,7 @@ public abstract class AbilityItem extends Item implements PolymerItem {
                      }
                   }
                   builder.append(" ").append(textCharacter);
-                  player.displayClientMessage(Component.literal(builder.toString()).withColor(profile.getSubArchetype().getColor()),true);
+                  player.sendSystemMessage(Component.literal(builder.toString()).withColor(profile.getSubArchetype().getColor()),true);
                }
             }else{
                if(player.getCooldowns().isOnCooldown(stack)){
@@ -85,7 +86,7 @@ public abstract class AbilityItem extends Item implements PolymerItem {
    }
    
    @Override
-   public @Nullable Identifier getPolymerItemModel(ItemStack stack, PacketContext context){
+   public @Nullable Identifier getPolymerItemModel(ItemStack stack, PacketContext context, HolderLookup.Provider lookup){
        if(PolymerResourcePackUtils.hasMainPack(context)){
           return Identifier.fromNamespaceAndPath(MOD_ID,this.ability.id());
        }else{

@@ -33,10 +33,10 @@ public class EntityAttackedCallback {
             if(profile.hasAbility(ArchetypeRegistry.MOONLIT_CAVE_SPIDER)){
                int durPerPhase = CONFIG.getInt(ArchetypeRegistry.MOONLIT_CAVE_SPIDER_VENOM_DURATION_PER_PHASE);
                double ampPerPhase = CONFIG.getDouble(ArchetypeRegistry.MOONLIT_CAVE_SPIDER_VENOM_STRENGTH_PER_PHASE);
-               long timeOfDay = player.level().getDayTime();
+               long timeOfDay = player.level().getGameTime();
                int day = (int) (timeOfDay/24000L % Integer.MAX_VALUE);
                int curPhase = day % 8;
-               int moonLevel = profile.hasAbility(ArchetypeRegistry.MOONLIT_WITCH) ? Math.abs(-curPhase+4) : 4; // 0 - new moon, 4 - full moon
+               int moonLevel = profile.hasAbility(ArchetypeRegistry.MOONLIT_CAVE_SPIDER) ? Math.abs(-curPhase+4) : 4; // 0 - new moon, 4 - full moon
                duration += moonLevel*durPerPhase;
                amplifier += (int)(moonLevel*ampPerPhase);
             }

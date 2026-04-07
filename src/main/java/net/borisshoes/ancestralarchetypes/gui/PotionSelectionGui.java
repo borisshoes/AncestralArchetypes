@@ -15,6 +15,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Tuple;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
@@ -75,10 +76,10 @@ public class PotionSelectionGui extends SimpleGui {
    }
    
    @Override
-   public boolean onAnyClick(int index, ClickType type, net.minecraft.world.inventory.ClickType action){
+   public boolean onAnyClick(int index, ClickType type, ContainerInput action){
       if(this.map.containsKey(index)){
          PlayerArchetypeData profile = profile(player);
-         long timeOfDay = player.level().getDayTime();
+         long timeOfDay = player.level().getGameTime();
          int day = (int) (timeOfDay/24000L % Integer.MAX_VALUE);
          int curPhase = day % 8;
          int moonLevel = profile.hasAbility(ArchetypeRegistry.MOONLIT_WITCH) ? Math.abs(-curPhase+4) : 4; // 0 - new moon, 4 - full moon
@@ -109,7 +110,7 @@ public class PotionSelectionGui extends SimpleGui {
       potionTypeItem.addLoreLineRaw(Component.translatable("text.ancestralarchetypes.potion_brewer_gui_toggle"));
       setSlot(8,potionTypeItem);
       
-      long timeOfDay = player.level().getDayTime();
+      long timeOfDay = player.level().getGameTime();
       int day = (int) (timeOfDay/24000L % Integer.MAX_VALUE);
       int curPhase = day % 8;
       int moonLevel = profile.hasAbility(ArchetypeRegistry.MOONLIT_WITCH) ? Math.abs(-curPhase+4) : 4; // 0 - new moon, 4 - full moon
@@ -143,7 +144,7 @@ public class PotionSelectionGui extends SimpleGui {
    public static boolean isUnlocked(ServerPlayer player, Holder<Potion> potion){
       if(potion == null) return false;
       PlayerArchetypeData profile = profile(player);
-      long timeOfDay = player.level().getDayTime();
+      long timeOfDay = player.level().getGameTime();
       int day = (int) (timeOfDay/24000L % Integer.MAX_VALUE);
       int curPhase = day % 8;
       int moonLevel = profile.hasAbility(ArchetypeRegistry.MOONLIT_WITCH) ? Math.abs(-curPhase+4) : 4; // 0 - new moon, 4 - full moon

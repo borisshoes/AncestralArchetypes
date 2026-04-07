@@ -44,7 +44,7 @@ public abstract class PlayerMixin {
       if(player.level().isClientSide() || !(player instanceof ServerPlayer serverPlayer)) return constant;
       PlayerArchetypeData profile = profile(serverPlayer);
       boolean canBreakQuickly =  (profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER) && player.isUnderWater())
-            || (player.getVehicle() != null && !player.getVehicle().getTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList().isEmpty());
+            || (player.getVehicle() != null && !player.getVehicle().entityTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList().isEmpty());
       return canBreakQuickly ? Math.min(constant, 1) : constant;
    }
    
@@ -87,7 +87,7 @@ public abstract class PlayerMixin {
       Player player = (Player) (Object) this;
       Entity vehicle = player.getVehicle();
       
-      if(vehicle != null && !vehicle.getTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList().isEmpty()){
+      if(vehicle != null && !vehicle.entityTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList().isEmpty()){
          return fullCharge;
       }
       

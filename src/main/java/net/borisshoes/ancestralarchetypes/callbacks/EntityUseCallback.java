@@ -54,7 +54,7 @@ public class EntityUseCallback {
    }
    
    private static InteractionResult mountCheck(Player playerEntity, Entity entity){
-      List<String> tags = entity.getTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
+      List<String> tags = entity.entityTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
       boolean spiritMount = !tags.isEmpty();
       if(!spiritMount) return InteractionResult.PASS;
       

@@ -11,6 +11,7 @@ import net.borisshoes.borislib.utils.TextUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Items;
 
@@ -55,7 +56,7 @@ public class ArchetypeSelectionGui extends SimpleGui {
    }
    
    @Override
-   public boolean onAnyClick(int index, ClickType type, net.minecraft.world.inventory.ClickType action){
+   public boolean onAnyClick(int index, ClickType type, ContainerInput action){
       PlayerArchetypeData profile = profile(player);
       if(subArchetype == null){
          if(this.map.containsKey(index)){
@@ -95,7 +96,7 @@ public class ArchetypeSelectionGui extends SimpleGui {
       PlayerArchetypeData profile = profile(player);
       GuiHelper.outlineGUI(this,subArchetype.getColor(), Component.empty());
       
-      GuiElementBuilder subArchetypeItem = GuiElementBuilder.from(subArchetype.getDisplayItem()).hideDefaultTooltip();
+      GuiElementBuilder subArchetypeItem = GuiElementBuilder.from(subArchetype.getDisplayItem().create()).hideDefaultTooltip();
       subArchetypeItem.setName(subArchetype.getName().withColor(subArchetype.getColor()));
       subArchetypeItem.addLoreLine(subArchetype.getDescription().withStyle(TextUtils.getClosestFormatting(subArchetype.getColor())));
       setSlot(4,subArchetypeItem);
@@ -112,7 +113,7 @@ public class ArchetypeSelectionGui extends SimpleGui {
             int index = i*7 + j;
             int offset = 1 + dynamicSlot[j];
             ArchetypeAbility ability = abilities.get(index);
-            GuiElementBuilder abilityItem = GuiElementBuilder.from(ability.displayStack()).hideDefaultTooltip();
+            GuiElementBuilder abilityItem = GuiElementBuilder.from(ability.getDisplayItemStack()).hideDefaultTooltip();
             abilityItem.setName(ability.getName().withColor(subArchetype.getColor()));
             abilityItem.addLoreLine(ability.getDescription().withStyle(TextUtils.getClosestFormatting(subArchetype.getColor())));
             setSlot((i+1)*9+offset,abilityItem);
@@ -140,7 +141,7 @@ public class ArchetypeSelectionGui extends SimpleGui {
       setSlot(26,GuiElementBuilder.from(GraphicalItem.withColor(GraphicalItem.MENU_RIGHT_CONNECTOR,0x20c3e0)).hideTooltip());
       
       GameProfile gameProfile = player.getGameProfile();
-      GuiElementBuilder head = new GuiElementBuilder(Items.PLAYER_HEAD).setSkullOwner(gameProfile,player.level().getServer());
+      GuiElementBuilder head = new GuiElementBuilder(Items.PLAYER_HEAD).setProfile(gameProfile);
       head.setName(Component.translatable("text.ancestralarchetypes.gui_title").withStyle(ChatFormatting.AQUA));
       head.addLoreLine(TextUtils.removeItalics(Component.translatable("text.ancestralarchetypes.gui_subtitle_1").withStyle(ChatFormatting.DARK_AQUA)));
       if(profile.getSubArchetype() != null && !showOnly){
@@ -161,7 +162,7 @@ public class ArchetypeSelectionGui extends SimpleGui {
          int offset = 1 + dynamicSlot[i];
          
          Archetype archetype = archetypes.get(i);
-         GuiElementBuilder archetypeItem = GuiElementBuilder.from(archetype.displayItem()).hideDefaultTooltip();
+         GuiElementBuilder archetypeItem = GuiElementBuilder.from(archetype.displayItem().create()).hideDefaultTooltip();
          archetypeItem.setName(archetype.getName().withColor(archetype.color()));
          archetypeItem.addLoreLine(archetype.getDescription().withStyle(TextUtils.getClosestFormatting(archetype.color())));
          setSlot(9+offset,archetypeItem);
@@ -172,7 +173,7 @@ public class ArchetypeSelectionGui extends SimpleGui {
             GuiElementBuilder subArchetypeItem;
             if(j < subArchetypes.size()){
                SubArchetype subArchetype = subArchetypes.get(j);
-               subArchetypeItem = GuiElementBuilder.from(subArchetype.getDisplayItem()).hideDefaultTooltip();
+               subArchetypeItem = GuiElementBuilder.from(subArchetype.getDisplayItem().create()).hideDefaultTooltip();
                subArchetypeItem.setName(subArchetype.getName().withColor(subArchetype.getColor()));
                subArchetypeItem.addLoreLine(subArchetype.getDescription().withStyle(TextUtils.getClosestFormatting(subArchetype.getColor())));
                subArchetypeItem.addLoreLine(Component.literal(""));
@@ -223,7 +224,8 @@ public class ArchetypeSelectionGui extends SimpleGui {
    }
    
    @Override
-   public void onClose(){
+   public void afterRemoval(){
+      super.afterRemoval();
       if(this.menuOnClose){
          ArchetypeSelectionGui gui = new ArchetypeSelectionGui(player,null, this.showOnly);
          gui.open();

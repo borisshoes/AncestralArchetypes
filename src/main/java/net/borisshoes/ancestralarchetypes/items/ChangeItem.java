@@ -5,6 +5,7 @@ import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.borislib.utils.SoundUtils;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -21,7 +22,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 
@@ -55,7 +56,7 @@ public class ChangeItem extends Item implements PolymerItem {
    }
    
    @Override
-   public @Nullable Identifier getPolymerItemModel(ItemStack stack, PacketContext context){
+   public @Nullable Identifier getPolymerItemModel(ItemStack stack, PacketContext context, HolderLookup.Provider lookup){
       return Identifier.fromNamespaceAndPath(MOD_ID,"change_item");
    }
 }

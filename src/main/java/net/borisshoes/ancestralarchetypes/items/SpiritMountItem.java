@@ -19,7 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import xyz.nucleoid.packettweaker.PacketContext;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import java.util.UUID;
 
@@ -46,7 +46,7 @@ public abstract class SpiritMountItem extends AbilityItem{
       if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
       PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.displayClientMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
+         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
          SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
          return InteractionResult.PASS;
       }
@@ -77,7 +77,7 @@ public abstract class SpiritMountItem extends AbilityItem{
          if(player.onGround()){
             spawnMount(player);
          }else{
-            player.displayClientMessage(Component.translatable("text.ancestralarchetypes.spirit_mount_in_air").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
+            player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.spirit_mount_in_air").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
             SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
             return InteractionResult.PASS;
          }

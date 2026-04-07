@@ -18,7 +18,7 @@ public class AbstractHorseDonkeyMixin {
    @Inject(method = "dropEquipment", at = @At("HEAD"), cancellable = true)
    private void archetypes$mountDrops(ServerLevel world, CallbackInfo ci){
       LivingEntity entity = (LivingEntity) (Object) this;
-      List<String> tags = entity.getTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
+      List<String> tags = entity.entityTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
       if(!tags.isEmpty()) ci.cancel();
    }
 }

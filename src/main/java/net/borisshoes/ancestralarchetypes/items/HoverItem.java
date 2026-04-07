@@ -5,6 +5,7 @@ import io.github.ladysnake.pal.VanillaAbilities;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.borislib.utils.SoundUtils;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -30,7 +31,6 @@ import net.minecraft.world.item.equipment.trim.ArmorTrim;
 import net.minecraft.world.item.equipment.trim.TrimMaterial;
 import net.minecraft.world.item.equipment.trim.TrimPattern;
 import net.minecraft.world.level.Level;
-import xyz.nucleoid.packettweaker.PacketContext;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
@@ -90,7 +90,7 @@ public class HoverItem extends AbilityItem{
             }
          }
          message.append(" ≈");
-         player.displayClientMessage(Component.literal(message.toString()).withColor(ArchetypeRegistry.GHASTLING.getColor()), true);
+         player.sendSystemMessage(Component.literal(message.toString()).withColor(ArchetypeRegistry.GHASTLING.getColor()), true);
          stack.set(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER).setAsset(ResourceKey.create(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.fromNamespaceAndPath(MOD_ID,"aviator_helmet_on"))).setDamageOnHurt(false).build());
          stack.remove(DataComponents.TRIM);
       }else{
@@ -117,7 +117,7 @@ public class HoverItem extends AbilityItem{
       if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
       PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.displayClientMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
+         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
          SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
          return InteractionResult.PASS;
       }

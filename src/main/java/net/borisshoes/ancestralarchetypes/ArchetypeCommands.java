@@ -3,6 +3,7 @@ package net.borisshoes.ancestralarchetypes;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.borisshoes.ancestralarchetypes.gui.ArchetypeSelectionGui;
 import net.borisshoes.borislib.config.ConfigValue;
 import net.borisshoes.borislib.config.IConfigSetting;
@@ -18,6 +19,7 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.Shearable;
@@ -421,6 +423,10 @@ public class ArchetypeCommands {
    public static int getItems(CommandContext<CommandSourceStack> context){
       try{
          CommandSourceStack source = context.getSource();
+         if(!Permissions.check(source, MOD_ID + ".items", PermissionLevel.ALL)){
+            source.sendFailure(Component.translatable("command.ancestralarchetypes.no_permission").withStyle(ChatFormatting.RED));
+            return -1;
+         }
          if(!source.isPlayer() || source.getPlayer() == null){
             source.sendFailure(Component.translatable("command.ancestralarchetypes.not_player_error"));
             return -1;
@@ -446,6 +452,10 @@ public class ArchetypeCommands {
    public static int toggleReminders(CommandContext<CommandSourceStack> context){
       try{
          CommandSourceStack source = context.getSource();
+         if(!Permissions.check(source, MOD_ID + ".togglereminders", PermissionLevel.ALL)){
+            source.sendFailure(Component.translatable("command.ancestralarchetypes.no_permission").withStyle(ChatFormatting.RED));
+            return -1;
+         }
          if(!source.isPlayer() || source.getPlayer() == null){
             source.sendFailure(Component.translatable("command.ancestralarchetypes.not_player_error"));
             return -1;
@@ -468,6 +478,10 @@ public class ArchetypeCommands {
    public static int changeArchetype(CommandContext<CommandSourceStack> context){
       try{
          CommandSourceStack source = context.getSource();
+         if(!Permissions.check(source, MOD_ID + ".changearchetype", PermissionLevel.ALL)){
+            source.sendFailure(Component.translatable("command.ancestralarchetypes.no_permission").withStyle(ChatFormatting.RED));
+            return -1;
+         }
          if(!source.isPlayer() || source.getPlayer() == null){
             source.sendFailure(Component.translatable("command.ancestralarchetypes.not_player_error"));
             return -1;

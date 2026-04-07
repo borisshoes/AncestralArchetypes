@@ -17,7 +17,7 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 
 public class EntityLoadCallbacks {
    public static void unloadEntity(Entity entity, ServerLevel serverWorld){
-      List<String> tags = entity.getTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
+      List<String> tags = entity.entityTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
       boolean spiritMount = !tags.isEmpty();
       
       if(spiritMount && entity.getRemovalReason() == Entity.RemovalReason.KILLED){
@@ -26,7 +26,7 @@ public class EntityLoadCallbacks {
             ArchetypeAbility ability = AncestralArchetypes.abilityFromTag(tags.getFirst());
             if(ability != null){
                profile.setAbilityCooldown(ability, CONFIG.getInt(ArchetypeRegistry.SPIRIT_MOUNT_KILL_COOLDOWN));
-               player.displayClientMessage(Component.translatable("text.ancestralarchetypes.spirit_mount_unsummon").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
+               player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.spirit_mount_unsummon").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
             }
          }
       }

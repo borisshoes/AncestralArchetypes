@@ -13,7 +13,7 @@ public class MountInventoryGui extends SimpleGui {
       setTitle(Component.translatable("text.ancestralarchetypes.spirit_mount_inventory"));
       
       for(int i = 0; i < this.size; i++){
-         setSlotRedirect(i,new MountInventorySlot(inv,i,i%9,i/9));
+         setSlot(i,new MountInventorySlot(inv,i,i%9,i/9));
       }
    }
 }

@@ -1,7 +1,6 @@
 package net.borisshoes.ancestralarchetypes;
 
 import io.github.ladysnake.pal.VanillaAbilities;
-import net.borisshoes.ancestralarchetypes.cca.IArchetypeProfile;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
 import net.borisshoes.borislib.BorisLib;
 import net.borisshoes.borislib.datastorage.DataKey;
@@ -310,83 +309,6 @@ public class PlayerArchetypeData implements StorableData {
       this.abilities.clear();
       if(this.subArchetype == null) return;
       abilities.addAll(subArchetype.getActualAbilities());
-   }
-   
-   /**
-    * Copies all data from an old IArchetypeProfile into this PlayerArchetypeData.
-    * Used for migrating from the old CCA-based storage to the new system.
-    *
-    * @param oldData The old profile to copy data from
-    */
-   public void copyFrom(IArchetypeProfile oldData, ServerPlayer player){
-      if(oldData == null || !oldData.hasData()) return;
-      this.username = player.getScoreboardName();
-      
-      // Copy subarchetype and recalculate abilities
-      this.subArchetype = oldData.getSubArchetype();
-      this.calculateAbilities();
-      
-      // Copy basic state
-      this.giveReminders = oldData.giveReminders();
-      this.deathReductionSizeLevel = oldData.getDeathReductionSizeLevel();
-      this.glideTime = oldData.getGlideTime();
-      this.hoverTime = oldData.getHoverTime();
-      this.fortifyTime = oldData.getFortifyTime();
-      this.fortifyActive = oldData.isFortifyActive();
-      this.healthUpdate = oldData.getHealthUpdate();
-      
-      // Copy customization
-      this.gliderColor = oldData.getGliderColor();
-      this.helmetColor = oldData.getHelmetColor();
-      this.gliderTrimMaterial = oldData.getGliderTrimMaterial();
-      this.helmetTrimMaterial = oldData.getHelmetTrimMaterial();
-      
-      // Copy horse/mount settings
-      this.horseMarking = oldData.getHorseMarking();
-      this.horseColor = oldData.getHorseColor();
-      this.mountName = oldData.getMountName();
-      
-      // Copy potion brewer stack
-      this.potionBrewerStack = oldData.getPotionStack();
-      
-      // Copy archetype changes allowed (inverse of canChangeArchetype check)
-      // If they can change, they have at least 1 remaining
-      this.archetypeChangesAllowed = oldData.canChangeArchetype() ? 1 : 0;
-      
-      // Copy ability cooldowns
-      for(ArchetypeAbility ability : oldData.getAbilities()){
-         int cooldown = oldData.getAbilityCooldown(ability);
-         if(cooldown > 0){
-            this.abilityCooldowns.put(ability, new CooldownEntry(cooldown));
-         }
-      }
-      
-      // Copy mount data (UUID and health for each mount ability)
-      for(ArchetypeAbility ability : oldData.getAbilities()){
-         UUID mountId = oldData.getMountEntity(ability);
-         float mountHealth = oldData.getMountHealth(ability);
-         if(mountId != null || mountHealth > 0){
-            this.mountData.put(ability, new Tuple<>(mountId, mountHealth));
-         }
-      }
-      
-      // Copy mount inventory
-      SimpleContainer oldMountInv = oldData.getMountInventory();
-      for(int i = 0; i < Math.min(oldMountInv.getItems().size(), this.mountInventory.getItems().size()); i++){
-         ItemStack stack = oldMountInv.getItem(i);
-         if(!stack.isEmpty()){
-            this.mountInventory.setItem(i, stack.copy());
-         }
-      }
-      
-      // Copy backpack inventory
-      SimpleContainer oldBackpackInv = oldData.getBackpackInventory();
-      for(int i = 0; i < Math.min(oldBackpackInv.getItems().size(), this.backpackInventory.getItems().size()); i++){
-         ItemStack stack = oldBackpackInv.getItem(i);
-         if(!stack.isEmpty()){
-            this.backpackInventory.setItem(i, stack.copy());
-         }
-      }
    }
    
    public Set<ArchetypeAbility> getAbilities(){

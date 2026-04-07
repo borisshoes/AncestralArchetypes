@@ -1,4 +1,4 @@
-accessWidener	v2	named
+accessWidener	v2	official
 
 accessible field net/minecraft/world/damagesource/CombatTracker entries Ljava/util/List;
 accessible method net/minecraft/world/entity/animal/equine/Horse setVariantAndMarkings (Lnet/minecraft/world/entity/animal/equine/Variant;Lnet/minecraft/world/entity/animal/equine/Markings;)V
