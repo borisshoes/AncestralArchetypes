@@ -36,6 +36,7 @@ import static net.borisshoes.borislib.BorisLib.PLAYER_MOVEMENT_TRACKER;
 @Mixin(Entity.class)
 public class EntityMixin {
    
+
    @Inject(method = "attemptToShearEquipment", at = @At("HEAD"), cancellable = true)
    private void archetypes$stopMountShear(Player player, InteractionHand interactionHand, ItemStack itemStack, Mob mob, CallbackInfoReturnable<Boolean> cir){
       Entity entity = (Entity)(Object) this;

@@ -22,11 +22,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.StringUtil;
-import net.minecraft.world.entity.Shearable;
 import net.minecraft.world.entity.animal.equine.Markings;
 import net.minecraft.world.entity.animal.equine.Variant;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.item.equipment.trim.TrimMaterial;
 
 import java.util.*;
@@ -47,7 +45,7 @@ public class ArchetypeCommands {
    public static CompletableFuture<Suggestions> getAbilitySuggestions(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder, String archetypeId, boolean curAbilities, boolean invert){
       String start = builder.getRemaining().toLowerCase(Locale.ROOT);
       Set<String> items = new HashSet<>();
-      SubArchetype subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,archetypeId));
+      SubArchetype subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(archetypesId(archetypeId));
       if(subArchetype != null && curAbilities){
          if(invert){
             ArchetypeRegistry.ABILITIES.stream().filter(key -> !subArchetype.getRawAbilities().contains(key)).forEach(key -> items.add(key.id().toLowerCase(Locale.ROOT)));
@@ -92,7 +90,7 @@ public class ArchetypeCommands {
    public static int setSubArchetype(CommandContext<CommandSourceStack> context, Collection<ServerPlayer> targets, String archetypeId){
       try{
          CommandSourceStack source = context.getSource();
-         SubArchetype subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,archetypeId));
+         SubArchetype subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(archetypesId(archetypeId));
          if(subArchetype == null && !archetypeId.equals("none")){
             source.sendFailure(Component.translatable("command.ancestralarchetypes.invalid_archetype",archetypeId));
             return 0;
@@ -154,7 +152,7 @@ public class ArchetypeCommands {
                return 0;
             }
          }else{
-            subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,archetypeId));
+            subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(archetypesId(archetypeId));
             if(subArchetype == null){
                source.sendFailure(Component.translatable("command.ancestralarchetypes.invalid_archetype",archetypeId));
                return 0;
@@ -603,7 +601,7 @@ public class ArchetypeCommands {
       try{
          CommandSourceStack src = context.getSource();
          
-         SubArchetype subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,archetypeId));
+         SubArchetype subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(archetypesId(archetypeId));
          if(subArchetype == null && !archetypeId.equals("none")){
             src.sendFailure(Component.translatable("command.ancestralarchetypes.invalid_archetype",archetypeId));
             return 0;
@@ -667,7 +665,7 @@ public class ArchetypeCommands {
       try{
          CommandSourceStack src = context.getSource();
          
-         SubArchetype subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,archetypeId));
+         SubArchetype subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(archetypesId(archetypeId));
          if(subArchetype == null){
             src.sendFailure(Component.translatable("command.ancestralarchetypes.invalid_archetype",archetypeId));
             return 0;
@@ -686,12 +684,12 @@ public class ArchetypeCommands {
       try{
          CommandSourceStack src = context.getSource();
          
-         SubArchetype subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,archetypeId));
+         SubArchetype subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(archetypesId(archetypeId));
          if(subArchetype == null){
             src.sendFailure(Component.translatable("command.ancestralarchetypes.invalid_archetype",archetypeId));
             return 0;
          }
-         ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,abilityId));
+         ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.getValue(archetypesId(abilityId));
          if(ability == null){
             src.sendFailure(Component.translatable("command.ancestralarchetypes.invalid_ability",abilityId));
             return 0;
@@ -716,12 +714,12 @@ public class ArchetypeCommands {
       try{
          CommandSourceStack src = context.getSource();
          
-         SubArchetype subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,archetypeId));
+         SubArchetype subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(archetypesId(archetypeId));
          if(subArchetype == null){
             src.sendFailure(Component.translatable("command.ancestralarchetypes.invalid_archetype",archetypeId));
             return 0;
          }
-         ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,abilityId));
+         ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.getValue(archetypesId(abilityId));
          if(ability == null){
             src.sendFailure(Component.translatable("command.ancestralarchetypes.invalid_ability",abilityId));
             return 0;

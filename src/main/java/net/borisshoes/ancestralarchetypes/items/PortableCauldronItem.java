@@ -5,6 +5,7 @@ import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.ancestralarchetypes.gui.PotionSelectionGui;
 import net.borisshoes.borislib.utils.SoundUtils;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -30,7 +31,6 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.level.Level;
-import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

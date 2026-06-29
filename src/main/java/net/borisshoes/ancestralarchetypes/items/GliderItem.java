@@ -3,6 +3,7 @@ package net.borisshoes.ancestralarchetypes.items;
 import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.borislib.utils.SoundUtils;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -26,7 +27,6 @@ import net.minecraft.world.item.equipment.trim.ArmorTrim;
 import net.minecraft.world.item.equipment.trim.TrimMaterial;
 import net.minecraft.world.item.equipment.trim.TrimPattern;
 import net.minecraft.world.level.Level;
-import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 

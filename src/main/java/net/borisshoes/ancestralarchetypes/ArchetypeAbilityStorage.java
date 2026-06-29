@@ -8,23 +8,21 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.ValueInput;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.archetypesId;
 
 public class ArchetypeAbilityStorage implements StorableData {
    
    private final HashMap<SubArchetype, Set<ArchetypeAbility>> storedAbilities = new HashMap<>();
    
-   public static final DataKey<ArchetypeAbilityStorage> KEY = DataRegistry.register(DataKey.ofGlobal(Identifier.fromNamespaceAndPath(MOD_ID, "archetype_abilities"), ArchetypeAbilityStorage::new));
+   public static final DataKey<ArchetypeAbilityStorage> KEY = DataRegistry.register(DataKey.ofGlobal(archetypesId("archetype_abilities"), ArchetypeAbilityStorage::new));
    
    private ArchetypeAbilityStorage(){
       initializeDefaults();
@@ -46,7 +44,7 @@ public class ArchetypeAbilityStorage implements StorableData {
       
       for(String subArchetypeId : abilitiesTag.keySet()){
          try{
-            SubArchetype subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(Identifier.fromNamespaceAndPath(MOD_ID, subArchetypeId));
+            SubArchetype subArchetype = ArchetypeRegistry.SUBARCHETYPES.getValue(archetypesId(subArchetypeId));
             if(subArchetype == null){
                AncestralArchetypes.LOGGER.warn("Unknown subarchetype '{}' in saved ability storage, skipping", subArchetypeId);
                continue;
@@ -57,7 +55,7 @@ public class ArchetypeAbilityStorage implements StorableData {
             for(Tag tag : abilityList){
                if(tag instanceof StringTag(String abilityId)){
                   try{
-                     ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.getValue(Identifier.fromNamespaceAndPath(MOD_ID, abilityId));
+                     ArchetypeAbility ability = ArchetypeRegistry.ABILITIES.getValue(archetypesId(abilityId));
                      if(ability != null){
                         abilities.add(ability);
                      }else{
@@ -114,7 +112,7 @@ public class ArchetypeAbilityStorage implements StorableData {
    }
    
    public static boolean addAbility(MinecraftServer server, SubArchetype subArchetype, ArchetypeAbility ability){
-      SubArchetype regArch = ArchetypeRegistry.SUBARCHETYPES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,subArchetype.getId()));
+      SubArchetype regArch = ArchetypeRegistry.SUBARCHETYPES.getValue(archetypesId(subArchetype.getId()));
       boolean succ = false;
       if(regArch != null){
          ArchetypeAbilityStorage storage = DataAccess.getGlobal(KEY);
@@ -126,7 +124,7 @@ public class ArchetypeAbilityStorage implements StorableData {
    }
    
    public static boolean removeAbility(MinecraftServer server, SubArchetype subArchetype, ArchetypeAbility ability){
-      SubArchetype regArch = ArchetypeRegistry.SUBARCHETYPES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,subArchetype.getId()));
+      SubArchetype regArch = ArchetypeRegistry.SUBARCHETYPES.getValue(archetypesId(subArchetype.getId()));
       boolean succ = false;
       if(regArch != null){
          ArchetypeAbilityStorage storage = DataAccess.getGlobal(KEY);
@@ -138,7 +136,7 @@ public class ArchetypeAbilityStorage implements StorableData {
    }
    
    public static void resetAbilities(MinecraftServer server, SubArchetype subArchetype){
-      SubArchetype regArch = ArchetypeRegistry.SUBARCHETYPES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,subArchetype.getId()));
+      SubArchetype regArch = ArchetypeRegistry.SUBARCHETYPES.getValue(archetypesId(subArchetype.getId()));
       if(regArch != null){
          ArchetypeAbilityStorage storage = DataAccess.getGlobal(KEY);
          regArch.resetAbilities();

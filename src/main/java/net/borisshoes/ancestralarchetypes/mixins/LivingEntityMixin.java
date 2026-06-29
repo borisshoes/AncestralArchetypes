@@ -9,6 +9,7 @@ import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.ancestralarchetypes.gui.MountInventoryGui;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
+import net.borisshoes.ancestralarchetypes.misc.MetamorphTypes;
 import net.borisshoes.borislib.gui.GraphicalItem;
 import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.borisshoes.borislib.utils.SoundUtils;
@@ -185,6 +186,14 @@ public abstract class LivingEntityMixin {
       
       if(entity instanceof ServerPlayer player){
          PlayerArchetypeData profile = profile(player);
+         System.out.println(profile.getMetamorph() + " " + profile.getMetamorphFuseTime());
+         if(profile.getMetamorph() == MetamorphTypes.TNT && profile.getMetamorphFuseTime() <= 0){
+            profile.metamorphIgniteDeath(player);
+            player.setHealth(1.0f);
+            System.out.println("Protecting");
+            return true;
+         }
+         if(profile.isMetamorphed()) return original;
          if(profile.hasAbility(ArchetypeRegistry.MAGMA_TOTEM) && profile.getDeathReductionSizeLevel() <= 1){
             profile.changeDeathReductionSizeLevel(player, false);
             player.level().sendParticles(ParticleTypes.TOTEM_OF_UNDYING, player.getX(), player.getY() + player.getBbHeight() / 2, player.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
@@ -195,28 +204,42 @@ public abstract class LivingEntityMixin {
             player.level().sendParticles(ParticleTypes.TOTEM_OF_UNDYING, player.getX(), player.getY() + player.getBbHeight() / 2, player.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
             makeSound(SoundEvents.ZOMBIE_VILLAGER_CURE);
             return true;
+         }else if(profile.hasAbility(ArchetypeRegistry.SULFUR_TOTEM) && profile.getDeathReductionSizeLevel() <= 1){
+            profile.changeDeathReductionSizeLevel(player, false);
+            player.level().sendParticles(ParticleTypes.TOTEM_OF_UNDYING, player.getX(), player.getY() + player.getBbHeight() / 2, player.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
+            makeSound(SoundEvents.ZOMBIE_VILLAGER_CURE);
+            return true;
          }
       }
       return original;
    }
    
-   @ModifyVariable(method = "knockback", at = @At("HEAD"), ordinal = 0, argsOnly = true)
-   private double archetypes$knockback(double strength){
+   @ModifyVariable(method = "knockback", at = @At("HEAD"), argsOnly = true, name = "power")
+   private double archetypes$knockback(double power){
       LivingEntity entity = (LivingEntity) (Object) this;
+      double newStrength = power;
       
       if(entity instanceof ServerPlayer player){
          PlayerArchetypeData profile = profile(player);
+         
          if(profile.hasAbility(ArchetypeRegistry.INCREASED_KNOCKBACK)){
-            return strength * (float) CONFIG.getDouble(ArchetypeRegistry.KNOCKBACK_INCREASE);
+            newStrength *= (float) CONFIG.getDouble(ArchetypeRegistry.KNOCKBACK_INCREASE);
          }
          if(profile.hasAbility(ArchetypeRegistry.LIGHTWEIGHT)){
-            return strength * (float) CONFIG.getDouble(ArchetypeRegistry.LIGHTWEIGHT_INCREASED_KNOCKBACK);
+            newStrength *= (float) CONFIG.getDouble(ArchetypeRegistry.LIGHTWEIGHT_INCREASED_KNOCKBACK);
          }
          if(profile.hasAbility(ArchetypeRegistry.REDUCED_KNOCKBACK)){
-            return strength * (float) CONFIG.getDouble(ArchetypeRegistry.KNOCKBACK_DECREASE);
+            newStrength *= (float) CONFIG.getDouble(ArchetypeRegistry.KNOCKBACK_DECREASE);
+         }
+         
+         if(profile.getMetamorph() == MetamorphTypes.NETHERITE){
+            newStrength *= (float) CONFIG.getDouble(ArchetypeRegistry.METAMORPH_NETHERITE_KNOCKBACK_MODIFIER);
+         }
+         if(profile.getMetamorph() == MetamorphTypes.IRON){
+            newStrength *= (float) CONFIG.getDouble(ArchetypeRegistry.METAMORPH_IRON_KNOCKBACK_MODIFIER);
          }
       }
-      return strength;
+      return newStrength;
    }
    
    @Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)
@@ -227,8 +250,18 @@ public abstract class LivingEntityMixin {
          PlayerArchetypeData profile = profile(player);
          if(profile.hasAbility(ArchetypeRegistry.NO_FALL_DAMAGE) && source.is(DamageTypeTags.IS_FALL)){
             cir.setReturnValue(false);
+            return;
          }else if(profile.hasAbility(ArchetypeRegistry.BOUNCY) && source.is(DamageTypeTags.IS_FALL) && !player.isShiftKeyDown()){
             cir.setReturnValue(false);
+            return;
+         }
+         
+         if(profile.getMetamorph() == MetamorphTypes.TNT && profile.getMetamorphFuseTime() <= 0){
+            if(source.is(DamageTypeTags.IS_EXPLOSION)){
+               profile.metamorphIgniteExplosion(player);
+            }else if(source.is(DamageTypeTags.IS_FIRE)){
+               profile.metamorphIgniteFire(player);
+            }
          }
       }
    }
@@ -299,6 +332,19 @@ public abstract class LivingEntityMixin {
       if(entity instanceof ServerPlayer player){
          PlayerArchetypeData profile = profile(player);
          ItemStack weapon = source.getWeaponItem();
+         
+         if(profile.getMetamorph() == MetamorphTypes.WOOL && source.is(DamageTypeTags.IS_FALL)){
+            newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.METAMORPH_WOOL_FALL_MODIFIER);
+         }
+         if(profile.getMetamorph() == MetamorphTypes.IRON && source.is(DamageTypeTags.IS_PROJECTILE)){
+            newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.METAMORPH_IRON_PROJECTILE_MODIFIER);
+         }
+         if(profile.getMetamorph() == MetamorphTypes.IRON && source.is(DamageTypeTags.IS_EXPLOSION)){
+            newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.METAMORPH_IRON_BLAST_MODIFIER);
+         }
+         if(profile.getMetamorph() == MetamorphTypes.NETHERITE && source.is(DamageTypeTags.IS_EXPLOSION)){
+            newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.METAMORPH_NETHERITE_BLAST_MODIFIER);
+         }
          
          if(profile.hasAbility(ArchetypeRegistry.IMPALE_VULNERABLE) && weapon != null){
             int impaleLvl = EnchantmentHelper.getItemEnchantmentLevel(MinecraftUtils.getEnchantment(Enchantments.IMPALING), weapon);

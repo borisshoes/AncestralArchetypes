@@ -11,7 +11,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,7 +31,7 @@ import net.minecraft.world.item.equipment.trim.TrimMaterial;
 import net.minecraft.world.item.equipment.trim.TrimPattern;
 import net.minecraft.world.level.Level;
 
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.archetypesId;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.EQUIPMENT_ASSET_REGISTRY_KEY;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.SLOW_HOVER_ABILITY;
@@ -91,10 +90,10 @@ public class HoverItem extends AbilityItem{
          }
          message.append(" ≈");
          player.sendSystemMessage(Component.literal(message.toString()).withColor(ArchetypeRegistry.GHASTLING.getColor()), true);
-         stack.set(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER).setAsset(ResourceKey.create(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.fromNamespaceAndPath(MOD_ID,"aviator_helmet_on"))).setDamageOnHurt(false).build());
+         stack.set(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER).setAsset(ResourceKey.create(EQUIPMENT_ASSET_REGISTRY_KEY, archetypesId("aviator_helmet_on"))).setDamageOnHurt(false).build());
          stack.remove(DataComponents.TRIM);
       }else{
-         stack.set(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER).setAsset(ResourceKey.create(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.fromNamespaceAndPath(MOD_ID,"aviator_helmet_off"))).setDamageOnHurt(false).build());
+         stack.set(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER).setAsset(ResourceKey.create(EQUIPMENT_ASSET_REGISTRY_KEY, archetypesId("aviator_helmet_off"))).setDamageOnHurt(false).build());
          stack.remove(DataComponents.TRIM);
       }
       

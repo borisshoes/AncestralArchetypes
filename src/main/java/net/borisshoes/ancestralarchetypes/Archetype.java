@@ -2,7 +2,6 @@ package net.borisshoes.ancestralarchetypes;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;

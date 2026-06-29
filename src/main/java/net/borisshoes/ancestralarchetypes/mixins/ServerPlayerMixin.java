@@ -1,11 +1,9 @@
 package net.borisshoes.ancestralarchetypes.mixins;
 
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
-import net.borisshoes.borislib.tracker.PlayerMovementEntry;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.portal.TeleportTransition;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,13 +16,15 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 public class ServerPlayerMixin {
    
    @Inject(method = "die", at = @At("HEAD"))
-   private void archetypes$resetDeathSizeReductionLevel(DamageSource damageSource, CallbackInfo ci){
+   private void archetypes$onDeath(DamageSource damageSource, CallbackInfo ci){
       ServerPlayer player = (ServerPlayer) (Object) this;
       
       PlayerArchetypeData profile = profile(player);
       if(profile.getDeathReductionSizeLevel() != 0){
          profile.resetDeathReductionSizeLevel(player);
       }
+      
+      profile.metamorph(null,player);
    }
    
    @Inject(method = "setGameMode", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;removeEntitiesOnShoulder()V"))

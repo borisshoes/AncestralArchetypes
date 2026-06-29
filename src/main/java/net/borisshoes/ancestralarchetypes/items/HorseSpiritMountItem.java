@@ -18,7 +18,7 @@ import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.equipment.Equippable;
 
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.archetypesId;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.EQUIPMENT_ASSET_REGISTRY_KEY;
 
@@ -42,7 +42,7 @@ public class HorseSpiritMountItem extends SpiritMountItem{
             .add(Attributes.ARMOR, new AttributeModifier(Identifier.withDefaultNamespace("armor.body"), 15.0, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.BODY)
             .add(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(Identifier.withDefaultNamespace("armor.body"), 5.0F, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.BODY)
             .build());
-      bodyArmor.set(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.BODY).setEquipSound(SoundEvents.HORSE_ARMOR).setAsset(ResourceKey.create(EQUIPMENT_ASSET_REGISTRY_KEY, Identifier.fromNamespaceAndPath(MOD_ID,"spirit"))).setAllowedEntities(EntityType.HORSE).setDamageOnHurt(false).build());
+      bodyArmor.set(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.BODY).setEquipSound(SoundEvents.HORSE_ARMOR).setAsset(ResourceKey.create(EQUIPMENT_ASSET_REGISTRY_KEY, archetypesId("spirit"))).setAllowedEntities(EntityType.HORSE).setDamageOnHurt(false).build());
       bodyArmor.enchant(MinecraftUtils.getEnchantment(Enchantments.PROTECTION),4);
       horse.setBodyArmorItem(bodyArmor);
       horse.setVariantAndMarkings(profile.getHorseColor(), profile.getHorseMarking());

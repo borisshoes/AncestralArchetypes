@@ -3,8 +3,9 @@ package net.borisshoes.ancestralarchetypes.items;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
-import net.borisshoes.borislib.utils.ParticleEffectUtils;
+import net.borisshoes.ancestralarchetypes.misc.TeleportIndicator;
 import net.borisshoes.borislib.utils.SoundUtils;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -25,12 +26,21 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
 public class LongTeleportItem extends AbilityItem{
+   private static final Map<UUID, Vec3> CACHED_SPOTS = new HashMap<>();
+   private static final double STABILITY_THRESHOLD = 1.5;
+   private static final double MIN_ALIGNMENT_DOT = 0.70; // ~45 degrees - allows precise aiming at long range
+   private static final double PERPENDICULAR_TOLERANCE_RATIO = 0.12; // 12% of distance - scales with range
+   private static final double DISTANCE_PREFERENCE_THRESHOLD = 4.0; // Prefer spots at least 4 blocks further away
+   
    public LongTeleportItem(Properties settings){
       super(ArchetypeRegistry.LONG_TELEPORT, "\uD83D\uDC41", settings);
    }
@@ -53,8 +63,9 @@ public class LongTeleportItem extends AbilityItem{
       if(profile.getAbilityCooldown(this.ability) <= 0 && (slot == EquipmentSlot.MAINHAND || slot == EquipmentSlot.OFFHAND)){
          Vec3 spot = findTeleportSpot(world,player);
          if(spot != null){
-            ParticleEffectUtils.circle(world,player,spot.subtract(0,0,0), ParticleTypes.ENCHANTED_HIT,0.5,12,1,0.1,0);
-            world.sendParticles(player, ParticleTypes.WITCH, true,true, spot.x,spot.y,spot.z,5,.15,.15,.15,0);
+            Vec3 eyePos = player.getEyePosition();
+            TeleportIndicator.show(player, spot.add(0,1,0), eyePos);
+            world.sendParticles(player, ParticleTypes.PORTAL, true, true, spot.x, spot.y+1, spot.z, 1, 0.1, 0.1, 0.1, 0.4);
          }
       }
    }
@@ -80,16 +91,74 @@ public class LongTeleportItem extends AbilityItem{
    }
    
    private boolean teleport(ServerLevel world, ServerPlayer user){
-      Vec3 spot = findTeleportSpot(world,user);
+      UUID playerUUID = user.getUUID();
+      Vec3 cachedSpot = CACHED_SPOTS.get(playerUUID);
+      
+      // Try to use cached spot first (what the indicator is showing)
+      if(cachedSpot != null){
+         // Safety check - ensure it's still valid
+         if(isSpaceClearFor(user, world, cachedSpot) && hasGroundSupport(world, user, cachedSpot)){
+            if(user.randomTeleport(cachedSpot.x, cachedSpot.y, cachedSpot.z, true)){
+               TeleportIndicator.hide(user);
+               CACHED_SPOTS.remove(playerUUID);
+               world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS);
+               return true;
+            }
+         }
+      }
+      
+      // Fallback: recalculate if cached spot failed safety check
+      Vec3 spot = findTeleportSpot(world, user);
       if(spot == null) return false;
-      if(user.randomTeleport(spot.x,spot.y,spot.z,true)){
+      if(user.randomTeleport(spot.x, spot.y, spot.z, true)){
+         TeleportIndicator.hide(user);
+         CACHED_SPOTS.remove(playerUUID);
          world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS);
          return true;
       }
       return false;
    }
    
+   public static void clearCache(UUID playerUUID){
+      CACHED_SPOTS.remove(playerUUID);
+   }
+   
+   public static void clearAllCaches(){
+      CACHED_SPOTS.clear();
+   }
+   
    private Vec3 findTeleportSpot(ServerLevel world, ServerPlayer user){
+      UUID playerUUID = user.getUUID();
+      Vec3 cachedSpot = CACHED_SPOTS.get(playerUUID);
+      
+      // If cached spot exists and is still valid, prefer it for stability
+      if(cachedSpot != null){
+         if(isSpaceClearFor(user, world, cachedSpot) && hasGroundSupport(world, user, cachedSpot)){
+            Vec3 origin = user.position();
+            Vec3 direction = user.getLookAngle().normalize();
+            Vec3 toSpot = cachedSpot.subtract(origin);
+            double distanceToSpot = toSpot.length();
+            
+            // Check alignment with aim direction
+            double dotProduct = direction.dot(toSpot.normalize());
+            
+            // Calculate perpendicular distance from aim ray to cached spot
+            double alongRay = direction.dot(toSpot);
+            Vec3 pointOnRay = origin.add(direction.scale(alongRay));
+            double perpendicularDist = pointOnRay.distanceTo(cachedSpot);
+            
+            // Scale tolerance with distance - allows precision at long range, tight control at close range
+            double maxPerpendicularDist = Math.max(2.0, distanceToSpot * PERPENDICULAR_TOLERANCE_RATIO);
+            
+            // Keep cached spot if it's well-aligned AND close to aim ray
+            if(dotProduct > MIN_ALIGNMENT_DOT && perpendicularDist < maxPerpendicularDist){
+               return cachedSpot;
+            }
+         }
+         CACHED_SPOTS.remove(playerUUID);
+      }
+      
+      // Find new spot
       Vec3 direction = user.getLookAngle().normalize();
       double maxRange = CONFIG.getDouble(ArchetypeRegistry.LONG_TELEPORT_DISTANCE);
       double leniencyRange = 1.5;
@@ -114,14 +183,32 @@ public class LongTeleportItem extends AbilityItem{
                   Vec3 candidate = new Vec3(base.x, base.y + yOff, base.z);
                   if(!isSpaceClearFor(user, world, candidate)) continue;
                   if(hasGroundSupport(world, user, candidate)){
-                     return candidate;
+                     // Prefer farther spots - update cache if new spot is significantly different or farther
+                     boolean shouldUpdate = cachedSpot == null ||
+                           cachedSpot.distanceTo(candidate) > STABILITY_THRESHOLD ||
+                           candidate.distanceTo(origin) > cachedSpot.distanceTo(origin) + DISTANCE_PREFERENCE_THRESHOLD;
+                     
+                     if(shouldUpdate){
+                        CACHED_SPOTS.put(playerUUID, candidate);
+                        return candidate;
+                     }
+                     return cachedSpot;
                   }
                   Vec3 down = candidate;
                   while(origin.distanceToSqr(down) <= maxDistSq && down.y > world.getMinY()){
                      down = down.add(0.0, -dropStep, 0.0);
                      if(!isSpaceClearFor(user, world, down)) break;
                      if(hasGroundSupport(world, user, down)){
-                        return down;
+                        // Prefer farther spots - update cache if new spot is significantly different or farther
+                        boolean shouldUpdate = cachedSpot == null ||
+                              cachedSpot.distanceTo(down) > STABILITY_THRESHOLD ||
+                              down.distanceTo(origin) > cachedSpot.distanceTo(origin) + DISTANCE_PREFERENCE_THRESHOLD;
+                        
+                        if(shouldUpdate){
+                           CACHED_SPOTS.put(playerUUID, down);
+                           return down;
+                        }
+                        return cachedSpot;
                      }
                   }
                }

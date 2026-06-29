@@ -20,7 +20,6 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -69,12 +68,16 @@ public class AncestralArchetypes implements ModInitializer, ClientModInitializer
       LOGGER.info("Evolving Ancestral Archetypes Into Your Client!");
    }
    
+   public static Identifier archetypesId(String id){
+      return Identifier.fromNamespaceAndPath(MOD_ID,id);
+   }
+   
    public static ArchetypeAbility abilityFromTag(String tag){
       int lastDotIndex = tag.lastIndexOf(".");
       if (lastDotIndex == -1) {
          return null;
       }
-      return ArchetypeRegistry.ABILITIES.getValue(Identifier.fromNamespaceAndPath(MOD_ID,tag.substring(lastDotIndex + 1)));
+      return ArchetypeRegistry.ABILITIES.getValue(archetypesId(tag.substring(lastDotIndex + 1)));
    }
    
    public static PlayerArchetypeData profile(ServerPlayer player){

@@ -1,7 +1,6 @@
 package net.borisshoes.ancestralarchetypes;
 
 import net.borisshoes.borislib.config.IConfigSetting;
-import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;

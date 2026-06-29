@@ -4,6 +4,8 @@ import eu.pb4.polymer.core.api.item.PolymerItem;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
+import net.borisshoes.borislib.utils.TextUtils;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -17,9 +19,8 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
-import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.archetypesId;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
 public abstract class AbilityItem extends Item implements PolymerItem {
@@ -28,7 +29,7 @@ public abstract class AbilityItem extends Item implements PolymerItem {
    public final String textCharacter;
    
    public AbilityItem(ArchetypeAbility ability, String character, Properties settings){
-      super(settings.setId(ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(MOD_ID,ability.id()))));
+      super(settings.setId(ResourceKey.create(Registries.ITEM, archetypesId(ability.id()))));
       this.ability = ability;
       this.textCharacter = character;
    }
@@ -55,22 +56,26 @@ public abstract class AbilityItem extends Item implements PolymerItem {
                   player.getCooldowns().addCooldown(stack,100000000);
                }
                if((slot == EquipmentSlot.MAINHAND || slot == EquipmentSlot.OFFHAND) && player.level().getServer().getTickCount() % 2 == 0){
-                  StringBuilder builder = new StringBuilder(textCharacter+" ");
-                  int value = (int) ((1.0-profile.getAbilityCooldownPercent(this.ability)) * 100);
-                  char[] unicodeChars = {'▁', '▂', '▃', '▅', '▆', '▇', '▌'};
-                  for (int i = 0; i < 10; i++) {
-                     int segmentValue = value - (i * 10);
-                     if (segmentValue <= 0) {
-                        builder.append(unicodeChars[0]);
-                     } else if (segmentValue >= 10) {
-                        builder.append(unicodeChars[unicodeChars.length - 1]);
-                     } else {
-                        int charIndex = (int) ((double) segmentValue / 10 * (unicodeChars.length - 1));
-                        builder.append(unicodeChars[charIndex]);
-                     }
-                  }
-                  builder.append(" ").append(textCharacter);
-                  player.sendSystemMessage(Component.literal(builder.toString()).withColor(profile.getSubArchetype().getColor()),true);
+                  TextUtils.energyBar(player, 1.0-profile.getAbilityCooldownPercent(this.ability), 10,
+                        Component.literal(textCharacter+" ").withColor(profile.getSubArchetype().getColor()),
+                        Component.literal(" "+textCharacter).withColor(profile.getSubArchetype().getColor()),
+                        (style) -> style.withColor(profile.getSubArchetype().getColor()));
+//                  StringBuilder builder = new StringBuilder(textCharacter+" ");
+//                  int value = (int) ((1.0-profile.getAbilityCooldownPercent(this.ability)) * 100);
+//                  char[] unicodeChars = {'▁', '▂', '▃', '▅', '▆', '▇', '▌'};
+//                  for (int i = 0; i < 10; i++) {
+//                     int segmentValue = value - (i * 10);
+//                     if (segmentValue <= 0) {
+//                        builder.append(unicodeChars[0]);
+//                     } else if (segmentValue >= 10) {
+//                        builder.append(unicodeChars[unicodeChars.length - 1]);
+//                     } else {
+//                        int charIndex = (int) ((double) segmentValue / 10 * (unicodeChars.length - 1));
+//                        builder.append(unicodeChars[charIndex]);
+//                     }
+//                  }
+//                  builder.append(" ").append(textCharacter);
+//                  player.sendSystemMessage(Component.literal(builder.toString()).withColor(profile.getSubArchetype().getColor()),true);
                }
             }else{
                if(player.getCooldowns().isOnCooldown(stack)){
@@ -88,7 +93,7 @@ public abstract class AbilityItem extends Item implements PolymerItem {
    @Override
    public @Nullable Identifier getPolymerItemModel(ItemStack stack, PacketContext context, HolderLookup.Provider lookup){
        if(PolymerResourcePackUtils.hasMainPack(context)){
-          return Identifier.fromNamespaceAndPath(MOD_ID,this.ability.id());
+          return archetypesId(this.ability.id());
        }else{
           return BuiltInRegistries.ITEM.getResourceKey(getPolymerItem(stack,context)).get().identifier();
        }

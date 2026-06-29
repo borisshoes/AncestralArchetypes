@@ -3,6 +3,7 @@ package net.borisshoes.ancestralarchetypes.entities;
 import com.google.common.base.MoreObjects;
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
@@ -32,7 +33,6 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.*;
 import org.jetbrains.annotations.Nullable;
-import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import java.util.List;
 

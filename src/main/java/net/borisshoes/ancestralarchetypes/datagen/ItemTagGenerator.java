@@ -2,6 +2,7 @@ package net.borisshoes.ancestralarchetypes.datagen;
 
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
+import net.borisshoes.ancestralarchetypes.misc.MetamorphTypes;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagsProvider;
 import net.minecraft.core.HolderLookup;
@@ -46,8 +47,46 @@ public class ItemTagGenerator extends FabricTagsProvider.ItemTagsProvider {
       valueLookupBuilder(ArchetypeRegistry.MAGMA_CUBE_GROW_ITEMS)
             .add(Items.MAGMA_CREAM);
       
+      valueLookupBuilder(ArchetypeRegistry.SULFUR_GROW_ITEMS)
+            .add(Items.GUNPOWDER);
+      
       valueLookupBuilder(ArchetypeRegistry.CHOCOLATE_ALLERGY_FOODS)
             .add(Items.COOKIE);
+      
+      valueLookupBuilder(ArchetypeRegistry.METAMORPH_ITEMS.get(MetamorphTypes.ICE))
+            .add(Items.ICE)
+            .add(Items.BLUE_ICE)
+            .add(Items.PACKED_ICE);
+      
+      valueLookupBuilder(ArchetypeRegistry.METAMORPH_ITEMS.get(MetamorphTypes.WOOL))
+            .forceAddTag(ItemTags.WOOL);
+      
+      valueLookupBuilder(ArchetypeRegistry.METAMORPH_ITEMS.get(MetamorphTypes.IRON))
+            .add(Items.IRON_BLOCK)
+            .add(Items.RAW_IRON_BLOCK);
+      
+      valueLookupBuilder(ArchetypeRegistry.METAMORPH_ITEMS.get(MetamorphTypes.NETHERITE))
+            .add(Items.NETHERITE_BLOCK);
+      
+      valueLookupBuilder(ArchetypeRegistry.METAMORPH_ITEMS.get(MetamorphTypes.TNT))
+            .add(Items.TNT);
+      
+      valueLookupBuilder(ArchetypeRegistry.METAMORPH_ITEMS.get(MetamorphTypes.GOLD))
+            .add(Items.GOLD_BLOCK)
+            .add(Items.RAW_GOLD_BLOCK);
+      
+      valueLookupBuilder(ArchetypeRegistry.METAMORPH_ITEMS.get(MetamorphTypes.MAGMA))
+            .add(Items.MAGMA_BLOCK);
+      
+      valueLookupBuilder(ArchetypeRegistry.METAMORPH_ITEMS.get(MetamorphTypes.BOOKSHELF))
+            .add(Items.BOOKSHELF)
+            .add(Items.CHISELED_BOOKSHELF);
+      
+      valueLookupBuilder(ArchetypeRegistry.METAMORPH_ITEMS.get(MetamorphTypes.SCULK))
+            .add(Items.SCULK)
+            .add(Items.SCULK_CATALYST)
+            .add(Items.SCULK_SENSOR)
+            .add(Items.SCULK_SHRIEKER);
       
       TagAppender<Item, Item> abilityItemBuilder = valueLookupBuilder(ArchetypeRegistry.ABILITY_ITEMS);
       for(Item item : ArchetypeRegistry.ITEMS){

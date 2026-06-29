@@ -4,12 +4,12 @@ import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.mixins.ThrowableItemProjectileAccessor;
 import net.borisshoes.borislib.utils.SoundUtils;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -27,16 +27,15 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
-import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
 import java.util.List;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.archetypesId;
 
 public class SnowblastEntity extends Snowball implements PolymerEntity {
    public static final ItemStack VIEW_STACK = new ItemStack(Items.SNOWBALL);
-   static{ VIEW_STACK.set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MOD_ID,"snow_blast_ball")); }
+   static{ VIEW_STACK.set(DataComponents.ITEM_MODEL, archetypesId("snow_blast_ball")); }
    
    public SnowblastEntity(EntityType<? extends SnowblastEntity> entityType, Level world){
       super(entityType, world);

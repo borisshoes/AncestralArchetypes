@@ -35,8 +35,13 @@ public abstract class ServerGamePacketListenerImplMixin {
    
    @Inject(method = "handlePlayerInput", at = @At("HEAD"))
    private void onPlayerInput(ServerboundPlayerInputPacket pkt, CallbackInfo ci) {
-      if(AncestralArchetypes.profile(player).hasAbility(ArchetypeRegistry.LAVA_WALKER) && player.getFluidHeight(FluidTags.LAVA) > 0.1 && !player.isShiftKeyDown()){
-         Input input = pkt.input();
+      PlayerArchetypeData profile = AncestralArchetypes.profile(player);
+      Input input = pkt.input();
+      if(input.jump() && profile.hasAbility(ArchetypeRegistry.LEAP) && profile.getLeapCharge() > 0){
+         profile.leap(player);
+         return;
+      }
+      if(profile.hasAbility(ArchetypeRegistry.LAVA_WALKER) && player.getFluidHeight(FluidTags.LAVA) > 0.1 && !player.isShiftKeyDown()){
          this.hasInput = input.backward() || input.forward() || input.left() || input.right();
       }
    }

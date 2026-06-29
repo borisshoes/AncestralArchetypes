@@ -6,19 +6,17 @@ import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.ancestralarchetypes.callbacks.DeglowTimerCallback;
 import net.borisshoes.ancestralarchetypes.entities.LevitationBulletEntity;
 import net.borisshoes.ancestralarchetypes.events.BulletTargetEvent;
-import net.borisshoes.ancestralarchetypes.mixins.EntityAccessor;
+import net.borisshoes.ancestralarchetypes.misc.ArchetypeUtils;
 import net.borisshoes.borislib.BorisLib;
 import net.borisshoes.borislib.events.Event;
 import net.borisshoes.borislib.utils.MathUtils;
 import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.borisshoes.borislib.utils.SoundUtils;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
-import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -38,12 +36,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.scores.PlayerTeam;
-import net.minecraft.world.scores.Scoreboard;
 import org.jetbrains.annotations.Nullable;
-import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 
-import java.util.List;
 import java.util.Optional;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
@@ -74,7 +68,7 @@ public class LevitationBulletItem extends AbilityItem {
          if(target != null && player.level().getServer().getTickCount() % 4 == 0){
             boolean shouldGlow = Event.getEventsOfType(BulletTargetEvent.class).stream().noneMatch(e -> e.player.getId() == player.getId() && e.target.getId() == target.getId());
             if(shouldGlow){
-               addGlow(player,target, ChatFormatting.LIGHT_PURPLE);
+               ArchetypeUtils.addGlow(player,target, ChatFormatting.LIGHT_PURPLE);
                BorisLib.addTickTimerCallback(new DeglowTimerCallback(player,target));
             }
             Event.addEvent(new BulletTargetEvent(player,target));
@@ -148,27 +142,5 @@ public class LevitationBulletItem extends AbilityItem {
    private boolean hasLineOfSight(ServerLevel world, Entity viewer, Vec3 from, Vec3 to){
       BlockHitResult hit = world.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, viewer));
       return hit.getType() == HitResult.Type.MISS;
-   }
-   
-   private static void addGlow(ServerPlayer viewer, LivingEntity target, ChatFormatting color){
-      String teamName = "glow_" + viewer.getStringUUID() + "_" + target.getId();
-      PlayerTeam team = new PlayerTeam(new Scoreboard(), teamName);
-      team.setColor(color);
-      team.setAllowFriendlyFire(true);
-      team.setSeeFriendlyInvisibles(false);
-      team.getPlayers().add(target.getScoreboardName());
-      byte flags = target.getEntityData().get(EntityAccessor.getFLAGS());
-      byte glowing = (byte)(flags | (1 << 6));
-      List<SynchedEntityData.DataValue<?>> entries = List.of(SynchedEntityData.DataValue.create(EntityAccessor.getFLAGS(), glowing));
-      viewer.connection.send(new ClientboundSetEntityDataPacket(target.getId(), entries));
-      viewer.connection.send(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(team,true));
-   }
-   
-   public static void removeGlow(ServerPlayer viewer, LivingEntity target){
-      String teamName = "glow_" + viewer.getStringUUID() + "_" + target.getId();
-      PlayerTeam team = new PlayerTeam(new Scoreboard(), teamName);
-      byte flags = target.getEntityData().get(EntityAccessor.getFLAGS());
-      viewer.connection.send(ClientboundSetPlayerTeamPacket.createRemovePacket(team));
-      viewer.connection.send(new ClientboundSetEntityDataPacket(target.getId(), List.of(SynchedEntityData.DataValue.create(EntityAccessor.getFLAGS(), flags))));
    }
 }

@@ -2,8 +2,8 @@ package net.borisshoes.ancestralarchetypes.callbacks;
 
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
+import net.borisshoes.ancestralarchetypes.items.LongTeleportItem;
 import net.borisshoes.borislib.datastorage.DataAccess;
-import net.borisshoes.borislib.tracker.PlayerMovementEntry;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,12 +18,14 @@ public class PlayerConnectionCallback {
       if((player.getHealth() > 20 && player.getMaxHealth() > 20) || profile.getDeathReductionSizeLevel() != 0){
          if(profile.hasAbility(ArchetypeRegistry.GIANT_SIZED) ||
                profile.hasAbility(ArchetypeRegistry.MASSIVE_SIZED) ||
-               profile.hasAbility(ArchetypeRegistry.SLIME_TOTEM) || profile.getDeathReductionSizeLevel() != 0){
+               profile.hasAbility(ArchetypeRegistry.MOONLIT_FROG) ||
+               profile.getDeathReductionSizeLevel() != 0){
             profile.setHealthUpdate(player.getHealth());
          }
       }
       
       if(player.isVehicle()) player.getFirstPassenger().stopRiding();
+      LongTeleportItem.clearCache(player.getUUID());
    }
    
    public static void onPlayerJoin(ServerGamePacketListenerImpl handler, PacketSender packetSender, MinecraftServer server){

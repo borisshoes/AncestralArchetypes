@@ -1,7 +1,7 @@
 package net.borisshoes.ancestralarchetypes.callbacks;
 
 import net.borisshoes.ancestralarchetypes.events.BulletTargetEvent;
-import net.borisshoes.ancestralarchetypes.items.LevitationBulletItem;
+import net.borisshoes.ancestralarchetypes.misc.ArchetypeUtils;
 import net.borisshoes.borislib.BorisLib;
 import net.borisshoes.borislib.events.Event;
 import net.borisshoes.borislib.timers.TickTimerCallback;
@@ -23,7 +23,7 @@ public class DeglowTimerCallback extends TickTimerCallback {
       if(found){
          BorisLib.addTickTimerCallback(new DeglowTimerCallback(player, target));
       }else{
-         LevitationBulletItem.removeGlow(player,target);
+         ArchetypeUtils.removeGlow(player,target);
       }
    }
 }
