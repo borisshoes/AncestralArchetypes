@@ -861,6 +861,7 @@ public class ArchetypeRegistry {
       
       PolymerItemUtils.CONTEXT_ITEM_CHECK.register(
             (itemInstance, context) -> {
+               if(context == null || context.get(PacketContext.GAME_PROFILE) == null) return false;
                UUID player = context.get(PacketContext.GAME_PROFILE).id();
                if(player == null) return false;
                PlayerArchetypeData profile = profile(player);
@@ -885,6 +886,7 @@ public class ArchetypeRegistry {
       
       PolymerItemUtils.ITEM_MODIFICATION_EVENT.register(
             (original, client, context) -> {
+               if(context == null || context.get(PacketContext.GAME_PROFILE) == null) return original;
                UUID player = context.get(PacketContext.GAME_PROFILE).id();
                if(player == null) return original;
                PlayerArchetypeData profile = profile(player);
