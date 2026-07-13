@@ -1,6 +1,8 @@
 package net.borisshoes.ancestralarchetypes.mixins;
 
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
+import net.borisshoes.ancestralarchetypes.items.MetamorphHeadItem;
+import net.borisshoes.ancestralarchetypes.misc.ArchetypeUtils;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,6 +17,12 @@ public class ItemEntityMixin {
       ItemEntity itemEntity = (ItemEntity) (Object) this;
       if(stack.getItem() instanceof AbilityItem){
          itemEntity.discard();
+         return;
+      }else if(stack.getItem() instanceof MetamorphHeadItem){
+         itemEntity.discard();
+         return;
       }
+      
+      ArchetypeUtils.removeMetamorphHelmetTags(stack);
    }
 }

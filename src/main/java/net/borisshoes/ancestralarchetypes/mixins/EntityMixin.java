@@ -12,10 +12,7 @@ import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -37,12 +34,7 @@ import static net.borisshoes.borislib.BorisLib.PLAYER_MOVEMENT_TRACKER;
 public class EntityMixin {
    
 
-   @Inject(method = "attemptToShearEquipment", at = @At("HEAD"), cancellable = true)
-   private void archetypes$stopMountShear(Player player, InteractionHand interactionHand, ItemStack itemStack, Mob mob, CallbackInfoReturnable<Boolean> cir){
-      Entity entity = (Entity)(Object) this;
-      List<String> tags = entity.entityTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
-      if(!tags.isEmpty()) cir.setReturnValue(false);
-   }
+   
    
    @ModifyReturnValue(method = "isSteppingCarefully", at = @At("RETURN"))
    private boolean archetypes$lightweightBypass(boolean original){
@@ -56,28 +48,6 @@ public class EntityMixin {
          }
       }
       return original;
-   }
-   
-   @Inject(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;updateEntityMovementAfterFallOn(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/world/entity/Entity;)V"))
-   private void archetypes$onEntityLand(MoverType type, Vec3 movement, CallbackInfo ci, @Local Block block, @Local BlockState state){
-      Entity entity = (Entity)(Object) this;
-      if(entity instanceof ServerPlayer player){
-         PlayerArchetypeData profile = profile(player);
-         ServerLevel world = player.level();
-         
-         if(profile.hasAbility(ArchetypeRegistry.BOUNCY) && !player.isDeadOrDying()){
-            if (!player.isSuppressingBounce()) {
-               Vec3 oldVel = PLAYER_MOVEMENT_TRACKER.get(player).velocity();
-               if (oldVel.y < 0.0) {
-                  double newY = oldVel.y > -0.425 ? 0 : -0.9*oldVel.y;
-                  Vec3 newVel = new Vec3(oldVel.x, newY, oldVel.z);
-                  player.fallDistance = 0;
-                  player.setDeltaMovement(newVel);
-                  player.connection.send(new ClientboundSetEntityMotionPacket(player.getId(), newVel));
-               }
-            }
-         }
-      }
    }
    
    @Inject(method = "removePassenger", at = @At("TAIL"))
@@ -95,7 +65,7 @@ public class EntityMixin {
    
    @WrapOperation(method = "startRiding(Lnet/minecraft/world/entity/Entity;ZZ)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/EntityType;canSerialize()Z"))
    private boolean playerladder$allowRidingPlayers(EntityType<?> instance, Operation<Boolean> original, Entity entity, boolean force, boolean emit) {
-      if(instance == EntityType.PLAYER && entity instanceof ServerPlayer player && AncestralArchetypes.profile(player).hasAbility(ArchetypeRegistry.RIDEABLE)) {
+      if(instance == EntityTypes.PLAYER && entity instanceof ServerPlayer player && AncestralArchetypes.profile(player).hasAbility(ArchetypeRegistry.RIDEABLE)) {
          return true;
       }else{
          return original.call(instance);

@@ -3,7 +3,7 @@ package net.borisshoes.ancestralarchetypes.items;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -18,7 +18,7 @@ public class DonkeySpiritMountItem  extends SpiritMountItem{
    
    @Override
    protected LivingEntity getMountEntity(ServerPlayer player){
-      Donkey donkey = EntityType.DONKEY.create(player.level(), EntitySpawnReason.MOB_SUMMONED);
+      Donkey donkey = EntityTypes.DONKEY.create(player.level(), EntitySpawnReason.MOB_SUMMONED);
       donkey.getAttribute(Attributes.MAX_HEALTH).setBaseValue(60.0f);
       donkey.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.25f);
       donkey.getAttribute(Attributes.JUMP_STRENGTH).setBaseValue(0.85f);

@@ -9,6 +9,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.EnchantmentMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
@@ -25,7 +26,7 @@ public class EnchantmentMenuMixin {
       List<ServerPlayer> players = level.getEntitiesOfClass(ServerPlayer.class,new AABB(pos).inflate(4));
       players.removeIf(player -> AncestralArchetypes.profile(player).getMetamorph() != MetamorphTypes.BOOKSHELF);
       players.forEach(player -> {
-         float dist = Mth.sqrt((float) player.distanceToSqr(pos.getBottomCenter()));
+         float dist = Mth.sqrt((float) player.distanceToSqr(Vec3.atBottomCenterOf(pos)));
          cases.addAndGet(Math.max(0,(int) (5 * (4 - dist))));
       });
       return Math.max(bookcases,Math.min(20,cases.get())); // This CANNOT be replaced by clamp, the IDE is lying

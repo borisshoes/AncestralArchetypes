@@ -186,11 +186,9 @@ public abstract class LivingEntityMixin {
       
       if(entity instanceof ServerPlayer player){
          PlayerArchetypeData profile = profile(player);
-         System.out.println(profile.getMetamorph() + " " + profile.getMetamorphFuseTime());
-         if(profile.getMetamorph() == MetamorphTypes.TNT && profile.getMetamorphFuseTime() <= 0){
+         if(profile.getMetamorph() == MetamorphTypes.TNT && profile.canMetamorphTntDeathShield()){
             profile.metamorphIgniteDeath(player);
             player.setHealth(1.0f);
-            System.out.println("Protecting");
             return true;
          }
          if(profile.isMetamorphed()) return original;

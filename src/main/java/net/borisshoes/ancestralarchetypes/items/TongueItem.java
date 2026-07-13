@@ -25,7 +25,7 @@ import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -128,7 +128,7 @@ public class TongueItem extends AbilityItem{
       
       if(!found){
          AABB box = new AABB(playerPos, playerPos).inflate(baseLength + 0.5);
-         List<ItemEntity> items = world.getEntities(EntityType.ITEM, box, (entity) -> itemInRange(entity.position(), playerPos, result.endPos(), 0.5));
+         List<ItemEntity> items = world.getEntities(EntityTypes.ITEM, box, (entity) -> itemInRange(entity.position(), playerPos, result.endPos(), 0.5));
          items.sort(Comparator.comparingDouble((e) -> (double)e.distanceTo(user)));
          
          for(ItemEntity hit : items){

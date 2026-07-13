@@ -36,6 +36,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.scores.TeamColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -68,7 +69,7 @@ public class LevitationBulletItem extends AbilityItem {
          if(target != null && player.level().getServer().getTickCount() % 4 == 0){
             boolean shouldGlow = Event.getEventsOfType(BulletTargetEvent.class).stream().noneMatch(e -> e.player.getId() == player.getId() && e.target.getId() == target.getId());
             if(shouldGlow){
-               ArchetypeUtils.addGlow(player,target, ChatFormatting.LIGHT_PURPLE);
+               ArchetypeUtils.addGlow(player,target, TeamColor.LIGHT_PURPLE);
                BorisLib.addTickTimerCallback(new DeglowTimerCallback(player,target));
             }
             Event.addEvent(new BulletTargetEvent(player,target));

@@ -2,7 +2,7 @@ package net.borisshoes.ancestralarchetypes.callbacks;
 
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
-import net.borisshoes.ancestralarchetypes.items.LongTeleportItem;
+import net.borisshoes.ancestralarchetypes.items.DirectionalTeleportItem;
 import net.borisshoes.borislib.datastorage.DataAccess;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.server.MinecraftServer;
@@ -25,7 +25,7 @@ public class PlayerConnectionCallback {
       }
       
       if(player.isVehicle()) player.getFirstPassenger().stopRiding();
-      LongTeleportItem.clearCache(player.getUUID());
+      DirectionalTeleportItem.clearAllPlayerCaches(player.getUUID());
    }
    
    public static void onPlayerJoin(ServerGamePacketListenerImpl handler, PacketSender packetSender, MinecraftServer server){

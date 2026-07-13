@@ -30,7 +30,7 @@ import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.CONFIG_SETTIN
 
 public class AncestralArchetypes implements ModInitializer, ClientModInitializer {
    
-   static final Logger LOGGER = LogManager.getLogger("Ancestral Archetypes");
+   public static final Logger LOGGER = LogManager.getLogger("Ancestral Archetypes");
    private static final String CONFIG_NAME = "AncestralArchetypes.properties";
    public static final String MOD_ID = "ancestralarchetypes";
    

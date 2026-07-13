@@ -1,5 +1,6 @@
 package net.borisshoes.ancestralarchetypes.callbacks;
 
+import com.mojang.datafixers.util.Pair;
 import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
@@ -29,7 +30,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -55,6 +55,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.ITEMS;
+import static net.borisshoes.ancestralarchetypes.items.MetamorphHeadItem.METAMORPH_HIDDEN_MODEL;
 import static net.borisshoes.borislib.BorisLib.PLAYER_MOVEMENT_TRACKER;
 
 
@@ -314,7 +315,7 @@ public class TickCallback {
                if(subArchetype == null){
                   inspector.sendSystemMessage(Component.translatable("text.ancestralarchetypes.inspect_no_archetype", player.getFeedbackDisplayName()).withStyle(ChatFormatting.AQUA), false);
                }else{
-                  inspector.sendSystemMessage(Component.translatable("text.ancestralarchetypes.inspect_results", player.getFeedbackDisplayName(), subArchetype.getName().withStyle(TextUtils.getClosestFormatting(subArchetype.getColor()))).withStyle(ChatFormatting.AQUA), false);
+                  inspector.sendSystemMessage(Component.translatable("text.ancestralarchetypes.inspect_results", player.getFeedbackDisplayName(), subArchetype.getName().withColor(TextUtils.getClosestFormatting(subArchetype.getColor()))).withStyle(ChatFormatting.AQUA), false);
                }
                if(alert)
                   player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.inspected").withStyle(ChatFormatting.RED));
@@ -438,9 +439,16 @@ public class TickCallback {
          MinecraftUtils.attributeEffect(player, Attributes.ENTITY_INTERACTION_RANGE, CONFIG.getDouble(ArchetypeRegistry.MOUNTED_RANGE), AttributeModifier.Operation.ADD_VALUE, archetypesId("mounted_reach"), true);
          MinecraftUtils.attributeEffect(player, Attributes.SAFE_FALL_DISTANCE, 10, AttributeModifier.Operation.ADD_VALUE, archetypesId("mounted_fall"), true);
       }
+      
+      boolean shouldIceMetamorph = profile.isMetamorphed() && profile.getMetamorph() == MetamorphTypes.ICE;
+      MinecraftUtils.attributeEffect(player, Attributes.FRICTION_MODIFIER, -CONFIG.getFloat(ArchetypeRegistry.METAMORPH_ICE_FRICTION_REDUCTION), AttributeModifier.Operation.ADD_VALUE, archetypesId("metamorph_ice_friction"), !shouldIceMetamorph);
+      MinecraftUtils.attributeEffect(player, Attributes.AIR_DRAG_MODIFIER, -CONFIG.getFloat(ArchetypeRegistry.METAMORPH_ICE_DRAG_REDUCTION), AttributeModifier.Operation.ADD_VALUE, archetypesId("metamorph_ice_drag"), !shouldIceMetamorph);
    }
    
    public static void attributes(PlayerArchetypeData profile, ServerPlayer player){
+      MinecraftUtils.attributeEffect(player, Attributes.AIR_DRAG_MODIFIER, -CONFIG.getFloat(ArchetypeRegistry.LIGHTWEIGHT_DRAG_REDUCTION), AttributeModifier.Operation.ADD_VALUE, archetypesId("lightweight_drag"), !profile.hasAbility(ArchetypeRegistry.LIGHTWEIGHT));
+      MinecraftUtils.attributeEffect(player, Attributes.BOUNCINESS, CONFIG.getFloat(ArchetypeRegistry.BOUNCY_BOUNCINESS), AttributeModifier.Operation.ADD_VALUE, archetypesId("bouncy"), !profile.hasAbility(ArchetypeRegistry.BOUNCY));
+      
       MinecraftUtils.attributeEffect(player, Attributes.SCALE, -0.25, AttributeModifier.Operation.ADD_MULTIPLIED_BASE, archetypesId("short_sized"), !profile.hasAbility(ArchetypeRegistry.SHORT_SIZED));
       MinecraftUtils.attributeEffect(player, Attributes.MAX_HEALTH, -0.25, AttributeModifier.Operation.ADD_MULTIPLIED_BASE, archetypesId("short_sized"), !profile.hasAbility(ArchetypeRegistry.SHORT_SIZED));
       
@@ -495,15 +503,15 @@ public class TickCallback {
    
    private static void packHunterSkiddish(PlayerArchetypeData profile, ServerPlayer player){
       if(profile.hasAbility(ArchetypeRegistry.PACK_HUNTER)){
-         Tuple<Integer, Integer> pack = ArchetypeUtils.getNearbyPackHunterAllies(player);
+         Pair<Integer, Integer> pack = ArchetypeUtils.getNearbyPackHunterAllies(player);
          double strengthPerAlly = CONFIG.getDouble(ArchetypeRegistry.PACK_HUNTER_STRENGTH_PER_ALLY);
          double strengthPerHunter = CONFIG.getDouble(ArchetypeRegistry.PACK_HUNTER_STRENGTH_PER_PACK_HUNTER);
          double strengthMax = CONFIG.getDouble(ArchetypeRegistry.PACK_HUNTER_STRENGTH_MAX);
          double speedPerAlly = CONFIG.getDouble(ArchetypeRegistry.PACK_HUNTER_SPEED_PER_ALLY);
          double speedPerHunter = CONFIG.getDouble(ArchetypeRegistry.PACK_HUNTER_SPEED_PER_PACK_HUNTER);
          double speedMax = CONFIG.getDouble(ArchetypeRegistry.PACK_HUNTER_SPEED_MAX);
-         double strength = Math.min(strengthMax, strengthPerAlly * pack.getB() + strengthPerHunter * pack.getA());
-         double speed = Math.min(speedMax, speedPerAlly * pack.getB() + speedPerHunter * pack.getA());
+         double strength = Math.min(strengthMax, strengthPerAlly * pack.getSecond() + strengthPerHunter * pack.getFirst());
+         double speed = Math.min(speedMax, speedPerAlly * pack.getSecond() + speedPerHunter * pack.getFirst());
          
          if(strength == 0){
             Conditions.removeCondition(player.level().getServer(), player, Conditions.MIGHT, archetypesId("pack_hunter_might"));
@@ -562,7 +570,7 @@ public class TickCallback {
    }
    
    public static void inventoryItem(PlayerArchetypeData profile, ServerPlayer player, ItemStack stack){
-      HashMap<Item, Tuple<Float, Integer>> map = null;
+      HashMap<Item, Pair<Float, Integer>> map = null;
       boolean unusualFood = ArchetypeRegistry.TUFF_FOODS.containsKey(stack.getItem())
             || ArchetypeRegistry.COPPER_FOODS.containsKey(stack.getItem())
             || ArchetypeRegistry.IRON_FOODS.containsKey(stack.getItem())
@@ -601,8 +609,8 @@ public class TickCallback {
             ArchetypeRegistry.METAMORPH_ITEMS.values().stream().anyMatch(stack::is) && profile.getMetamorphFuseTime() == 0;
       if(shouldHaveGolemEatComponent){ // Add component
          if(!stack.has(DataComponents.CONSUMABLE)){
-            Tuple<Float, Integer> pair = map.get(stack.getItem());
-            Consumable comp = Consumable.builder().sound(SoundEvents.GENERIC_EAT).animation(ItemUseAnimation.EAT).consumeSeconds(pair.getB() / 20.0f * durationMod).hasConsumeParticles(true).build();
+            Pair<Float, Integer> pair = map.get(stack.getItem());
+            Consumable comp = Consumable.builder().sound(SoundEvents.GENERIC_EAT).animation(ItemUseAnimation.EAT).consumeSeconds(pair.getSecond() / 20.0f * durationMod).hasConsumeParticles(true).build();
             stack.set(DataComponents.CONSUMABLE, comp);
          }
       }else if(shouldHaveGelatianEatComponent){
@@ -627,6 +635,13 @@ public class TickCallback {
          }
       }else if(unusualFood && stack.has(DataComponents.CONSUMABLE)){ // Remove component
          stack.remove(DataComponents.CONSUMABLE);
+      }
+      
+      String hiddenHelmetModel = archetypes$ITEM_DATA.getStringProperty(stack, METAMORPH_HIDDEN_MODEL);
+      if(!hiddenHelmetModel.isEmpty()){
+         if(!player.getItemBySlot(EquipmentSlot.HEAD).equals(stack) || !profile.isMetamorphed()){
+            ArchetypeUtils.removeMetamorphHelmetTags(stack);
+         }
       }
    }
    

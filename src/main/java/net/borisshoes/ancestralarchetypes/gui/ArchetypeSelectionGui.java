@@ -10,6 +10,7 @@ import net.borisshoes.borislib.gui.GuiHelper;
 import net.borisshoes.borislib.utils.TextUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.MenuType;
@@ -98,7 +99,7 @@ public class ArchetypeSelectionGui extends SimpleGui {
       
       GuiElementBuilder subArchetypeItem = GuiElementBuilder.from(subArchetype.getDisplayItem().create()).hideDefaultTooltip();
       subArchetypeItem.setName(subArchetype.getName().withColor(subArchetype.getColor()));
-      subArchetypeItem.addLoreLine(subArchetype.getDescription().withStyle(TextUtils.getClosestFormatting(subArchetype.getColor())));
+      subArchetypeItem.addLoreLine(subArchetype.getDescription().withColor(TextUtils.getClosestFormatting(subArchetype.getColor())));
       setSlot(4,subArchetypeItem);
       
       ArrayList<ArchetypeAbility> abilities = new ArrayList<>(subArchetype.getActualAbilities());
@@ -115,7 +116,7 @@ public class ArchetypeSelectionGui extends SimpleGui {
             ArchetypeAbility ability = abilities.get(index);
             GuiElementBuilder abilityItem = GuiElementBuilder.from(ability.getDisplayItemStack()).hideDefaultTooltip();
             abilityItem.setName(ability.getName().withColor(subArchetype.getColor()));
-            abilityItem.addLoreLine(ability.getDescription().withStyle(TextUtils.getClosestFormatting(subArchetype.getColor())));
+            abilityItem.addLoreLine(ability.getDescription().withColor(TextUtils.getClosestFormatting(subArchetype.getColor())));
             setSlot((i+1)*9+offset,abilityItem);
          }
       }
@@ -164,7 +165,7 @@ public class ArchetypeSelectionGui extends SimpleGui {
          Archetype archetype = archetypes.get(i);
          GuiElementBuilder archetypeItem = GuiElementBuilder.from(archetype.displayItem().create()).hideDefaultTooltip();
          archetypeItem.setName(archetype.getName().withColor(archetype.color()));
-         archetypeItem.addLoreLine(archetype.getDescription().withStyle(TextUtils.getClosestFormatting(archetype.color())));
+         archetypeItem.addLoreLine(archetype.getDescription().withColor(TextUtils.getClosestFormatting(archetype.color())));
          setSlot(9+offset,archetypeItem);
          setSlot(18+offset,GuiElementBuilder.from(GraphicalItem.withColor(GraphicalItem.MENU_HORIZONTAL,archetype.color())).hideTooltip());
          
@@ -175,7 +176,7 @@ public class ArchetypeSelectionGui extends SimpleGui {
                SubArchetype subArchetype = subArchetypes.get(j);
                subArchetypeItem = GuiElementBuilder.from(subArchetype.getDisplayItem().create()).hideDefaultTooltip();
                subArchetypeItem.setName(subArchetype.getName().withColor(subArchetype.getColor()));
-               subArchetypeItem.addLoreLine(subArchetype.getDescription().withStyle(TextUtils.getClosestFormatting(subArchetype.getColor())));
+               subArchetypeItem.addLoreLine(subArchetype.getDescription().withColor(TextUtils.getClosestFormatting(subArchetype.getColor())));
                subArchetypeItem.addLoreLine(Component.literal(""));
                subArchetypeItem.addLoreLine(Component.translatable("text.ancestralarchetypes.gui_subtitle_1").withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
                this.map.put(27+offset+(9*j),subArchetype);
@@ -189,8 +190,8 @@ public class ArchetypeSelectionGui extends SimpleGui {
    
    private GuiElementBuilder createNextPageItem() {
       GuiElementBuilder nextPage = GuiElementBuilder.from(GraphicalItem.with(GraphicalItem.RIGHT_ARROW));
-      nextPage.setName(Component.translatable("gui.borislib.next_page_title", this.page, this.numPages).withColor(ChatFormatting.AQUA.getColor().intValue()));
-      nextPage.addLoreLine(Component.translatable("text.borislib.two_elements", Component.translatable("gui.borislib.click").withColor(ChatFormatting.GREEN.getColor().intValue()), Component.translatable("gui.borislib.next_page_sub").withColor(ChatFormatting.DARK_AQUA.getColor().intValue())));
+      nextPage.setName(Component.translatable("gui.borislib.next_page_title", this.page, this.numPages).withColor(TextColor.AQUA));
+      nextPage.addLoreLine(Component.translatable("text.borislib.two_elements", Component.translatable("gui.borislib.click").withColor(TextColor.GREEN), Component.translatable("gui.borislib.next_page_sub").withColor(TextColor.DARK_AQUA)));
       nextPage.setCallback((clickType) -> {
          if (this.page < this.numPages) {
             ++this.page;
@@ -202,8 +203,8 @@ public class ArchetypeSelectionGui extends SimpleGui {
    
    private GuiElementBuilder createPrevPageItem() {
       GuiElementBuilder prevPage = GuiElementBuilder.from(GraphicalItem.with(GraphicalItem.LEFT_ARROW));
-      prevPage.setName(Component.translatable("gui.borislib.prev_page_title", this.page, this.numPages).withColor(ChatFormatting.AQUA.getColor().intValue()));
-      prevPage.addLoreLine(Component.translatable("text.borislib.two_elements", Component.translatable("gui.borislib.click").withColor(ChatFormatting.GREEN.getColor().intValue()), Component.translatable("gui.borislib.prev_page_sub").withColor(ChatFormatting.DARK_AQUA.getColor().intValue())));
+      prevPage.setName(Component.translatable("gui.borislib.prev_page_title", this.page, this.numPages).withColor(TextColor.AQUA));
+      prevPage.addLoreLine(Component.translatable("text.borislib.two_elements", Component.translatable("gui.borislib.click").withColor(TextColor.GREEN), Component.translatable("gui.borislib.prev_page_sub").withColor(TextColor.DARK_AQUA)));
       prevPage.setCallback((clickType) -> {
          if (this.page > 1) {
             --this.page;

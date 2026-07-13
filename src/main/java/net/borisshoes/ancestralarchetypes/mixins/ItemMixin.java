@@ -1,6 +1,7 @@
 package net.borisshoes.ancestralarchetypes.mixins;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.datafixers.util.Pair;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.ancestralarchetypes.callbacks.GlowBerryShieldCallback;
@@ -19,7 +20,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -27,7 +27,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
@@ -51,40 +50,31 @@ public class ItemMixin {
    private void archetypes$onFinishUsing(ItemStack stack, Level world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir, @Local Consumable component){
       if (user instanceof ServerPlayer playerEntity) {
          PlayerArchetypeData profile = profile(playerEntity);
-         HashMap<Item, Tuple<Float,Integer>> map = null;
+         HashMap<Item, Pair<Float,Integer>> map = null;
          float healthMod = 1.0f;
          
          if(ArchetypeRegistry.TUFF_FOODS.containsKey(stack.getItem())){
             if(profile.hasAbility(ArchetypeRegistry.TUFF_EATER)){
                map = ArchetypeRegistry.TUFF_FOODS;
                healthMod = (float) CONFIG.getDouble(ArchetypeRegistry.TUFF_FOOD_HEALTH_MODIFIER);
-            }else{
-               cir.setReturnValue(stack);
-               return;
             }
          }
          if(ArchetypeRegistry.COPPER_FOODS.containsKey(stack.getItem())){
             if(profile.hasAbility(ArchetypeRegistry.COPPER_EATER)){
                map = ArchetypeRegistry.COPPER_FOODS;
                healthMod = (float) CONFIG.getDouble(ArchetypeRegistry.COPPER_FOOD_HEALTH_MODIFIER);
-            }else{
-               cir.setReturnValue(stack);
-               return;
             }
          }
          if(ArchetypeRegistry.IRON_FOODS.containsKey(stack.getItem())){
             if(profile.hasAbility(ArchetypeRegistry.IRON_EATER)){
                map = ArchetypeRegistry.IRON_FOODS;
                healthMod = (float) CONFIG.getDouble(ArchetypeRegistry.IRON_FOOD_HEALTH_MODIFIER);
-            }else{
-               cir.setReturnValue(stack);
-               return;
             }
          }
          
          if(map != null){
-            Tuple<Float,Integer> pair = map.get(stack.getItem());
-            playerEntity.heal(pair.getA() * healthMod);
+            Pair<Float,Integer> pair = map.get(stack.getItem());
+            playerEntity.heal(pair.getFirst() * healthMod);
             world.playSound(null, playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), SoundEvents.IRON_GOLEM_REPAIR, SoundSource.PLAYERS, 0.5f, Mth.randomBetween(playerEntity.getRandom(), 0.9f, 1.0f));
          }
          

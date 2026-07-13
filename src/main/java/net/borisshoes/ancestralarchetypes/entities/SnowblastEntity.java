@@ -19,6 +19,7 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball;
 import net.minecraft.world.item.ItemStack;
@@ -93,6 +94,6 @@ public class SnowblastEntity extends Snowball implements PolymerEntity {
    
    @Override
    public EntityType<?> getPolymerEntityType(PacketContext packetContext){
-      return EntityType.SNOWBALL;
+      return EntityTypes.SNOWBALL;
    }
 }

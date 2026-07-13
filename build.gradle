@@ -67,6 +67,7 @@ dependencies {
     include(implementation("eu.pb4:polymer-virtual-entity:${project.polymer_version}"))
     include(implementation("eu.pb4:polymer-networking:${project.polymer_version}"))
     include(implementation("eu.pb4:polymer-autohost:${project.polymer_version}"))
+    include(implementation("eu.pb4:factorytools:${project.factorytools_version}"))
     include(implementation("xyz.nucleoid:server-translations-api:${project.translation_version}"))
     include(implementation("me.lucko:fabric-permissions-api:${project.fabric_permissions_api_version}"))
     include(implementation("io.github.ladysnake:PlayerAbilityLib:${pal_version}"))
@@ -75,8 +76,8 @@ dependencies {
 //    modCompileOnly("com.github.borisshoes:arcananovum:dev-SNAPSHOT") {
 //        changing = true
 //    }
-    //compileOnly ("maven.modrinth:arcana-novum:${project.arcana_version}")
-    compileOnly files("libs/arcananovum-4.0.0+26.1-DEV.1.jar")
+    compileOnly ("maven.modrinth:arcana-novum:${project.arcana_version}")
+    //compileOnly files("libs/arcananovum-4.0.0+26.1-DEV.1.jar")
 }
 
 processResources {

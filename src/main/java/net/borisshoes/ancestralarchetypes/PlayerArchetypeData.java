@@ -1,9 +1,10 @@
 package net.borisshoes.ancestralarchetypes;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.ladysnake.pal.VanillaAbilities;
-import net.borisshoes.ancestralarchetypes.callbacks.GlowBerryShieldCallback;
 import net.borisshoes.ancestralarchetypes.callbacks.MetamorphTNTShieldCallback;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
+import net.borisshoes.ancestralarchetypes.misc.ArchetypeUtils;
 import net.borisshoes.ancestralarchetypes.misc.EcholocationVibrationSystem;
 import net.borisshoes.ancestralarchetypes.misc.MetamorphTypes;
 import net.borisshoes.borislib.BorisLib;
@@ -14,6 +15,7 @@ import net.borisshoes.borislib.utils.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.TrailParticleOption;
 import net.minecraft.core.registries.Registries;
@@ -28,7 +30,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.ItemStackWithSlot;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -52,10 +53,11 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
-import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.archetypesId;
+import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.ITEMS;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.SLOW_HOVER_ABILITY;
+import static net.borisshoes.ancestralarchetypes.items.MetamorphHeadItem.METAMORPH_HIDDEN_MODEL;
+import static net.borisshoes.ancestralarchetypes.items.MetamorphHeadItem.METAMORPH_VISIBLE_MODEL;
 
 public class PlayerArchetypeData implements StorableData {
    
@@ -73,6 +75,7 @@ public class PlayerArchetypeData implements StorableData {
    private float fortifyTime;
    private int metamorphTime;
    private int metamorphFuseTime;
+   private boolean metamorphTntShield;
    private float savedFlySpeed = 0.05f;
    private int leapCooldown;
    private int leapCharge;
@@ -93,7 +96,7 @@ public class PlayerArchetypeData implements StorableData {
    private SubArchetype subArchetype;
    private final Set<ArchetypeAbility> abilities = new HashSet<>();
    private final HashMap<ArchetypeAbility, CooldownEntry> abilityCooldowns = new HashMap<>();
-   private final HashMap<ArchetypeAbility, Tuple<UUID, Float>> mountData = new HashMap<>();
+   private final HashMap<ArchetypeAbility, Pair<UUID, Float>> mountData = new HashMap<>();
    private final SimpleContainer mountInventory = new SimpleContainer(54);
    private final SimpleContainer backpackInventory = new SimpleContainer(18);
    
@@ -157,6 +160,7 @@ public class PlayerArchetypeData implements StorableData {
       this.ticksSinceArchetypeChange = view.getLongOr("ticksSinceArchetypeChange", CONFIG.getInt(ArchetypeRegistry.ARCHETYPE_CHANGE_COOLDOWN));
       this.metamorphTime = view.getIntOr("metamorphTime", 0);
       this.metamorphFuseTime = view.getIntOr("metamorphFuseTime", 0);
+      this.metamorphTntShield = view.getBooleanOr("metamorphTntShield", false);
       this.activeMetamorph = MetamorphTypes.fromString(view.getStringOr("activeMetamorph", ""));
       
       // Resolve trim materials from registry
@@ -222,7 +226,7 @@ public class PlayerArchetypeData implements StorableData {
             if(ability != null){
                CompoundTag entryTag = mountDataTag.getCompound(key).orElse(new CompoundTag());
                UUID uuid = AlgoUtils.getUUID(entryTag.getStringOr("id", ""));
-               mountData.put(ability, new Tuple<>(uuid, entryTag.getFloatOr("hp", 1f)));
+               mountData.put(ability, new Pair<>(uuid, entryTag.getFloatOr("hp", 1f)));
             }
          }catch(Exception e){
             AncestralArchetypes.LOGGER.warn("Failed to parse mount data for ability '{}': {}", key, e.getMessage());
@@ -270,6 +274,7 @@ public class PlayerArchetypeData implements StorableData {
       tag.putLong("ticksSinceArchetypeChange", ticksSinceArchetypeChange);
       tag.putInt("metamorphTime", metamorphTime);
       tag.putInt("metamorphFuseTime", metamorphFuseTime);
+      tag.putBoolean("metamorphTntShield", metamorphTntShield);
       tag.putString("activeMetamorph", activeMetamorph != null ? activeMetamorph.name() : "");
       
       if(mountName != null) tag.putString("mountName", mountName);
@@ -296,8 +301,8 @@ public class PlayerArchetypeData implements StorableData {
       CompoundTag mountDataTag = new CompoundTag();
       mountData.forEach((ability, pair) -> {
          CompoundTag tagEntry = new CompoundTag();
-         tagEntry.putString("id", pair.getA() != null ? pair.getA().toString() : "");
-         tagEntry.putFloat("hp", pair.getB());
+         tagEntry.putString("id", pair.getFirst() != null ? pair.getFirst().toString() : "");
+         tagEntry.putFloat("hp", pair.getSecond());
          mountDataTag.put(ability.id(), tagEntry);
       });
       tag.put("mountData", mountDataTag);
@@ -336,7 +341,7 @@ public class PlayerArchetypeData implements StorableData {
       }else if(activeMetamorph == MetamorphTypes.GOLD || activeMetamorph == MetamorphTypes.IRON || activeMetamorph == MetamorphTypes.NETHERITE){
          abilities.remove(ArchetypeRegistry.BOUNCY);
          abilities.remove(ArchetypeRegistry.JUMPY);
-      }else if(activeMetamorph == MetamorphTypes.WOOL){
+      }else if(activeMetamorph == MetamorphTypes.WOOL || activeMetamorph == MetamorphTypes.ICE){
          abilities.remove(ArchetypeRegistry.BOUNCY);
       }
    }
@@ -390,18 +395,18 @@ public class PlayerArchetypeData implements StorableData {
    }
    
    public UUID getMountEntity(ArchetypeAbility ability){
-      Tuple<UUID, Float> data = this.mountData.get(ability);
+      Pair<UUID, Float> data = this.mountData.get(ability);
       if(data != null){
-         return data.getA();
+         return data.getFirst();
       }else{
          return null;
       }
    }
    
    public float getMountHealth(ArchetypeAbility ability){
-      Tuple<UUID, Float> data = this.mountData.get(ability);
+      Pair<UUID, Float> data = this.mountData.get(ability);
       if(data != null){
-         return data.getB();
+         return data.getSecond();
       }else{
          return 0f;
       }
@@ -478,9 +483,20 @@ public class PlayerArchetypeData implements StorableData {
    public void metamorph(MetamorphTypes type, ServerPlayer player){
       this.activeMetamorph = type;
       this.metamorphFuseTime = 0;
+      this.metamorphTntShield = false;
       this.metamorphTime = type == null ? 0 : CONFIG.getInt(ArchetypeRegistry.METAMORPH_ABILITY_DURATION);
       calculateAbilities();
       resetVibrationSystem(player);
+      
+      if(this.activeMetamorph == null){
+         ItemStack headStack = player.getItemBySlot(EquipmentSlot.HEAD);
+         String hiddenHelmetModel = archetypes$ITEM_DATA.getStringProperty(headStack, METAMORPH_HIDDEN_MODEL);
+         if(!hiddenHelmetModel.isEmpty()){
+            ArchetypeUtils.removeMetamorphHelmetTags(headStack);
+         }else if(headStack.is(ArchetypeRegistry.METAMORPH_HELMET_ITEM)){
+            player.setItemSlot(EquipmentSlot.HEAD,ItemStack.EMPTY);
+         }
+      }
    }
    
    public boolean isMetamorphed(){
@@ -499,28 +515,37 @@ public class PlayerArchetypeData implements StorableData {
       return metamorphFuseTime;
    }
    
+   public boolean canMetamorphTntDeathShield(){
+      return !this.metamorphTntShield;
+   }
+   
    public void metamorphIgniteFire(ServerPlayer player){
-      metamorphTNTPrime(CONFIG.getInt(ArchetypeRegistry.METAMORPH_TNT_FIRE_FUSE_TIME));
+      metamorphTNTPrime(player, CONFIG.getInt(ArchetypeRegistry.METAMORPH_TNT_FIRE_FUSE_TIME));
    }
    
    public void metamorphIgniteExplosion(ServerPlayer player){
-      metamorphTNTPrime(CONFIG.getInt(ArchetypeRegistry.METAMORPH_TNT_EXPLOSION_FUSE_TIME));
+      metamorphTNTPrime(player, CONFIG.getInt(ArchetypeRegistry.METAMORPH_TNT_EXPLOSION_FUSE_TIME));
    }
    
    public void metamorphIgniteDeath(ServerPlayer player){
       int fuseTime = CONFIG.getInt(ArchetypeRegistry.METAMORPH_TNT_DEATH_FUSE_TIME);
-      metamorphTNTPrime(fuseTime);
-      float curAbs = player.getAbsorptionAmount();
-      float addedAbs = CONFIG.getFloat((ArchetypeRegistry.METAMORPH_TNT_DEATH_ABSORPTION_HP));
-      BorisLib.addTickTimerCallback(new MetamorphTNTShieldCallback(fuseTime,player,addedAbs));
-      MinecraftUtils.addMaxAbsorption(player, archetypesId(ArchetypeRegistry.BERRY_EATER.id()),addedAbs);
-      player.setAbsorptionAmount((curAbs + addedAbs));
+      if(this.metamorphFuseTime <= 0){
+         metamorphTNTPrime(player, fuseTime);
+      }
+      if(!metamorphTntShield){
+         float curAbs = player.getAbsorptionAmount();
+         float addedAbs = CONFIG.getFloat((ArchetypeRegistry.METAMORPH_TNT_DEATH_ABSORPTION_HP));
+         BorisLib.addTickTimerCallback(new MetamorphTNTShieldCallback(fuseTime, player, addedAbs));
+         MinecraftUtils.addMaxAbsorption(player, archetypesId(ArchetypeRegistry.BERRY_EATER.id()), addedAbs);
+         player.setAbsorptionAmount((curAbs + addedAbs));
+      }
+      metamorphTntShield = true;
    }
    
-   private void metamorphTNTPrime(int time){
+   private void metamorphTNTPrime(ServerPlayer player, int time){
       if(activeMetamorph == MetamorphTypes.TNT && metamorphFuseTime == 0){
          metamorphFuseTime = time;
-         // TODO sounds or smth
+         SoundUtils.playSound(player.level(), BlockPos.containing(player.position()), SoundEvents.TNT_PRIMED, SoundSource.PLAYERS, 2.0f, 0.5f);
       }
    }
    
@@ -539,6 +564,7 @@ public class PlayerArchetypeData implements StorableData {
    public void setSubarchetype(ServerPlayer player, SubArchetype subarchetype){
       if(!player.getUUID().equals(playerID)) return;
       this.subArchetype = subarchetype;
+      metamorph(null, player);
       this.calculateAbilities();
       resetDeathReductionSizeLevel(player);
       resetVibrationSystem(player);
@@ -613,24 +639,40 @@ public class PlayerArchetypeData implements StorableData {
          }
       }
       
+      ItemStack headSlot = player.getItemBySlot(EquipmentSlot.HEAD);
+      if(headSlot.isEmpty()){
+         ItemStack helmet = new ItemStack(ArchetypeRegistry.METAMORPH_HELMET_ITEM);
+         Identifier modelId = this.activeMetamorph.getBlock().asItem().getDefaultInstance().get(DataComponents.ITEM_MODEL);
+         helmet.set(DataComponents.ITEM_MODEL, modelId);
+         archetypes$ITEM_DATA.putProperty(helmet, METAMORPH_VISIBLE_MODEL, modelId.toString());
+         player.setItemSlot(EquipmentSlot.HEAD, helmet);
+      }else{
+         ArchetypeUtils.addMetamorphHelmetTags(headSlot, this.activeMetamorph);
+      }
+      
       if(this.metamorphFuseTime > 0){
          if(--this.metamorphFuseTime == 0){
+            this.metamorphTntShield = true;
             float explosionPower = CONFIG.getFloat(ArchetypeRegistry.METAMORPH_TNT_EXPLOSION_POWER);
             boolean damageBlocks = CONFIG.getBoolean(ArchetypeRegistry.METAMORPH_TNT_DAMAGES_BLOCKS);
-            DamageSource dmgSource = player.damageSources().source(ArchetypeRegistry.METAMORPH_TNT,player,player);
+            DamageSource dmgSource = player.damageSources().source(ArchetypeRegistry.METAMORPH_TNT, player, player);
             player.hurtServer(player.level(), player.damageSources().source(ArchetypeRegistry.METAMORPH_TNT_EXECUTE, player, player), Float.MAX_VALUE);
             player.level().explode(null, dmgSource, null, player.getX(), player.getY(), player.getZ(), explosionPower, false, damageBlocks ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE);
          }else{
-            String time = TextUtils.readableDouble((double) this.metamorphFuseTime / 20.0,2);
-            ChatFormatting style = this.metamorphFuseTime % 40 > 20 ? ChatFormatting.RED : ChatFormatting.GOLD;
+            String time = TextUtils.readableDouble((double) this.metamorphFuseTime / 20.0, 1);
+            ChatFormatting style = this.metamorphFuseTime % 20 > 10 ? ChatFormatting.RED : ChatFormatting.GOLD;
             MutableComponent message = Component.literal("")
                   .append(Component.object(MetamorphTypes.TNT.getSprite()))
                   .append(Component.literal(" ⚠ ").withStyle(style))
-                  .append(Component.literal(time+" ").withStyle(style))
+                  .append(Component.literal(time + " ").withStyle(style))
                   .append(Component.translatable("text.ancestralarchetypes.seconds").withStyle(style))
                   .append(Component.literal(" ⚠ ").withStyle(style))
                   .append(Component.object(MetamorphTypes.TNT.getSprite()));
             player.sendSystemMessage(message, true);
+            
+            Vec3 playerCenter = player.position().add(0, player.getBbHeight() / 2.0, 0);
+            player.level().sendParticles(ParticleTypes.SMOKE, playerCenter.x, playerCenter.y, playerCenter.z, 3, 0.25, 0.25, 0.25, 0.1);
+            player.level().sendParticles(ParticleTypes.FLAME, playerCenter.x, playerCenter.y, playerCenter.z, 1, 0.25, 0.25, 0.25, 0.1);
          }
          return;
       }
@@ -679,8 +721,8 @@ public class PlayerArchetypeData implements StorableData {
       }else if(this.activeMetamorph == MetamorphTypes.BOOKSHELF && this.metamorphTime % 5 == 0){
          for(BlockPos blockPos : BlockPos.betweenClosed(player.getBoundingBox().inflate(4))){
             if(player.level().getBlockState(blockPos).is(Blocks.ENCHANTING_TABLE)){
-               TrailParticleOption particle = new TrailParticleOption(blockPos.getCenter(),0xfcf7ea,60);
-               player.level().sendParticles(particle,player.getX(), player.getY() + player.getBbHeight()/2.0, player.getZ(), 2, 0.5, 0.5, 0.5, 0);
+               TrailParticleOption particle = new TrailParticleOption(Vec3.atCenterOf(blockPos), 0xfcf7ea, 60);
+               player.level().sendParticles(particle, player.getX(), player.getY() + player.getBbHeight() / 2.0, player.getZ(), 2, 0.5, 0.5, 0.5, 0);
             }
          }
       }
@@ -810,25 +852,25 @@ public class PlayerArchetypeData implements StorableData {
       this.ticksSinceArchetypeChange = CONFIG.getInt(ArchetypeRegistry.ARCHETYPE_CHANGE_COOLDOWN);
    }
    
-   public void setPotionType(Tuple<Item, Holder<Potion>> pair){
-      this.potionBrewerStack = pair == null ? ItemStack.EMPTY : PotionContents.createItemStack(pair.getA(), pair.getB());
+   public void setPotionType(Pair<Item, Holder<Potion>> pair){
+      this.potionBrewerStack = pair == null ? ItemStack.EMPTY : PotionContents.createItemStack(pair.getFirst(), pair.getSecond());
    }
    
    public void setMountEntity(ArchetypeAbility ability, UUID uuid){
-      Tuple<UUID, Float> prev = this.mountData.get(ability);
+      Pair<UUID, Float> prev = this.mountData.get(ability);
       if(prev != null){
-         this.mountData.put(ability, new Tuple<>(uuid, prev.getB()));
+         this.mountData.put(ability, new Pair<>(uuid, prev.getSecond()));
       }else{
-         this.mountData.put(ability, new Tuple<>(uuid, 0f));
+         this.mountData.put(ability, new Pair<>(uuid, 0f));
       }
    }
    
    public void setMountHealth(ArchetypeAbility ability, float health){
-      Tuple<UUID, Float> prev = this.mountData.get(ability);
+      Pair<UUID, Float> prev = this.mountData.get(ability);
       if(prev != null){
-         this.mountData.put(ability, new Tuple<>(prev.getA(), health));
+         this.mountData.put(ability, new Pair<>(prev.getFirst(), health));
       }else{
-         this.mountData.put(ability, new Tuple<>(null, health));
+         this.mountData.put(ability, new Pair<>(null, health));
       }
    }
    

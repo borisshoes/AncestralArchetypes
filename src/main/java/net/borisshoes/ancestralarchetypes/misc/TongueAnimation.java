@@ -95,7 +95,7 @@ public final class TongueAnimation {
       this.serverTick = 0;
       this.phase = Phase.EXTENDING;
       this.holder = new ElementHolder();
-      this.display = new BlockDisplayElement(Blocks.RED_TERRACOTTA.defaultBlockState());
+      this.display = new BlockDisplayElement(Blocks.DYED_TERRACOTTA.red().defaultBlockState());
       this.display.setScale(new Vector3f(tongueThickness, tongueThickness, 0.001f));
       this.display.setTranslation(new Vector3f(0, (float) (player.getEyeHeight() * 0.8), 0));
       this.display.setTeleportDuration(TELEPORT_DURATION);

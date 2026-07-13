@@ -8,14 +8,14 @@ import net.minecraft.world.level.block.Blocks;
 
 public enum MetamorphTypes{
    ICE("ice", Blocks.PACKED_ICE, new AtlasSprite(AtlasIds.BLOCKS, Identifier.parse("block/packed_ice"))),
-   WOOL("wool", Blocks.WHITE_WOOL, new AtlasSprite(AtlasIds.BLOCKS, Identifier.parse("block/white_wool"))),
+   WOOL("wool", Blocks.WOOL.white(), new AtlasSprite(AtlasIds.BLOCKS, Identifier.parse("block/white_wool"))),
    IRON("iron", Blocks.IRON_BLOCK, new AtlasSprite(AtlasIds.BLOCKS, Identifier.parse("block/iron_block"))),
    NETHERITE("netherite", Blocks.NETHERITE_BLOCK, new AtlasSprite(AtlasIds.BLOCKS, Identifier.parse("block/netherite_block"))),
    TNT("tnt", Blocks.TNT, new AtlasSprite(AtlasIds.BLOCKS, Identifier.parse("block/tnt_side"))),
    GOLD("gold", Blocks.GOLD_BLOCK, new AtlasSprite(AtlasIds.BLOCKS, Identifier.parse("block/gold_block"))),
    MAGMA("magma", Blocks.MAGMA_BLOCK, new AtlasSprite(AtlasIds.BLOCKS, Identifier.parse("block/magma"))),
    BOOKSHELF("bookshelf", Blocks.BOOKSHELF, new AtlasSprite(AtlasIds.BLOCKS, Identifier.parse("block/bookshelf"))),
-   SCULK("sculk", Blocks.SCULK_SENSOR, new AtlasSprite(AtlasIds.BLOCKS, Identifier.parse("block/sculk_shrieker_can_summon_inner_top")));
+   SCULK("sculk", Blocks.SCULK_SHRIEKER, new AtlasSprite(AtlasIds.BLOCKS, Identifier.parse("block/sculk_shrieker_can_summon_inner_top")));
    
    private final String id;
    private final Block block;

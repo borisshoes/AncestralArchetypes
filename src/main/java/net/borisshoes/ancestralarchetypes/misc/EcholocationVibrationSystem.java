@@ -9,11 +9,11 @@ import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import net.borisshoes.ancestralarchetypes.AncestralArchetypes;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.borislib.events.Event;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.VibrationParticleOption;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -46,6 +46,7 @@ import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.scores.TeamColor;
 import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
@@ -358,7 +359,7 @@ public class EcholocationVibrationSystem implements VibrationSystem {
    
    private static void glowEntity(ServerPlayer player, @Nullable Entity entity){
       if(entity == null || player.getUUID().equals(entity.getUUID())) return;
-      ArchetypeUtils.addGlow(player, entity, ChatFormatting.DARK_AQUA);
+      ArchetypeUtils.addGlow(player, entity, TeamColor.DARK_AQUA);
       Event.addEvent(new EcholocationEntityGlowEvent(entity, player));
    }
    
@@ -457,7 +458,7 @@ public class EcholocationVibrationSystem implements VibrationSystem {
       private void addDisplay(BlockPos partPos){
          BlockDisplayElement blockDisplay = new BlockDisplayElement(toDisplayState(level.getBlockState(partPos)));
          blockDisplay.setGlowing(true);
-         blockDisplay.setGlowColorOverride(ChatFormatting.DARK_AQUA.getColor());
+         blockDisplay.setGlowColorOverride(TextColor.DARK_AQUA.getValue());
          blockDisplay.setViewRange(256.0f);
          blockDisplay.setDisplaySize(1024, 1024);
          blockDisplay.setBrightness(Brightness.FULL_BRIGHT);
@@ -477,7 +478,7 @@ public class EcholocationVibrationSystem implements VibrationSystem {
          itemDisplay.setItemDisplayContext(ItemDisplayContext.FIXED);
          itemDisplay.setBillboardMode(Display.BillboardConstraints.CENTER);
          itemDisplay.setGlowing(true);
-         itemDisplay.setGlowColorOverride(ChatFormatting.DARK_AQUA.getColor());
+         itemDisplay.setGlowColorOverride(TextColor.DARK_AQUA.getValue());
          itemDisplay.setViewRange(256.0f);
          itemDisplay.setBrightness(Brightness.FULL_BRIGHT);
          itemDisplay.setScale(new Vector3f(0.75f, 0.75f, 0.75f));
@@ -519,7 +520,7 @@ public class EcholocationVibrationSystem implements VibrationSystem {
       private static BlockState toDisplayState(BlockState actual){
          if(actual.getBlock() instanceof LiquidBlock){
             boolean lava = actual.getFluidState().is(FluidTags.LAVA);
-            return (lava ? Blocks.ORANGE_STAINED_GLASS : Blocks.BLUE_STAINED_GLASS).defaultBlockState();
+            return (lava ? Blocks.STAINED_GLASS.orange() : Blocks.STAINED_GLASS.blue()).defaultBlockState();
          }
          return actual;
       }

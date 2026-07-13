@@ -2,7 +2,7 @@ package net.borisshoes.ancestralarchetypes.callbacks;
 
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
-import net.borisshoes.ancestralarchetypes.items.LongTeleportItem;
+import net.borisshoes.ancestralarchetypes.items.DirectionalTeleportItem;
 import net.minecraft.server.level.ServerPlayer;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
@@ -24,6 +24,6 @@ public class PlayerRespawnCallback {
          }
       }
       
-      LongTeleportItem.clearCache(newPlayer.getUUID());
+      DirectionalTeleportItem.clearAllPlayerCaches(newPlayer.getUUID());
    }
 }

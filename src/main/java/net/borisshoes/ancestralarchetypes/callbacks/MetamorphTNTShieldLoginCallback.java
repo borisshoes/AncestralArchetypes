@@ -4,13 +4,11 @@ import net.borisshoes.ancestralarchetypes.AncestralArchetypes;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.borislib.callbacks.LoginCallback;
 import net.borisshoes.borislib.utils.MinecraftUtils;
-import net.borisshoes.borislib.utils.SoundUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.sounds.SoundEvents;
 
 public class MetamorphTNTShieldLoginCallback extends LoginCallback {
    

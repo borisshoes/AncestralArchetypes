@@ -30,7 +30,7 @@ public class HorseSpiritMountItem extends SpiritMountItem{
    @Override
    protected LivingEntity getMountEntity(ServerPlayer player){
       PlayerArchetypeData profile = profile(player);
-      Horse horse = EntityType.HORSE.create(player.level(), EntitySpawnReason.MOB_SUMMONED);
+      Horse horse = EntityTypes.HORSE.create(player.level(), EntitySpawnReason.MOB_SUMMONED);
       horse.getAttribute(Attributes.MAX_HEALTH).setBaseValue(60.0f);
       horse.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.35f);
       horse.getAttribute(Attributes.JUMP_STRENGTH).setBaseValue(1.25f);
@@ -42,9 +42,9 @@ public class HorseSpiritMountItem extends SpiritMountItem{
             .add(Attributes.ARMOR, new AttributeModifier(Identifier.withDefaultNamespace("armor.body"), 15.0, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.BODY)
             .add(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(Identifier.withDefaultNamespace("armor.body"), 5.0F, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.BODY)
             .build());
-      bodyArmor.set(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.BODY).setEquipSound(SoundEvents.HORSE_ARMOR).setAsset(ResourceKey.create(EQUIPMENT_ASSET_REGISTRY_KEY, archetypesId("spirit"))).setAllowedEntities(EntityType.HORSE).setDamageOnHurt(false).build());
+      bodyArmor.set(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.BODY).setEquipSound(SoundEvents.HORSE_ARMOR).setAsset(ResourceKey.create(EQUIPMENT_ASSET_REGISTRY_KEY, archetypesId("spirit"))).setAllowedEntities(EntityTypes.HORSE).setDamageOnHurt(false).build());
       bodyArmor.enchant(MinecraftUtils.getEnchantment(Enchantments.PROTECTION),4);
-      horse.setBodyArmorItem(bodyArmor);
+      horse.setItemSlot(EquipmentSlot.BODY,bodyArmor);
       horse.setVariantAndMarkings(profile.getHorseColor(), profile.getHorseMarking());
       horse.setHealth(60.0f);
       horse.setOwner(player);

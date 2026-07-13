@@ -1,5 +1,6 @@
 package net.borisshoes.ancestralarchetypes.items;
 
+import com.mojang.datafixers.util.Pair;
 import eu.pb4.polymer.common.api.PolymerCommonUtils;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
@@ -16,7 +17,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -49,7 +49,7 @@ public class BackpackItem extends AbilityItem{
       if(PolymerResourcePackUtils.hasMainPack(packetContext)){
          return Items.SHULKER_SHELL;
       }else{
-         return Items.MAGENTA_BUNDLE;
+         return Items.DYED_BUNDLE.magenta();
       }
    }
    
@@ -65,7 +65,7 @@ public class BackpackItem extends AbilityItem{
       List<MutableComponent> lore = new ArrayList<>();
       lore.add(Component.translatable("text.ancestralarchetypes.backpack_description").withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
       lore.add(Component.literal(""));
-      List<Tuple<Item,Integer>> cargo = getCargoList(player);
+      List<Pair<Item,Integer>> cargo = getCargoList(player);
       final int numDisplayed = 18;
       
       if(cargo.isEmpty()){
@@ -74,13 +74,13 @@ public class BackpackItem extends AbilityItem{
          lore.add(Component.translatable("text.ancestralarchetypes.backpack_contents").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD));
          int leftOverCount = 0;
          for(int i = 0; i < cargo.size(); i++){
-            int count = cargo.get(i).getB();
+            int count = cargo.get(i).getSecond();
             if(i >= numDisplayed){
                leftOverCount += count;
                continue;
             }
             
-            Item item = cargo.get(i).getA();
+            Item item = cargo.get(i).getFirst();
             int stacks = count / item.getDefaultMaxStackSize();
             int leftover = count % item.getDefaultMaxStackSize();
             
@@ -230,7 +230,7 @@ public class BackpackItem extends AbilityItem{
       }
    }
    
-   private static Tuple<Container, ItemStack> tryAddStackToInventory(Container inventory, ItemStack stack){
+   private static Pair<Container, ItemStack> tryAddStackToInventory(Container inventory, ItemStack stack){
       int size = inventory.getContainerSize();
       List<ItemStack> invList = new ArrayList<>(size);
       for(int i = 0; i < size; i++){
@@ -271,11 +271,11 @@ public class BackpackItem extends AbilityItem{
          inventory.setItem(i,invList.get(i));
       }
       
-      return new Tuple<>(inventory,stack);
+      return new Pair<>(inventory,stack);
    }
    
-   public List<Tuple<Item,Integer>> getCargoList(ServerPlayer player){
-      List<Tuple<Item,Integer>> list = new ArrayList<>();
+   public List<Pair<Item,Integer>> getCargoList(ServerPlayer player){
+      List<Pair<Item,Integer>> list = new ArrayList<>();
       PlayerArchetypeData profile = profile(player);
       if(!profile.hasAbility(this.ability)) return list;
       Container backpackInventory = profile.getBackpackInventory();
@@ -283,18 +283,19 @@ public class BackpackItem extends AbilityItem{
          if(stack.isEmpty()) continue;
          Item item = stack.getItem();
          boolean found = false;
-         for(Tuple<Item, Integer> pair : list){
-            if(pair.getA() == item){
-               pair.setB(pair.getB() + stack.getCount());
+         for(int i = 0; i < list.size(); i++){
+            Pair<Item, Integer> pair = list.get(i);
+            if(pair.getFirst() == item){
+               list.set(i, new Pair<>(item, pair.getSecond() + stack.getCount()));
                found = true;
                break;
             }
          }
          if(!found){
-            list.add(new Tuple<>(item,stack.getCount()));
+            list.add(new Pair<>(item,stack.getCount()));
          }
       }
-      list.sort((pair1, pair2) -> pair2.getB().compareTo(pair1.getB()));
+      list.sort((pair1, pair2) -> pair2.getSecond().compareTo(pair1.getSecond()));
       return list;
    }
 }

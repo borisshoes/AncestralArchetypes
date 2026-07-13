@@ -1,5 +1,6 @@
 package net.borisshoes.ancestralarchetypes.gui;
 
+import com.mojang.datafixers.util.Pair;
 import eu.pb4.sgui.api.ClickType;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
@@ -14,7 +15,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Items;
@@ -32,37 +32,37 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 public class PotionSelectionGui extends SimpleGui {
    
    private static final ArrayList<PotionEntry> POTIONS = new ArrayList<>(Arrays.asList(
-         new PotionEntry(new Tuple<>(Potions.FIRE_RESISTANCE, 0), new Tuple<>(Potions.LONG_FIRE_RESISTANCE, 2)),
-         new PotionEntry(new Tuple<>(Potions.WATER_BREATHING,0), new Tuple<>(Potions.LONG_WATER_BREATHING,1)),
-         new PotionEntry(new Tuple<>(Potions.NIGHT_VISION,0), new Tuple<>(Potions.LONG_NIGHT_VISION,1)),
-         new PotionEntry(new Tuple<>(Potions.TURTLE_MASTER,1), new Tuple<>(Potions.LONG_TURTLE_MASTER,3)),
-         new PotionEntry(new Tuple<>(Potions.SWIFTNESS,0), new Tuple<>(Potions.LONG_SWIFTNESS,2)),
-         new PotionEntry(new Tuple<>(Potions.STRENGTH,0), new Tuple<>(Potions.LONG_STRENGTH,2)),
-         new PotionEntry(new Tuple<>(Potions.LEAPING,0), new Tuple<>(Potions.LONG_LEAPING,1)),
+         new PotionEntry(new Pair<>(Potions.FIRE_RESISTANCE, 0), new Pair<>(Potions.LONG_FIRE_RESISTANCE, 2)),
+         new PotionEntry(new Pair<>(Potions.WATER_BREATHING,0), new Pair<>(Potions.LONG_WATER_BREATHING,1)),
+         new PotionEntry(new Pair<>(Potions.NIGHT_VISION,0), new Pair<>(Potions.LONG_NIGHT_VISION,1)),
+         new PotionEntry(new Pair<>(Potions.TURTLE_MASTER,1), new Pair<>(Potions.LONG_TURTLE_MASTER,3)),
+         new PotionEntry(new Pair<>(Potions.SWIFTNESS,0), new Pair<>(Potions.LONG_SWIFTNESS,2)),
+         new PotionEntry(new Pair<>(Potions.STRENGTH,0), new Pair<>(Potions.LONG_STRENGTH,2)),
+         new PotionEntry(new Pair<>(Potions.LEAPING,0), new Pair<>(Potions.LONG_LEAPING,1)),
          
-         new PotionEntry(new Tuple<>(Potions.SLOW_FALLING,0), new Tuple<>(Potions.LONG_SLOW_FALLING,1)),
-         new PotionEntry(new Tuple<>(Potions.REGENERATION,0), new Tuple<>(Potions.LONG_REGENERATION,2)),
-         new PotionEntry(new Tuple<>(Potions.INVISIBILITY,0), new Tuple<>(Potions.LONG_INVISIBILITY,1)),
-         new PotionEntry(new Tuple<>(Potions.STRONG_TURTLE_MASTER,4)),
-         new PotionEntry(new Tuple<>(Potions.STRONG_SWIFTNESS,2)),
-         new PotionEntry(new Tuple<>(Potions.STRONG_STRENGTH,2)),
-         new PotionEntry(new Tuple<>(Potions.STRONG_LEAPING,1)),
+         new PotionEntry(new Pair<>(Potions.SLOW_FALLING,0), new Pair<>(Potions.LONG_SLOW_FALLING,1)),
+         new PotionEntry(new Pair<>(Potions.REGENERATION,0), new Pair<>(Potions.LONG_REGENERATION,2)),
+         new PotionEntry(new Pair<>(Potions.INVISIBILITY,0), new Pair<>(Potions.LONG_INVISIBILITY,1)),
+         new PotionEntry(new Pair<>(Potions.STRONG_TURTLE_MASTER,4)),
+         new PotionEntry(new Pair<>(Potions.STRONG_SWIFTNESS,2)),
+         new PotionEntry(new Pair<>(Potions.STRONG_STRENGTH,2)),
+         new PotionEntry(new Pair<>(Potions.STRONG_LEAPING,1)),
          
-         new PotionEntry(new Tuple<>(Potions.HEALING,0), new Tuple<>(Potions.STRONG_HEALING,3)),
-         new PotionEntry(true, new Tuple<>(Potions.HEALING,2), new Tuple<>(Potions.STRONG_HEALING,4)),
-         new PotionEntry(new Tuple<>(Potions.WATER,0)),
-         new PotionEntry(new Tuple<>(Potions.SLOWNESS,0), new Tuple<>(Potions.LONG_SLOWNESS,2)),
-         new PotionEntry(new Tuple<>(Potions.STRONG_SLOWNESS,2)),
-         new PotionEntry(new Tuple<>(Potions.POISON,1), new Tuple<>(Potions.LONG_POISON,3)),
-         new PotionEntry(new Tuple<>(Potions.STRONG_POISON,2)),
+         new PotionEntry(new Pair<>(Potions.HEALING,0), new Pair<>(Potions.STRONG_HEALING,3)),
+         new PotionEntry(true, new Pair<>(Potions.HEALING,2), new Pair<>(Potions.STRONG_HEALING,4)),
+         new PotionEntry(new Pair<>(Potions.WATER,0)),
+         new PotionEntry(new Pair<>(Potions.SLOWNESS,0), new Pair<>(Potions.LONG_SLOWNESS,2)),
+         new PotionEntry(new Pair<>(Potions.STRONG_SLOWNESS,2)),
+         new PotionEntry(new Pair<>(Potions.POISON,1), new Pair<>(Potions.LONG_POISON,3)),
+         new PotionEntry(new Pair<>(Potions.STRONG_POISON,2)),
          
-         new PotionEntry(new Tuple<>(Potions.HARMING,1), new Tuple<>(Potions.STRONG_HARMING,4)),
-         new PotionEntry(true, new Tuple<>(Potions.HARMING,2), new Tuple<>(Potions.STRONG_HARMING,4)),
-         new PotionEntry(new Tuple<>(Potions.WEAKNESS,0), new Tuple<>(Potions.LONG_WEAKNESS,2)),
-         new PotionEntry(new Tuple<>(Potions.WIND_CHARGED,1)),
-         new PotionEntry(new Tuple<>(Potions.WEAVING,1)),
-         new PotionEntry(new Tuple<>(Potions.OOZING,2)),
-         new PotionEntry(new Tuple<>(Potions.INFESTED,2))
+         new PotionEntry(new Pair<>(Potions.HARMING,1), new Pair<>(Potions.STRONG_HARMING,4)),
+         new PotionEntry(true, new Pair<>(Potions.HARMING,2), new Pair<>(Potions.STRONG_HARMING,4)),
+         new PotionEntry(new Pair<>(Potions.WEAKNESS,0), new Pair<>(Potions.LONG_WEAKNESS,2)),
+         new PotionEntry(new Pair<>(Potions.WIND_CHARGED,1)),
+         new PotionEntry(new Pair<>(Potions.WEAVING,1)),
+         new PotionEntry(new Pair<>(Potions.OOZING,2)),
+         new PotionEntry(new Pair<>(Potions.INFESTED,2))
    ));
    
    private final HashMap<Integer, Integer> map;
@@ -87,7 +87,7 @@ public class PotionSelectionGui extends SimpleGui {
          PotionEntry entry = POTIONS.get(this.map.get(index));
          Holder<Potion> potion = entry.getPotion(moonLevel);
          if(potion != null){
-            profile.setPotionType(new Tuple<>(entry.lingering() ? Items.LINGERING_POTION : (splash ? Items.SPLASH_POTION : Items.POTION), potion));
+            profile.setPotionType(new Pair<>(entry.lingering() ? Items.LINGERING_POTION : (splash ? Items.SPLASH_POTION : Items.POTION), potion));
             SoundUtils.playSongToPlayer(player, SoundEvents.BREWING_STAND_BREW,0.3f,1);
             close();
          }else{
@@ -150,8 +150,8 @@ public class PotionSelectionGui extends SimpleGui {
       int moonLevel = profile.hasAbility(ArchetypeRegistry.MOONLIT_WITCH) ? Math.abs(-curPhase+4) : 4; // 0 - new moon, 4 - full moon
       
       for(PotionEntry entry : POTIONS){
-         for(Tuple<Holder<Potion>, Integer> pair : entry.potionLevels){
-            if(pair.getA().equals(potion) && moonLevel >= pair.getB()) return true;
+         for(Pair<Holder<Potion>, Integer> pair : entry.potionLevels){
+            if(pair.getFirst().equals(potion) && moonLevel >= pair.getSecond()) return true;
          }
       }
       return false;
@@ -168,18 +168,18 @@ public class PotionSelectionGui extends SimpleGui {
       };
    }
    
-   private record PotionEntry(boolean lingering, Tuple<Holder<Potion>, Integer>... potionLevels){
-      private PotionEntry(Tuple<Holder<Potion>, Integer>... potionLevels){
+   private record PotionEntry(boolean lingering, Pair<Holder<Potion>, Integer>... potionLevels){
+      private PotionEntry(Pair<Holder<Potion>, Integer>... potionLevels){
          this(false, potionLevels);
       }
       
       public Holder<Potion> getPotion(int moonLevel){
          int maxPhase = -1;
          Holder<Potion> potion = null;
-         for(Tuple<Holder<Potion>, Integer> pair : potionLevels){
-            if(moonLevel >= pair.getB() && pair.getB() > maxPhase){
-               maxPhase = pair.getB();
-               potion = pair.getA();
+         for(Pair<Holder<Potion>, Integer> pair : potionLevels){
+            if(moonLevel >= pair.getSecond() && pair.getSecond() > maxPhase){
+               maxPhase = pair.getSecond();
+               potion = pair.getFirst();
             }
          }
          return potion;
@@ -187,17 +187,17 @@ public class PotionSelectionGui extends SimpleGui {
       
       public int getMinPhase(){
          int minPhase = 5;
-         for(Tuple<Holder<Potion>, Integer> pair : potionLevels){
-            if(pair.getB() < minPhase) minPhase = pair.getB();
+         for(Pair<Holder<Potion>, Integer> pair : potionLevels){
+            if(pair.getSecond() < minPhase) minPhase = pair.getSecond();
          }
          return minPhase;
       }
       
       public int getUpgradePhase(int moonLevel){
          int minPhase = 5;
-         for(Tuple<Holder<Potion>, Integer> pair : potionLevels){
-            if(moonLevel < pair.getB() && pair.getB() < minPhase){
-               minPhase = pair.getB();
+         for(Pair<Holder<Potion>, Integer> pair : potionLevels){
+            if(moonLevel < pair.getSecond() && pair.getSecond() < minPhase){
+               minPhase = pair.getSecond();
             }
          }
          return minPhase;

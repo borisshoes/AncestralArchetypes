@@ -4,13 +4,14 @@ import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.ManualAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
-import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
-import net.minecraft.ChatFormatting;
+import net.borisshoes.ancestralarchetypes.ArchetypeAbility;
+import net.borisshoes.borislib.conditions.Conditions;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Brightness;
 import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -29,32 +30,33 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.archetypesI
 
 public final class TeleportIndicator {
    private static final int TTL = 3;
-   private static final int GLOW_COLOR = ChatFormatting.DARK_PURPLE.getColor() == null ? 0xAA00AA : ChatFormatting.DARK_PURPLE.getColor();
    private static final Map<UUID, TeleportIndicator> INDICATORS = new HashMap<>();
    
    private final ServerPlayer player;
    private final ServerLevel world;
    private final ElementHolder holder;
    private final ItemDisplayElement display;
+   private final int glowColor;
    private Vec3 pos;
    private int ttl;
    
-   private TeleportIndicator(ServerPlayer player, Vec3 spot){
+   private TeleportIndicator(ServerPlayer player, Vec3 spot, ArchetypeAbility ability, int glowColor){
       this.player = player;
       this.world = player.level();
       this.pos = spot;
       this.ttl = TTL;
+      this.glowColor = glowColor;
       this.holder = new ElementHolder();
       
       ItemStack displayStack = new ItemStack(Items.ENDER_EYE);
       if(PolymerResourcePackUtils.hasMainPack(player)){
-         displayStack.set(DataComponents.ITEM_MODEL,archetypesId(ArchetypeRegistry.LONG_TELEPORT.id()));
+         displayStack.set(DataComponents.ITEM_MODEL, archetypesId(ability.id()));
       }
       this.display = new ItemDisplayElement(displayStack);
       this.display.setItemDisplayContext(ItemDisplayContext.FIXED);
       this.display.setBillboardMode(Display.BillboardConstraints.CENTER);
       this.display.setGlowing(false);
-      this.display.setGlowColorOverride(GLOW_COLOR);
+      this.display.setGlowColorOverride(this.glowColor);
       this.display.setViewRange(256.0f);
       this.display.setBrightness(Brightness.FULL_BRIGHT);
       this.display.setScale(new Vector3f(0.5f, 0.5f, 0.5f));
@@ -64,11 +66,11 @@ public final class TeleportIndicator {
       this.holder.startWatching(player);
    }
    
-   public static void show(ServerPlayer player, Vec3 spot, Vec3 eyePos){
+   public static void show(ServerPlayer player, Vec3 spot, Vec3 eyePos, ArchetypeAbility ability, int glowColor){
       TeleportIndicator indicator = INDICATORS.get(player.getUUID());
       if(indicator == null || indicator.player != player || indicator.player.level() != indicator.world){
          if(indicator != null) indicator.destroy();
-         indicator = new TeleportIndicator(player, spot);
+         indicator = new TeleportIndicator(player, spot, ability, glowColor);
          INDICATORS.put(player.getUUID(), indicator);
       }else{
          indicator.refresh(spot);
@@ -107,7 +109,8 @@ public final class TeleportIndicator {
    
    private void updateGlow(Vec3 eyePos){
       boolean hasLineOfSight = checkLineOfSight(eyePos, this.pos);
-      this.display.setGlowing(!hasLineOfSight);
+      boolean isBlinded = this.player.getEffect(MobEffects.BLINDNESS) != null || Conditions.getConditionValue(this.player.getUUID(),Conditions.NEARSIGHT) != Conditions.NEARSIGHT.value().getBase();
+      this.display.setGlowing(!hasLineOfSight || isBlinded);
       this.display.tick();
    }
    
