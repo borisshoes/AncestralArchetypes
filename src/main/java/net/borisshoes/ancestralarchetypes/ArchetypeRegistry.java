@@ -1240,12 +1240,11 @@ public class ArchetypeRegistry {
       
       PolymerItemUtils.ITEM_MODIFICATION_EVENT.register(
             (original, client, context) -> {
-               if(context == null || context.get(PacketContext.GAME_PROFILE) == null) return client;
+               if(context == null || context.get(PacketContext.GAME_PROFILE) == null) return original;
                String metamorphHelmet = archetypes$ITEM_DATA.getStringProperty(original, METAMORPH_HELMET_TYPE);
                if(!metamorphHelmet.isEmpty()){
                   ArchetypeUtils.addMetamorphHelmetTags(client, MetamorphTypes.fromString(metamorphHelmet));
                }
-               
                UUID player = context.get(PacketContext.GAME_PROFILE).id();
                if(player == null) return client;
                PlayerArchetypeData profile = profile(player);
