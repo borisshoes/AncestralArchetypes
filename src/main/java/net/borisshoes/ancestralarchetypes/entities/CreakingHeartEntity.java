@@ -527,7 +527,7 @@ public class CreakingHeartEntity extends LivingEntity implements PolymerEntity, 
          this.blockElement.setViewRange(4.0f);
          this.blockElement.setBrightness(Brightness.FULL_BRIGHT);
          this.blockElement.setInterpolationDuration(INTERP_DURATION);
-         this.blockElement.setScale(new Vector3f(entityScale, entityScale, entityScale));
+         this.blockElement.setScale(new Vector3f(entityScale, entityScale, entityScale).mul(0.75f));
          this.blockElement.setTranslation(new Vector3f(-entityScale * 0.5f, baseY - entityScale * 0.5f, -entityScale * 0.5f));
          
          this.noPackHolder.addElement(blockElement);
@@ -581,22 +581,22 @@ public class CreakingHeartEntity extends LivingEntity implements PolymerEntity, 
          heartElement.setLeftRotation(new Quaternionf().rotateY(heartRotAngle));
          heartElement.startInterpolation();
          
-         // ---- block display: normal bounce + slow CW Y-rotation, kept centred ----
-         // A 1×1×1 block model spans (0,0,0)→(1,1,1) in model space.
-         // After scale(s) and rotateY(a), the block centre (0.5s, 0.5s, 0.5s) moves to:
-         //   x' = 0.5s·cos(a) - 0.5s·sin(a),  z' = 0.5s·sin(a) + 0.5s·cos(a)
-         // To keep the centre at world (0, baseY, 0) we set:
-         //   tx = -x' = 0.5s·(sin(a) - cos(a)),  tz = -z' = -0.5s·(sin(a) + cos(a)),  ty = baseY - 0.5s
-         float blockBounceY = Mth.sin(bouncePhase) * BOUNCE_AMP_BLOCK;
-         float blockRotAngle = (float) (animTick * Math.PI * 2.0 / ROT_PERIOD_BLOCK);
-         float cosA = Mth.cos(blockRotAngle);
-         float sinA = Mth.sin(blockRotAngle);
-         float blockTX = 0.5f * entityScale * (sinA - cosA) + sx;
-         float blockTZ = -0.5f * entityScale * (sinA + cosA) + sz;
-         float blockTY = baseY - entityScale * 0.5f + blockBounceY + sy;
-         blockElement.setTranslation(new Vector3f(blockTX, blockTY, blockTZ));
-         blockElement.setLeftRotation(new Quaternionf().rotateY(blockRotAngle));
-         blockElement.startInterpolation();
+          // ---- block display: normal bounce + slow CW Y-rotation, kept centred ----
+          // A 1×1×1 block model spans (0,0,0)→(1,1,1) in model space.
+          // After scale(s) and rotateY(a), the block centre (0.5s, 0.5s, 0.5s) moves to:
+          //   x' = 0.5s·cos(a) + 0.5s·sin(a),  z' = -0.5s·sin(a) + 0.5s·cos(a)
+          // To keep the centre at world (0, baseY, 0) we set:
+          //   tx = -x' = -0.5s·(cos(a) + sin(a)),  tz = -z' = 0.5s·(sin(a) - cos(a)),  ty = baseY - 0.5s
+          float blockBounceY = Mth.sin(bouncePhase) * BOUNCE_AMP_BLOCK;
+          float blockRotAngle = (float) (animTick * Math.PI * 2.0 / ROT_PERIOD_BLOCK);
+          float cosA = Mth.cos(blockRotAngle);
+          float sinA = Mth.sin(blockRotAngle);
+          float blockTX = -0.5f * entityScale * (cosA + sinA) + sx;
+          float blockTZ = 0.5f * entityScale * (sinA - cosA) + sz;
+          float blockTY = baseY - entityScale * 0.5f + blockBounceY + sy;
+          blockElement.setTranslation(new Vector3f(blockTX, blockTY, blockTZ));
+          blockElement.setLeftRotation(new Quaternionf().rotateY(blockRotAngle));
+          blockElement.startInterpolation();
          
          entityScale *= 1.25f;
          this.entityModelElement.setScale(new Vector3f(entityScale, entityScale, entityScale));
