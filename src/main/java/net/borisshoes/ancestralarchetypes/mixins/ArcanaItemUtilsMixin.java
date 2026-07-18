@@ -23,23 +23,23 @@ import static net.borisshoes.arcananovum.utils.ArcanaItemUtils.arcanaInvHelper;
 @Pseudo
 @Mixin(ArcanaItemUtils.class)
 public class ArcanaItemUtilsMixin {
-
+   
    @Inject(method = "getArcanaInventory", at = @At(value = "INVOKE", target = "Ljava/util/List;addAll(Ljava/util/Collection;)Z"))
    private static void archetypes$addArchetypeArcanaInventories(ServerPlayer player, CallbackInfoReturnable<List<ArcanaItemUtils.ArcanaInvItem>> cir, @Local(name = "arcanaInv") List<ArcanaItemUtils.ArcanaInvItem> arcanaInv){
       PlayerArchetypeData data = AncestralArchetypes.profile(player);
       ArcanaItemContainer shulkerContainer = new ArcanaItemContainer(
             archetypesId("shulker_backpack"),
-            data.getBackpackInventory(), data.getBackpackInventory().getContainerSize(),40,
+            data.getBackpackInventory(), data.getBackpackInventory().getContainerSize(), 40,
             Component.literal("BP"),
             ArchetypeRegistry.BACKPACK.getName(),
             0.5);
       ArcanaItemContainer mountContainer = new ArcanaItemContainer(
             archetypesId("mount_inventory"),
-            data.getMountInventory(), data.getMountInventory().getContainerSize(),60,
+            data.getMountInventory(), data.getMountInventory().getContainerSize(), 60,
             Component.literal("MI"),
             Component.translatable("text.ancestralarchetypes.spirit_mount_inventory"),
             0.5);
-      arcanaInvHelper(data.getBackpackInventory(),arcanaInv,new ArrayList<>(List.of(shulkerContainer)));
-      arcanaInvHelper(data.getMountInventory(),arcanaInv,new ArrayList<>(List.of(mountContainer)));
+      arcanaInvHelper(data.getBackpackInventory(), arcanaInv, new ArrayList<>(List.of(shulkerContainer)));
+      arcanaInvHelper(data.getMountInventory(), arcanaInv, new ArrayList<>(List.of(mountContainer)));
    }
 }

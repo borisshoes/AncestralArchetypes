@@ -12,18 +12,18 @@ public class DeglowTimerCallback extends TickTimerCallback {
    public final ServerPlayer player;
    public final LivingEntity target;
    
-   public DeglowTimerCallback(ServerPlayer player, LivingEntity target) {
+   public DeglowTimerCallback(ServerPlayer player, LivingEntity target){
       super(1, null, null);
       this.player = player;
       this.target = target;
    }
    
-   public void onTimer() {
+   public void onTimer(){
       boolean found = Event.getEventsOfType(BulletTargetEvent.class).stream().anyMatch(e -> e.player.getId() == player.getId() && e.target.getId() == target.getId());
       if(found){
          BorisLib.addTickTimerCallback(new DeglowTimerCallback(player, target));
       }else{
-         ArchetypeUtils.removeGlow(player,target);
+         ArchetypeUtils.removeGlow(player, target);
       }
    }
 }

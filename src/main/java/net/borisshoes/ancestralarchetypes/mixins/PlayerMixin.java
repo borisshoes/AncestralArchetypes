@@ -26,7 +26,8 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 @Mixin(Player.class)
 public abstract class PlayerMixin {
    
-   @Shadow public abstract boolean hurtServer(ServerLevel world, DamageSource source, float amount);
+   @Shadow
+   public abstract boolean hurtServer(ServerLevel world, DamageSource source, float amount);
    
    @ModifyReturnValue(method = "isHurt", at = @At("RETURN"))
    private boolean archetypes$canFoodHeal(boolean original){
@@ -43,8 +44,8 @@ public abstract class PlayerMixin {
       Player player = (Player) (Object) this;
       if(player.level().isClientSide() || !(player instanceof ServerPlayer serverPlayer)) return constant;
       PlayerArchetypeData profile = profile(serverPlayer);
-      boolean canBreakQuickly =  (profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER) && player.isUnderWater())
-            || (player.getVehicle() != null && !player.getVehicle().entityTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList().isEmpty());
+      boolean canBreakQuickly = (profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER) && player.isUnderWater())
+            || (player.getVehicle() != null && !player.getVehicle().entityTags().stream().filter(s -> s.contains("$" + MOD_ID + ".spirit_mount")).toList().isEmpty());
       return canBreakQuickly ? Math.min(constant, 1) : constant;
    }
    
@@ -65,7 +66,8 @@ public abstract class PlayerMixin {
       if(player.level().isClientSide() || !(player instanceof ServerPlayer serverPlayer)) return original;
       PlayerArchetypeData profile = profile(serverPlayer);
       double newValue = original;
-      if(profile.hasAbility(ArchetypeRegistry.HASTY)) newValue *= CONFIG.getDouble(ArchetypeRegistry.HASTY_MINING_MODIFIER);
+      if(profile.hasAbility(ArchetypeRegistry.HASTY))
+         newValue *= CONFIG.getDouble(ArchetypeRegistry.HASTY_MINING_MODIFIER);
       return (float) newValue;
    }
    
@@ -87,7 +89,7 @@ public abstract class PlayerMixin {
       Player player = (Player) (Object) this;
       Entity vehicle = player.getVehicle();
       
-      if(vehicle != null && !vehicle.entityTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList().isEmpty()){
+      if(vehicle != null && !vehicle.entityTags().stream().filter(s -> s.contains("$" + MOD_ID + ".spirit_mount")).toList().isEmpty()){
          return fullCharge;
       }
       
@@ -97,7 +99,8 @@ public abstract class PlayerMixin {
    @Inject(method = "tick", at = @At("TAIL"))
    private void archetypes$onTick(CallbackInfo callbackInfo){
       Player entity = (Player) (Object) this;
-      if(!entity.level().isClientSide() && entity.isVehicle() && entity.isShiftKeyDown() && entity.onGround()) entity.getFirstPassenger().stopRiding();
+      if(!entity.level().isClientSide() && entity.isVehicle() && entity.isShiftKeyDown() && entity.onGround())
+         entity.getFirstPassenger().stopRiding();
    }
    
    @ModifyReturnValue(method = "onClimbable", at = @At("RETURN"))

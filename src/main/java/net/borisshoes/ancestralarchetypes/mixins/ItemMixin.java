@@ -48,9 +48,9 @@ public class ItemMixin {
    
    @Inject(method = "finishUsingItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/Consumable;onConsume(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/item/ItemStack;"), cancellable = true)
    private void archetypes$onFinishUsing(ItemStack stack, Level world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir, @Local Consumable component){
-      if (user instanceof ServerPlayer playerEntity) {
+      if(user instanceof ServerPlayer playerEntity){
          PlayerArchetypeData profile = profile(playerEntity);
-         HashMap<Item, Pair<Float,Integer>> map = null;
+         HashMap<Item, Pair<Float, Integer>> map = null;
          float healthMod = 1.0f;
          
          if(ArchetypeRegistry.TUFF_FOODS.containsKey(stack.getItem())){
@@ -73,7 +73,7 @@ public class ItemMixin {
          }
          
          if(map != null){
-            Pair<Float,Integer> pair = map.get(stack.getItem());
+            Pair<Float, Integer> pair = map.get(stack.getItem());
             playerEntity.heal(pair.getFirst() * healthMod);
             world.playSound(null, playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), SoundEvents.IRON_GOLEM_REPAIR, SoundSource.PLAYERS, 0.5f, Mth.randomBetween(playerEntity.getRandom(), 0.9f, 1.0f));
          }
@@ -81,8 +81,8 @@ public class ItemMixin {
          if((profile.hasAbility(ArchetypeRegistry.SLIME_TOTEM) && stack.is(ArchetypeRegistry.SLIME_GROW_ITEMS))
                || (profile.hasAbility(ArchetypeRegistry.MAGMA_TOTEM) && stack.is(ArchetypeRegistry.MAGMA_CUBE_GROW_ITEMS))
                || (profile.hasAbility(ArchetypeRegistry.SULFUR_TOTEM) && stack.is(ArchetypeRegistry.SULFUR_GROW_ITEMS))){
-            profile.changeDeathReductionSizeLevel(playerEntity,true);
-            playerEntity.level().sendParticles(ParticleTypes.TOTEM_OF_UNDYING,playerEntity.getX(), playerEntity.getY()+playerEntity.getBbHeight()/2, playerEntity.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
+            profile.changeDeathReductionSizeLevel(playerEntity, true);
+            playerEntity.level().sendParticles(ParticleTypes.TOTEM_OF_UNDYING, playerEntity.getX(), playerEntity.getY() + playerEntity.getBbHeight() / 2, playerEntity.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
             playerEntity.makeSound(SoundEvents.ZOMBIE_VILLAGER_CONVERTED);
          }
          
@@ -134,24 +134,24 @@ public class ItemMixin {
             
             float curAbs = playerEntity.getAbsorptionAmount();
             float addedAbs = absAmount;
-            BorisLib.addTickTimerCallback(new GlowBerryShieldCallback(absTime,playerEntity,addedAbs));
-            MinecraftUtils.addMaxAbsorption(playerEntity, archetypesId(ArchetypeRegistry.BERRY_EATER.id()),addedAbs);
+            BorisLib.addTickTimerCallback(new GlowBerryShieldCallback(absTime, playerEntity, addedAbs));
+            MinecraftUtils.addMaxAbsorption(playerEntity, archetypesId(ArchetypeRegistry.BERRY_EATER.id()), addedAbs);
             playerEntity.setAbsorptionAmount((curAbs + addedAbs));
          }
          
          if(profile.hasAbility(ArchetypeRegistry.WAX_SHIELD) && stack.is(Items.HONEYCOMB)){
             double maxAbs = CONFIG.getDouble(ArchetypeRegistry.WAX_SHIELD_MAX_HEALTH);
             float curAbs = playerEntity.getAbsorptionAmount();
-            float addedAbs = (float) Math.min(maxAbs,CONFIG.getDouble(ArchetypeRegistry.WAX_SHIELD_HEALTH));
+            float addedAbs = (float) Math.min(maxAbs, CONFIG.getDouble(ArchetypeRegistry.WAX_SHIELD_HEALTH));
             int duration = CONFIG.getInt(ArchetypeRegistry.WAX_SHIELD_DURATION);
-            BorisLib.addTickTimerCallback(new WaxShieldCallback(duration,playerEntity,addedAbs));
+            BorisLib.addTickTimerCallback(new WaxShieldCallback(duration, playerEntity, addedAbs));
             SoundUtils.playSongToPlayer(playerEntity, SoundEvents.AXE_WAX_OFF, 0.5f, 1.8f);
-            MinecraftUtils.addMaxAbsorption(playerEntity, archetypesId(ArchetypeRegistry.WAX_SHIELD.id()),addedAbs);
+            MinecraftUtils.addMaxAbsorption(playerEntity, archetypesId(ArchetypeRegistry.WAX_SHIELD.id()), addedAbs);
             playerEntity.setAbsorptionAmount((curAbs + addedAbs));
          }
          
          if(profile.hasAbility(ArchetypeRegistry.CHOCOLATE_ALLERGY) && stack.is(ArchetypeRegistry.CHOCOLATE_ALLERGY_FOODS)){
-            playerEntity.addEffect(new MobEffectInstance(MobEffects.POISON, CONFIG.getInt(ArchetypeRegistry.CHOCOLATE_ALLERGY_DURATION),CONFIG.getInt(ArchetypeRegistry.CHOCOLATE_ALLERGY_AMPLIFIER),true,true,true),playerEntity);
+            playerEntity.addEffect(new MobEffectInstance(MobEffects.POISON, CONFIG.getInt(ArchetypeRegistry.CHOCOLATE_ALLERGY_DURATION), CONFIG.getInt(ArchetypeRegistry.CHOCOLATE_ALLERGY_AMPLIFIER), true, true, true), playerEntity);
          }
          
          if(profile.hasAbility(ArchetypeRegistry.HURT_BY_WATER) && stack.has(DataComponents.POTION_CONTENTS) && !playerEntity.hasEffect(MobEffects.WATER_BREATHING)){
@@ -165,7 +165,7 @@ public class ItemMixin {
          if(profile.hasAbility(ArchetypeRegistry.METAMORPH)){
             for(Map.Entry<MetamorphTypes, TagKey<Item>> entry : ArchetypeRegistry.METAMORPH_ITEMS.entrySet()){
                if(stack.is(entry.getValue())){
-                  profile.metamorph(entry.getKey(),playerEntity);
+                  profile.metamorph(entry.getKey(), playerEntity);
                   SoundUtils.playSongToPlayer(playerEntity, SoundEvents.HONEY_DRINK, 0.5f, 1.3f);
                   user.gameEvent(GameEvent.EQUIP);
                   cir.setReturnValue(stack);

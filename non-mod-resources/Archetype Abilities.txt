@@ -1,0 +1,270 @@
+Aquarians
+
+Axolotl
+ + Regenerates below half health
+ + Gains slight resistance in water and rain
+ + Has Conduit Power, Aqua Affinity and Depth Strider
+ - Takes bonus damage from Impaling
+ - Takes damage in dry biomes without Fire Resistance or a Turtle Shell
+
+Guardian
+ + Has a powerful piercing Ray attack
+ + Reflects a portion of damage taken
+ + Gains slight resistance in water and rain
+ + Has Conduit Power, Aqua Affinity and Depth Strider
+ - Takes bonus damage from Impaling
+ - Takes damage in dry biomes without Fire Resistance or a Turtle Shell
+
+Salmon
+ + Gains heavy resistance in water and rain
+ + Has enhanced Conduit Power, Aqua Affinity and Depth Strider
+ - Takes bonus damage from Impaling
+ - Takes damage in dry biomes without Fire Resistance or a Turtle Shell
+
+
+Canids
+
+Fox
+ + Permanent speed increase
+ + Eating sweet berries grants regeneration and strength
+ + Eating glow berries grants speed and absorption
+ * Nearby enemy players increase speed but reduce damage dealt
+ * 1.5 blocks tall
+ - 25% less max health
+ - Can only eat meat or berries
+
+Wolf
+ + Nearby allies grant stacking strength and speed
+ + Scares skeletons
+ - Can only eat meat
+
+
+Centaurs
+
+Horse
+ + Gains a soulbound, heavily armored, agile horse mount
+ + When Mounted: extra reach, every hit crits, can mine normally
+ - Briefly stunned by damage
+
+Donkey
+ + Gains a soulbound donkey mount with 54 slots of soulbound storage
+ + When Mounted: extra reach, every hit crits, can mine normally
+ - Briefly stunned by damage
+
+Camel
+ + Gains a soulbound camel mount with an extra seat and powerful lunge
+ + When Mounted: extra reach, every hit crits, can mine normally
+ - Briefly stunned by damage
+
+
+Enderians
+
+Enderman
+ + Can teleport to a targeted location or through walls
+ + Hand-mined blocks are Silk Touched
+ + Resistant to projectiles
+ + Extra reach
+ * 2.5 blocks tall
+ - Frozen by direct eye contact
+ - Damaged by water and rain without Water Breathing
+
+Shulker
+ + Can fire a volley of tracking levitation bullets
+ + Can teleport to a random nearby spot
+ + Gains a small soulbound backpack
+ + Can immobilize self for heavy resistance
+ - Damaged by water and rain without Water Breathing
+
+Ender Dragon
+ + Wings allow brief gliding
+ + Can breathe Enderflame in an area or shoot a fireball
+ + Can be ridden by other players
+ + Extra reach
+ * 3.5 blocks tall
+ * Reduced knockback taken
+ - Damaged by water and rain without Water Breathing
+
+
+Felids
+
+Cat
+ + Immune to fall damage
+ + Faster while sneaking
+ + Permanent speed increase
+ + Scares creepers and phantoms
+ - Can only eat meat
+
+Ocelot
+ + First hit on a mob deals bonus damage
+ + Attacking a player from behind deals bonus damage
+ + Permanent speed increase
+ + Reduced fall damage taken
+ - Can only eat meat
+
+
+Gelatians
+
+Slime
+ + Fatal damage reduces size and max health instead of killing, twice per life
+ + Can eat slime balls to regrow
+ + Increased jump strength
+ + Bounces on terrain
+ - Drastically increased hunger rate
+
+Magma Cube
+ + Immune to fire
+ + Melee attacks ignite enemies
+ + Fatal damage reduces size and max health instead of killing, twice per life
+ + Can eat magma cream to regrow
+ + Increased jump strength
+ + Bounces on terrain
+ - Damaged by snowballs and cold biomes without Water Breathing
+ - Drastically increased hunger rate
+
+Sulfur Cube
+ + Can absorb blocks to gain their properties
+ + Fatal damage reduces size and max health instead of killing, once per life
+ + Can eat sulfur spikes to regrow
+ + Increased jump strength
+ + Bounces on terrain
+ - Reduced melee damage
+ - Drastically increased hunger rate
+ - Cannot absorb blocks when small
+ - Cannot activate sulfur totem when metamorphed
+
+
+Golems
+
+Copper Golem
+ + Can apply Honeycomb for absorption
+ + Resistant to projectiles
+ + Can fall safely from higher
+ + Can walk over crops, magma blocks and sculk safely
+ * 1 block tall
+ * Eats Copper items to heal directly
+ * Sprint is based on health percentage
+ * Takes increased knockback
+ - Halved max health
+ - Reduced melee damage
+ - No natural regeneration
+
+Tuff Golem
+ + Permanent haste and attack speed
+ + Resistant to projectiles
+ * Eats Tuff items to heal directly
+ * Sprint is based on health percentage
+ - No natural regeneration
+
+Iron Golem
+ + Deals extra melee damage and knockback
+ + Doubled max health
+ + Resistant to projectiles
+ + Extra reach
+ * Eats Iron items to heal directly
+ * Sprint is based on health percentage
+ * Takes reduced knockback
+ * 3 blocks tall
+ - No natural regeneration
+
+
+Infernals
+
+Blaze
+ + Can fire a volley of fireballs
+ + Immune to fire
+ + Melee attacks ignite enemies
+ + Gains slow falling when falling quickly
+ - Damaged by snowballs and cold biomes without Water Breathing
+
+Wither Skeleton
+ + Melee attacks wither enemies
+ + Immune to withering
+ + Immune to fire
+ * 2.5 blocks tall
+ - Damaged by snowballs and cold biomes without Water Breathing
+
+Strider
+ + Can be ridden by other players
+ + Can eat Warped Fungus for a speed boost
+ + Can stride through lava
+ + Immune to fire
+ * 2.5 blocks tall
+ - Damaged by snowballs and cold biomes without Water Breathing
+
+
+Sentinels
+
+Creaking
+ + Can place a destructible Creaking Heart: grants heavy resistance and strength
+ + Can respawn at the Creaking Heart
+ - Cannot leave the area of the Creaking Heart without removing it
+ - Creaking Heart gives brief slowness and weakness upon destruction
+ - Sunlight applies slight weakness
+ - Frozen by direct eye contact
+
+Warden
+ + Can unleash a massive Sonic Boom
+ + Can burrow through the ground
+ + Melee attacks deal increased damage and knockback
+ + Nearby sounds become visual cues
+ + Doubled max health
+ * 3 blocks tall
+ * Takes reduced knockback
+ - Nearsighted
+
+
+Swampers
+
+Witch
+ + Can periodically brew a free potion
+ + Better potions during fuller moons
+ + Immune to poison
+
+Cave Spider
+ + Melee attacks poison enemies
+ + Fuller moons apply stronger poison and grant a potion buff
+ + Can throw a web periodically
+ + Can climb like a spider
+ + Can fall safely from higher
+ + Can walk over crops, magma blocks and sculk safely
+ + Less affected by cobwebs
+ * 1 block tall
+ * Takes increased knockback
+ - Halved max health
+ - Deals reduced melee damage
+
+Frog
+ + Sticky tongue attack applies a biome-specific debuff
+ + Sneaking charges a big leap
+ + Can fall safely from higher
+ + Can walk over crops, magma blocks and sculk safely
+ + Fuller moons increase max health
+ + Immune to poison
+ * 1 block tall
+ * Takes increased knockback
+ - Halved max health
+ - Deals reduced melee damage
+
+
+Windswepts
+
+Breeze
+ + Can unleash a blast of Wind Charges
+ + Resistant to projectiles
+ + Sneaking charges a big leap
+ + Gains slow falling when falling quickly
+ - Deals reduced melee damage
+
+Parrot
+ + Wings allow brief gliding and grant a speed boost
+ + Can walk over crops, magma blocks and sculk safely
+ + Gains slow falling when falling quickly
+ * Takes increased knockback
+ - Allergic to chocolate
+
+Ghastling
+ + Can hover slowly for a prolonged period
+ + Can launch a freezing blast
+ + Gains slow falling when falling quickly
+ + Can be ridden by other players
+ - Takes damage in dry biomes without Fire Resistance or a Turtle Shell

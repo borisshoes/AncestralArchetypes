@@ -14,7 +14,7 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 @Mixin(PhantomSpawner.class)
 public class PhantomSpawnerMixin {
    
-   @ModifyExpressionValue(method= "tick",at=@At(value="INVOKE",target= "Lnet/minecraft/server/level/ServerPlayer;isSpectator()Z"))
+   @ModifyExpressionValue(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isSpectator()Z"))
    private boolean archetypes$fuckPhantoms(boolean original, @Local ServerPlayer player){
       if(original) return true;
       PlayerArchetypeData profile = profile(player);

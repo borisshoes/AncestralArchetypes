@@ -3,6 +3,7 @@ package net.borisshoes.ancestralarchetypes.callbacks;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.ancestralarchetypes.items.DirectionalTeleportItem;
+import net.borisshoes.ancestralarchetypes.misc.CreakingRespawnManager;
 import net.minecraft.server.level.ServerPlayer;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
@@ -25,5 +26,10 @@ public class PlayerRespawnCallback {
       }
       
       DirectionalTeleportItem.clearAllPlayerCaches(newPlayer.getUUID());
+      
+      // Drive the Creaking Heart anchored-respawn flow the moment the player leaves the death screen.
+      if(!alive){
+         CreakingRespawnManager.onRespawn(newPlayer);
+      }
    }
 }

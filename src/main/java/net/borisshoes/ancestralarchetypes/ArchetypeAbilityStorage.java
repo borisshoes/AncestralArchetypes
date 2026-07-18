@@ -107,7 +107,7 @@ public class ArchetypeAbilityStorage implements StorableData {
       ArchetypeAbilityStorage storage = DataAccess.getGlobal(KEY);
       for(SubArchetype subarchetype : ArchetypeRegistry.SUBARCHETYPES){
          subarchetype.setAbilities(storage.storedAbilities.get(subarchetype));
-         pushUpdateToPlayers(server,subarchetype);
+         pushUpdateToPlayers(server, subarchetype);
       }
    }
    
@@ -117,9 +117,9 @@ public class ArchetypeAbilityStorage implements StorableData {
       if(regArch != null){
          ArchetypeAbilityStorage storage = DataAccess.getGlobal(KEY);
          succ = regArch.addAbility(ability);
-         storage.storedAbilities.put(subArchetype,regArch.getRawAbilities());
+         storage.storedAbilities.put(subArchetype, regArch.getRawAbilities());
       }
-      pushUpdateToPlayers(server,subArchetype);
+      pushUpdateToPlayers(server, subArchetype);
       return succ;
    }
    
@@ -129,9 +129,9 @@ public class ArchetypeAbilityStorage implements StorableData {
       if(regArch != null){
          ArchetypeAbilityStorage storage = DataAccess.getGlobal(KEY);
          succ = regArch.removeAbility(ability);
-         storage.storedAbilities.put(subArchetype,regArch.getRawAbilities());
+         storage.storedAbilities.put(subArchetype, regArch.getRawAbilities());
       }
-      pushUpdateToPlayers(server,subArchetype);
+      pushUpdateToPlayers(server, subArchetype);
       return succ;
    }
    
@@ -140,16 +140,16 @@ public class ArchetypeAbilityStorage implements StorableData {
       if(regArch != null){
          ArchetypeAbilityStorage storage = DataAccess.getGlobal(KEY);
          regArch.resetAbilities();
-         storage.storedAbilities.put(subArchetype,regArch.getRawAbilities());
+         storage.storedAbilities.put(subArchetype, regArch.getRawAbilities());
       }
-      pushUpdateToPlayers(server,subArchetype);
+      pushUpdateToPlayers(server, subArchetype);
    }
    
    public static void pushUpdateToPlayers(MinecraftServer server, SubArchetype subArchetype){
       for(ServerPlayer player : server.getPlayerList().getPlayers()){
          PlayerArchetypeData data = AncestralArchetypes.profile(player);
          if(!subArchetype.equals(data.getSubArchetype())) continue;
-         data.changeArchetype(player,data.getSubArchetype(),true);
+         data.changeArchetype(player, data.getSubArchetype(), true);
       }
    }
 }

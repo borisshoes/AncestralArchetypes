@@ -109,7 +109,7 @@ public final class TeleportIndicator {
    
    private void updateGlow(Vec3 eyePos){
       boolean hasLineOfSight = checkLineOfSight(eyePos, this.pos);
-      boolean isBlinded = this.player.getEffect(MobEffects.BLINDNESS) != null || Conditions.getConditionValue(this.player.getUUID(),Conditions.NEARSIGHT) != Conditions.NEARSIGHT.value().getBase();
+      boolean isBlinded = this.player.getEffect(MobEffects.BLINDNESS) != null || Conditions.getConditionValue(this.player.getUUID(), Conditions.NEARSIGHT) != Conditions.NEARSIGHT.value().getBase();
       this.display.setGlowing(!hasLineOfSight || isBlinded);
       this.display.tick();
    }

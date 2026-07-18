@@ -11,7 +11,8 @@ import net.minecraft.world.item.component.TooltipDisplay;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 
-public record ArchetypeAbility(String id, boolean active, ItemStackTemplate displayStack, IConfigSetting<?>[] reliantConfigs,
+public record ArchetypeAbility(String id, boolean active, ItemStackTemplate displayStack,
+                               IConfigSetting<?>[] reliantConfigs,
                                ArchetypeAbility... overrides) {
    
    public ArchetypeAbility(String id, boolean active, ItemStackTemplate displayStack, IConfigSetting<?>[] reliantConfigs, ArchetypeAbility... overrides){

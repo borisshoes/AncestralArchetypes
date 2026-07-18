@@ -11,12 +11,12 @@ import net.minecraft.world.damagesource.DamageTypes;
 import java.util.concurrent.CompletableFuture;
 
 public class DamageTagGenerator extends FabricTagsProvider<DamageType> {
-   public DamageTagGenerator(FabricPackOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
+   public DamageTagGenerator(FabricPackOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture){
       super(output, Registries.DAMAGE_TYPE, registriesFuture);
    }
    
    @Override
-   protected void addTags(HolderLookup.Provider lookup) {
+   protected void addTags(HolderLookup.Provider lookup){
       builder(ArchetypeRegistry.NO_STARTLE)
             .add(DamageTypes.IN_FIRE)
             .add(DamageTypes.LAVA)

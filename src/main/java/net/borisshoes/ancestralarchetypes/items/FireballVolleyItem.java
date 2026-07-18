@@ -27,7 +27,7 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.FIREBALL_VOLLEY;
 
-public class FireballVolleyItem extends AbilityItem{
+public class FireballVolleyItem extends AbilityItem {
    
    public FireballVolleyItem(Properties settings){
       super(FIREBALL_VOLLEY, "\uD83D\uDD25", settings);
@@ -47,12 +47,12 @@ public class FireballVolleyItem extends AbilityItem{
       if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
       PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC), true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH, 0.25f, 0.8f);
          return InteractionResult.PASS;
       }
       
-      shootFireball(player,0.0f);
+      shootFireball(player, 0.0f);
       player.startUsingItem(hand);
       return InteractionResult.SUCCESS;
    }
@@ -61,25 +61,25 @@ public class FireballVolleyItem extends AbilityItem{
    public void onUseTick(Level world, LivingEntity user, ItemStack stack, int remainingUseTicks){
       if(!(user instanceof ServerPlayer player)) return;
       if(remainingUseTicks % 5 == 2){
-         shootFireball(player,5.0f);
+         shootFireball(player, 5.0f);
       }
    }
    
    @Override
-   public boolean releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks) {
+   public boolean releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks){
       if(!(user instanceof ServerPlayer player)) return false;
       int cooldown = CONFIG.getInt(ArchetypeRegistry.FIREBALL_COOLDOWN);
-      profile(player).setAbilityCooldown(this.ability, (int) Math.max(0.25*cooldown,cooldown*(1 - ((double)remainingUseTicks/ getUseDuration(stack,user)))));
+      profile(player).setAbilityCooldown(this.ability, (int) Math.max(0.25 * cooldown, cooldown * (1 - ((double) remainingUseTicks / getUseDuration(stack, user)))));
       return false;
    }
    
    @Override
    public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity user){
       if(!(user instanceof ServerPlayer player)) return stack;
-      shootFireball(player,5.0f);
-      shootFireball(player,5.0f);
-      shootFireball(player,5.0f);
-      profile(player).setAbilityCooldown(this.ability,CONFIG.getInt(ArchetypeRegistry.FIREBALL_COOLDOWN));
+      shootFireball(player, 5.0f);
+      shootFireball(player, 5.0f);
+      shootFireball(player, 5.0f);
+      profile(player).setAbilityCooldown(this.ability, CONFIG.getInt(ArchetypeRegistry.FIREBALL_COOLDOWN));
       player.connection.send(new ClientboundContainerSetSlotPacket(player.inventoryMenu.containerId, player.inventoryMenu.incrementStateId(), player.getUsedItemHand() == InteractionHand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, stack));
       return stack;
    }
@@ -114,6 +114,6 @@ public class FireballVolleyItem extends AbilityItem{
       SmallFireball smallFireballEntity = new SmallFireball(player.level(), player, rotatedVector.scale(1.5));
       smallFireballEntity.setPos(smallFireballEntity.getX(), player.getY(0.5) + 0.5, smallFireballEntity.getZ());
       player.level().addFreshEntity(smallFireballEntity);
-      SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS,1f, 0.75f + player.getRandom().nextFloat()*0.5f);
+      SoundUtils.playSound(player.level(), player.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1f, 0.75f + player.getRandom().nextFloat() * 0.5f);
    }
 }

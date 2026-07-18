@@ -3,6 +3,7 @@ package net.borisshoes.ancestralarchetypes;
 import com.mojang.datafixers.util.Pair;
 import io.github.ladysnake.pal.VanillaAbilities;
 import net.borisshoes.ancestralarchetypes.callbacks.MetamorphTNTShieldCallback;
+import net.borisshoes.ancestralarchetypes.entities.CreakingHeartEntity;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
 import net.borisshoes.ancestralarchetypes.misc.ArchetypeUtils;
 import net.borisshoes.ancestralarchetypes.misc.EcholocationVibrationSystem;
@@ -89,6 +90,9 @@ public class PlayerArchetypeData implements StorableData {
    private float healthUpdate;
    private MetamorphTypes activeMetamorph;
    private EcholocationVibrationSystem vibrationSystem;
+   private CreakingHeartEntity creakingHeart;
+   private long creakingRespawnDeathTick = 0L;
+   private int creakingRespawnGraceTicks = 0;
    private ItemStack potionBrewerStack = ItemStack.EMPTY;
    private Markings horseMarking = Markings.NONE;
    private Variant horseColor = Variant.CHESTNUT;
@@ -162,7 +166,7 @@ public class PlayerArchetypeData implements StorableData {
       this.metamorphFuseTime = view.getIntOr("metamorphFuseTime", 0);
       this.metamorphTntShield = view.getBooleanOr("metamorphTntShield", false);
       this.activeMetamorph = MetamorphTypes.fromString(view.getStringOr("activeMetamorph", ""));
-      
+      this.creakingRespawnDeathTick = view.getLongOr("creakingRespawnDeathTick", 0L);
       // Resolve trim materials from registry
       try{
          String gliderTrimStr = view.getStringOr("gliderTrimMaterial", "");
@@ -276,6 +280,7 @@ public class PlayerArchetypeData implements StorableData {
       tag.putInt("metamorphFuseTime", metamorphFuseTime);
       tag.putBoolean("metamorphTntShield", metamorphTntShield);
       tag.putString("activeMetamorph", activeMetamorph != null ? activeMetamorph.name() : "");
+      tag.putLong("creakingRespawnDeathTick", creakingRespawnDeathTick);
       
       if(mountName != null) tag.putString("mountName", mountName);
       tag.putString("subArchetype", subArchetype != null ? subArchetype.getId() : "");
@@ -494,7 +499,7 @@ public class PlayerArchetypeData implements StorableData {
          if(!hiddenHelmetModel.isEmpty()){
             ArchetypeUtils.removeMetamorphHelmetTags(headStack);
          }else if(headStack.is(ArchetypeRegistry.METAMORPH_HELMET_ITEM)){
-            player.setItemSlot(EquipmentSlot.HEAD,ItemStack.EMPTY);
+            player.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
          }
       }
    }
@@ -613,12 +618,23 @@ public class PlayerArchetypeData implements StorableData {
          username = player.getScoreboardName();
       }
       abilityCooldowns.forEach((ability, cooldown) -> cooldown.tick());
+      if(creakingRespawnGraceTicks > 0) creakingRespawnGraceTicks--;
       
       handleGlider(player);
       handleHover(player);
       handleFortify(player);
       handleLeap(player);
       handleMetamorph(player);
+      if(hasAbility(ArchetypeRegistry.ECHOLOCATION) && vibrationSystem != null){
+         vibrationSystem.tick(player);
+      }
+      if(hasAbility(ArchetypeRegistry.CREAKING_HEART)){
+         if(getCreakingHeart() != null && !creakingHeart.isAlive()){
+            this.creakingHeart = null;
+         }
+      }else{
+         this.creakingHeart = null;
+      }
       
       if(this.giveItemsCooldown > 0) this.giveItemsCooldown--;
       
@@ -688,6 +704,7 @@ public class PlayerArchetypeData implements StorableData {
       }
       
       if(this.activeMetamorph == MetamorphTypes.ICE){
+         boolean reducedParticles = CONFIG.getBoolean(ArchetypeRegistry.REDUCED_PARTICLES);
          double freezeRange = CONFIG.getDouble(ArchetypeRegistry.METAMORPH_ICE_FREEZE_RANGE);
          List<LivingEntity> freezers = player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(freezeRange), other -> {
             if(other.isAlliedTo(player)) return false;
@@ -697,13 +714,15 @@ public class PlayerArchetypeData implements StorableData {
          freezers.forEach(freezer -> freezer.setTicksFrozen(Math.min(freezer.getTicksRequiredToFreeze() + 20, freezer.getTicksFrozen() + 10)));
          
          int coeff = (int) ParticleEffectUtils.particleDensityCoeff(freezeRange);
+         if(reducedParticles) coeff = (int) (coeff * 0.3);
          for(int i = 0; i < coeff; i++){
             Vec3 point = MathUtils.randomSpherePoint(player.position(), freezeRange);
             player.level().sendParticles(ParticleTypes.SNOWFLAKE, point.x, point.y, point.z, 1, 0, 0, 0, 0.025);
          }
          
-         // TODO Add friction when it gets added
+         MetamorphTypes.ICE_WALKER.apply(player.level(), 1, null, player, player.position());
       }else if(this.activeMetamorph == MetamorphTypes.MAGMA){
+         boolean reducedParticles = CONFIG.getBoolean(ArchetypeRegistry.REDUCED_PARTICLES);
          double fireRange = CONFIG.getDouble(ArchetypeRegistry.METAMORPH_MAGMA_RANGE);
          int fireTime = CONFIG.getInt(ArchetypeRegistry.METAMORPH_MAGMA_FIRE_DURATION);
          List<LivingEntity> burners = player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(fireRange), other -> {
@@ -714,6 +733,7 @@ public class PlayerArchetypeData implements StorableData {
          burners.forEach(burner -> burner.setRemainingFireTicks(fireTime));
          
          int coeff = (int) ParticleEffectUtils.particleDensityCoeff(fireRange);
+         if(reducedParticles) coeff = (int) (coeff * 0.3);
          for(int i = 0; i < coeff; i++){
             Vec3 point = MathUtils.randomSpherePoint(player.position(), fireRange);
             player.level().sendParticles(ParticleTypes.SMALL_FLAME, point.x, point.y, point.z, 1, 0, 0, 0, 0.05);
@@ -995,6 +1015,53 @@ public class PlayerArchetypeData implements StorableData {
    
    public EcholocationVibrationSystem getVibrationSystem(){
       return vibrationSystem;
+   }
+   
+   public CreakingHeartEntity getCreakingHeart(){
+      return creakingHeart;
+   }
+   
+   public void setCreakingHeart(CreakingHeartEntity creakingHeart){
+      if(hasAbility(ArchetypeRegistry.CREAKING_HEART)){
+         this.creakingHeart = creakingHeart;
+      }else{
+         if(this.creakingHeart != null){
+            this.creakingHeart.discard();
+         }
+         this.creakingHeart = null;
+      }
+   }
+   
+   public boolean hasCreakingHeart(){
+      if(hasAbility(ArchetypeRegistry.CREAKING_HEART)){
+         return creakingHeart != null;
+      }else{
+         if(this.creakingHeart != null){
+            this.creakingHeart.discard();
+         }
+         this.creakingHeart = null;
+      }
+      return false;
+   }
+   
+   public long getCreakingRespawnDeathTick(){
+      return this.creakingRespawnDeathTick;
+   }
+   
+   public void setCreakingRespawnDeathTick(long tick){
+      this.creakingRespawnDeathTick = Math.max(0L, tick);
+   }
+   
+   public boolean isCreakingRespawnActive(){
+      return this.creakingRespawnDeathTick > 0L;
+   }
+   
+   public int getCreakingRespawnGraceTicks(){
+      return this.creakingRespawnGraceTicks;
+   }
+   
+   public void setCreakingRespawnGraceTicks(int ticks){
+      this.creakingRespawnGraceTicks = Math.max(0, ticks);
    }
    
    private static class CooldownEntry {

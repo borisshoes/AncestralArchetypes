@@ -30,9 +30,9 @@ public class PlayerConnectionCallback {
    
    public static void onPlayerJoin(ServerGamePacketListenerImpl handler, PacketSender packetSender, MinecraftServer server){
       ServerPlayer player = handler.player;
-      try {
+      try{
          DataAccess.getPlayer(player.getUUID(), PlayerArchetypeData.KEY).playerJoin(player);
-      } catch (Exception e) {
+      }catch(Exception e){
          System.err.println("[AncestralArchetypes] Failed to load player data for " + player.getScoreboardName() + ": " + e.getMessage());
          e.printStackTrace();
       }

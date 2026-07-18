@@ -31,11 +31,11 @@ public class SubArchetype {
    }
    
    public MutableComponent getName(){
-      return Component.translatable(MOD_ID+".subarchetype.name."+id);
+      return Component.translatable(MOD_ID + ".subarchetype.name." + id);
    }
    
    public MutableComponent getDescription(){
-      return Component.translatable(MOD_ID+".subarchetype.description."+id,this.parent == null ? Component.translatable("text.ancestralarchetypes.archetype") : parent.getName());
+      return Component.translatable(MOD_ID + ".subarchetype.description." + id, this.parent == null ? Component.translatable("text.ancestralarchetypes.archetype") : parent.getName());
    }
    
    public String getId(){

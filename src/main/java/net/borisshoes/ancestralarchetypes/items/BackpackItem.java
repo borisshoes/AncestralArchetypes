@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
-public class BackpackItem extends AbilityItem{
+public class BackpackItem extends AbilityItem {
    public BackpackItem(Properties settings){
       super(ArchetypeRegistry.BACKPACK, "\uD83D\uDCBC", settings);
    }
@@ -65,7 +65,7 @@ public class BackpackItem extends AbilityItem{
       List<MutableComponent> lore = new ArrayList<>();
       lore.add(Component.translatable("text.ancestralarchetypes.backpack_description").withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
       lore.add(Component.literal(""));
-      List<Pair<Item,Integer>> cargo = getCargoList(player);
+      List<Pair<Item, Integer>> cargo = getCargoList(player);
       final int numDisplayed = 18;
       
       if(cargo.isEmpty()){
@@ -86,14 +86,14 @@ public class BackpackItem extends AbilityItem{
             
             if(count > item.getDefaultMaxStackSize()){
                lore.add(Component.translatable("text.ancestralarchetypes.backpack_contents_stack",
-                     Component.literal(count+"").withColor(profile.getArchetype().color()),
-                     Component.translatable("text.ancestralarchetypes.stacks",stacks).withColor(profile.getArchetype().color()),
-                     Component.literal(leftover+"").withColor(profile.getArchetype().color()),
+                     Component.literal(count + "").withColor(profile.getArchetype().color()),
+                     Component.translatable("text.ancestralarchetypes.stacks", stacks).withColor(profile.getArchetype().color()),
+                     Component.literal(leftover + "").withColor(profile.getArchetype().color()),
                      item.getName(new ItemStack(item)).copy().withColor(profile.getSubArchetype().getColor())
-                     ).withStyle(ChatFormatting.DARK_PURPLE));
+               ).withStyle(ChatFormatting.DARK_PURPLE));
             }else{
                lore.add(Component.translatable("text.ancestralarchetypes.backpack_contents_item",
-                     Component.literal(count+"").withColor(profile.getArchetype().color()),
+                     Component.literal(count + "").withColor(profile.getArchetype().color()),
                      item.getName(new ItemStack(item)).copy().withColor(profile.getSubArchetype().getColor())
                ).withStyle(ChatFormatting.DARK_PURPLE));
             }
@@ -101,13 +101,13 @@ public class BackpackItem extends AbilityItem{
          
          if(leftOverCount > 0){
             lore.add(Component.translatable("text.ancestralarchetypes.backpack_contents_more",
-                  Component.literal(leftOverCount+"").withColor(profile.getArchetype().color()),
-                  Component.literal((cargo.size()-numDisplayed)+"").withColor(profile.getArchetype().color())
+                  Component.literal(leftOverCount + "").withColor(profile.getArchetype().color()),
+                  Component.literal((cargo.size() - numDisplayed) + "").withColor(profile.getArchetype().color())
             ).withStyle(ChatFormatting.LIGHT_PURPLE));
          }
       }
       
-      superStack.set(DataComponents.LORE,new ItemLore(lore.stream().map(TextUtils::removeItalics).collect(Collectors.toCollection(ArrayList::new))));
+      superStack.set(DataComponents.LORE, new ItemLore(lore.stream().map(TextUtils::removeItalics).collect(Collectors.toCollection(ArrayList::new))));
       return superStack;
    }
    
@@ -116,35 +116,35 @@ public class BackpackItem extends AbilityItem{
       if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
       PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC), true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH, 0.25f, 0.8f);
          return InteractionResult.PASS;
       }
       BackpackGui gui = new BackpackGui(player, profile.getBackpackInventory());
       gui.open();
-      profile(player).setAbilityCooldown(this.ability,10);
+      profile(player).setAbilityCooldown(this.ability, 10);
       return InteractionResult.SUCCESS;
    }
    
    @Override
-   public boolean overrideStackedOnOther(ItemStack stack, Slot slot, ClickAction clickType, Player user) {
+   public boolean overrideStackedOnOther(ItemStack stack, Slot slot, ClickAction clickType, Player user){
       if(!(user instanceof ServerPlayer player)) return false;
       PlayerArchetypeData profile = profile(player);
       if(!profile.hasAbility(this.ability)) return false;
       SimpleContainer backpackInventory = profile.getBackpackInventory();
       ItemStack backpackStack = slot.getItem();
-      if (clickType == ClickAction.PRIMARY && !backpackStack.isEmpty()) {
+      if(clickType == ClickAction.PRIMARY && !backpackStack.isEmpty()){
          ItemStack insertStack = slot.getItem();
          
-         if (!BackpackSlot.isValidItem(insertStack)) {
+         if(!BackpackSlot.isValidItem(insertStack)){
             SoundUtils.playSongToPlayer(player, SoundEvents.BUNDLE_INSERT_FAIL, 1.0F, 1.0F);
-         } else {
+         }else{
             int count = insertStack.getCount();
             ItemStack remainder = backpackInventory.addItem(insertStack);
             if(count == remainder.getCount()){
                SoundUtils.playSongToPlayer(player, SoundEvents.BUNDLE_INSERT_FAIL, 1.0F, 1.0F);
             }else{
-               if (!remainder.isEmpty()) {
+               if(!remainder.isEmpty()){
                   insertStack.setCount(remainder.getCount());
                }else{
                   insertStack.setCount(0);
@@ -155,15 +155,15 @@ public class BackpackItem extends AbilityItem{
          
          this.onContentChanged(player, stack);
          return true;
-      } else if (clickType == ClickAction.SECONDARY && backpackStack.isEmpty()) {
-         for(int i = backpackInventory.getContainerSize()-1; i >= 0; i--){
+      }else if(clickType == ClickAction.SECONDARY && backpackStack.isEmpty()){
+         for(int i = backpackInventory.getContainerSize() - 1; i >= 0; i--){
             ItemStack removeStack = backpackInventory.getItem(i).copy();
             if(!removeStack.isEmpty()){
                int count = removeStack.getCount();
                ItemStack remainderStack = slot.safeInsert(removeStack);
-               if (remainderStack.getCount() > 0) {
-                  backpackInventory.removeItem(i,count-remainderStack.getCount());
-               } else {
+               if(remainderStack.getCount() > 0){
+                  backpackInventory.removeItem(i, count - remainderStack.getCount());
+               }else{
                   backpackInventory.removeItemNoUpdate(i);
                   SoundUtils.playSongToPlayer(player, SoundEvents.BUNDLE_REMOVE_ONE, 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F);
                }
@@ -172,23 +172,23 @@ public class BackpackItem extends AbilityItem{
          }
          this.onContentChanged(player, stack);
          return true;
-      } else {
+      }else{
          return false;
       }
    }
    
    @Override
-   public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack otherStack, Slot slot, ClickAction clickType, Player user, SlotAccess cursorStackReference) {
+   public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack otherStack, Slot slot, ClickAction clickType, Player user, SlotAccess cursorStackReference){
       if(!(user instanceof ServerPlayer player)) return false;
       PlayerArchetypeData profile = profile(player);
       if(!profile.hasAbility(this.ability)) return false;
       SimpleContainer backpackInventory = profile.getBackpackInventory();
       
-      if (clickType == ClickAction.PRIMARY && otherStack.isEmpty()) {
+      if(clickType == ClickAction.PRIMARY && otherStack.isEmpty()){
          return false;
       }
       
-      if (clickType == ClickAction.PRIMARY) {
+      if(clickType == ClickAction.PRIMARY){
          if(!BackpackSlot.isValidItem(otherStack)){
             SoundUtils.playSongToPlayer(player, SoundEvents.BUNDLE_INSERT_FAIL, 1.0F, 1.0F);
          }else{
@@ -197,7 +197,7 @@ public class BackpackItem extends AbilityItem{
             if(count == remainder.getCount()){
                SoundUtils.playSongToPlayer(player, SoundEvents.BUNDLE_INSERT_FAIL, 1.0F, 1.0F);
             }else{
-               if (!remainder.isEmpty()) {
+               if(!remainder.isEmpty()){
                   otherStack.setCount(remainder.getCount());
                }else{
                   otherStack.setCount(0);
@@ -207,8 +207,8 @@ public class BackpackItem extends AbilityItem{
          }
          this.onContentChanged(player, stack);
          return true;
-      } else if (clickType == ClickAction.SECONDARY && otherStack.isEmpty()) {
-         for(int i = backpackInventory.getContainerSize()-1; i >= 0; i--){
+      }else if(clickType == ClickAction.SECONDARY && otherStack.isEmpty()){
+         for(int i = backpackInventory.getContainerSize() - 1; i >= 0; i--){
             ItemStack removeStack = backpackInventory.getItem(i);
             if(!removeStack.isEmpty()){
                SoundUtils.playSongToPlayer(player, SoundEvents.BUNDLE_REMOVE_ONE, 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F);
@@ -218,14 +218,14 @@ public class BackpackItem extends AbilityItem{
          }
          this.onContentChanged(player, stack);
          return true;
-      } else {
+      }else{
          return false;
       }
    }
    
-   private void onContentChanged(ServerPlayer user, ItemStack stack) {
+   private void onContentChanged(ServerPlayer user, ItemStack stack){
       AbstractContainerMenu screenHandler = user.containerMenu;
-      if (screenHandler != null) {
+      if(screenHandler != null){
          screenHandler.slotsChanged(user.getInventory());
       }
    }
@@ -247,7 +247,7 @@ public class BackpackItem extends AbilityItem{
                && existingStack.isStackable()
                && existingStack.getCount() < existingStack.getMaxStackSize();
          if(!canCombine) continue;
-         int toAdd = Math.min(existingStack.getMaxStackSize() - existingStack.getCount(),curCount);
+         int toAdd = Math.min(existingStack.getMaxStackSize() - existingStack.getCount(), curCount);
          existingStack.grow(toAdd);
          stack.setCount(curCount - toAdd);
       }
@@ -268,14 +268,14 @@ public class BackpackItem extends AbilityItem{
       }
       
       for(int i = 0; i < size; i++){
-         inventory.setItem(i,invList.get(i));
+         inventory.setItem(i, invList.get(i));
       }
       
-      return new Pair<>(inventory,stack);
+      return new Pair<>(inventory, stack);
    }
    
-   public List<Pair<Item,Integer>> getCargoList(ServerPlayer player){
-      List<Pair<Item,Integer>> list = new ArrayList<>();
+   public List<Pair<Item, Integer>> getCargoList(ServerPlayer player){
+      List<Pair<Item, Integer>> list = new ArrayList<>();
       PlayerArchetypeData profile = profile(player);
       if(!profile.hasAbility(this.ability)) return list;
       Container backpackInventory = profile.getBackpackInventory();
@@ -292,7 +292,7 @@ public class BackpackItem extends AbilityItem{
             }
          }
          if(!found){
-            list.add(new Pair<>(item,stack.getCount()));
+            list.add(new Pair<>(item, stack.getCount()));
          }
       }
       list.sort((pair1, pair2) -> pair2.getSecond().compareTo(pair1.getSecond()));

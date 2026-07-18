@@ -169,6 +169,12 @@ public class TickCallback {
       
       TeleportIndicator.tickAll();
       TongueAnimation.tickAll();
+      CreakingRespawnManager.tick(server);
+      // Re-apply echolocation entity glow packets every 2 ticks, AFTER the entity tracker has flushed its updates.
+      // Without this, any FLAGS change on a glowing entity causes the glow to disappear until the next sound.
+      if(server.getTickCount() % 2 == 0){
+         EcholocationVibrationSystem.refreshEntityGlows();
+      }
    }
    
    private static void slowfaller(PlayerArchetypeData profile, ServerPlayer player){
@@ -441,8 +447,9 @@ public class TickCallback {
       }
       
       boolean shouldIceMetamorph = profile.isMetamorphed() && profile.getMetamorph() == MetamorphTypes.ICE;
+      boolean shouldIceMetamorphInAir = shouldIceMetamorph && player.onGround();
       MinecraftUtils.attributeEffect(player, Attributes.FRICTION_MODIFIER, -CONFIG.getFloat(ArchetypeRegistry.METAMORPH_ICE_FRICTION_REDUCTION), AttributeModifier.Operation.ADD_VALUE, archetypesId("metamorph_ice_friction"), !shouldIceMetamorph);
-      MinecraftUtils.attributeEffect(player, Attributes.AIR_DRAG_MODIFIER, -CONFIG.getFloat(ArchetypeRegistry.METAMORPH_ICE_DRAG_REDUCTION), AttributeModifier.Operation.ADD_VALUE, archetypesId("metamorph_ice_drag"), !shouldIceMetamorph);
+      MinecraftUtils.attributeEffect(player, Attributes.AIR_DRAG_MODIFIER, -CONFIG.getFloat(ArchetypeRegistry.METAMORPH_ICE_DRAG_REDUCTION), AttributeModifier.Operation.ADD_VALUE, archetypesId("metamorph_ice_drag"), !shouldIceMetamorphInAir);
    }
    
    public static void attributes(PlayerArchetypeData profile, ServerPlayer player){

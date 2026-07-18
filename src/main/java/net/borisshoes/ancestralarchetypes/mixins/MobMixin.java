@@ -19,8 +19,8 @@ public class MobMixin {
    
    @Inject(method = "attemptToShearEquipment", at = @At("HEAD"), cancellable = true)
    private void archetypes$stopMountShear(Player player, InteractionHand hand, ItemStack heldItem, CallbackInfoReturnable<Boolean> cir){
-      Entity entity = (Entity)(Object) this;
-      List<String> tags = entity.entityTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
+      Entity entity = (Entity) (Object) this;
+      List<String> tags = entity.entityTags().stream().filter(s -> s.contains("$" + MOD_ID + ".spirit_mount")).toList();
       if(!tags.isEmpty()) cir.setReturnValue(false);
    }
 }

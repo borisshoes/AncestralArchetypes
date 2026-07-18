@@ -27,7 +27,7 @@ import net.minecraft.world.phys.Vec3;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
-public class RandomTeleportItem extends AbilityItem{
+public class RandomTeleportItem extends AbilityItem {
    public RandomTeleportItem(Properties settings){
       super(ArchetypeRegistry.RANDOM_TELEPORT, "۞", settings);
    }
@@ -46,12 +46,12 @@ public class RandomTeleportItem extends AbilityItem{
       if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
       PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC), true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH, 0.25f, 0.8f);
          return InteractionResult.PASS;
       }
       
-      if(teleport(player.level(),player)){
+      if(teleport(player.level(), player)){
          profile(player).setAbilityCooldown(this.ability, CONFIG.getInt(ArchetypeRegistry.RANDOM_TELEPORT_COOLDOWN));
          player.connection.send(new ClientboundContainerSetSlotPacket(player.inventoryMenu.containerId, player.inventoryMenu.incrementStateId(), player.getUsedItemHand() == InteractionHand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, player.getItemInHand(hand)));
          return InteractionResult.SUCCESS;
@@ -62,10 +62,10 @@ public class RandomTeleportItem extends AbilityItem{
    }
    
    private boolean teleport(ServerLevel world, ServerPlayer user){
-      double diameter = CONFIG.getDouble(ArchetypeRegistry.RANDOM_TELEPORT_RANGE)*2.0;
+      double diameter = CONFIG.getDouble(ArchetypeRegistry.RANDOM_TELEPORT_RANGE) * 2.0;
       boolean bl = false;
       
-      for (int i = 0; i < 16; i++) {
+      for(int i = 0; i < 16; i++){
          double d = user.getX() + (user.getRandom().nextDouble() - 0.5) * diameter;
          double e = Mth.clamp(
                user.getY() + (user.getRandom().nextDouble() - 0.5) * diameter,
@@ -73,12 +73,12 @@ public class RandomTeleportItem extends AbilityItem{
                world.getMinY() + world.getLogicalHeight() - 1
          );
          double f = user.getZ() + (user.getRandom().nextDouble() - 0.5) * diameter;
-         if (user.isPassenger()) {
+         if(user.isPassenger()){
             user.stopRiding();
          }
          
          Vec3 vec3d = user.position();
-         if (user.randomTeleport(d, e, f, true)) {
+         if(user.randomTeleport(d, e, f, true)){
             world.gameEvent(GameEvent.TELEPORT, vec3d, GameEvent.Context.of(user));
             SoundSource soundCategory;
             SoundEvent soundEvent;
@@ -92,7 +92,7 @@ public class RandomTeleportItem extends AbilityItem{
          }
       }
       
-      if (bl) {
+      if(bl){
          user.resetCurrentImpulseContext();
       }
       

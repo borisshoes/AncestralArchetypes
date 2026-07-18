@@ -18,12 +18,12 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
 @Mixin(AbstractThrownPotion.class)
 public class AbstractThrownPotionMixin {
-
+   
    @Inject(method = "onHitAsWater", at = @At("HEAD"))
    private void archetypes$waterDamage(ServerLevel world, CallbackInfo ci){
       AbstractThrownPotion entity = (AbstractThrownPotion) (Object) this;
       AABB box = entity.getBoundingBox().inflate(4.0, 2.0, 4.0);
-      for (ServerPlayer playerEntity : world.getEntitiesOfClass(ServerPlayer.class, box, (e) -> true)){
+      for(ServerPlayer playerEntity : world.getEntitiesOfClass(ServerPlayer.class, box, (e) -> true)){
          double d = entity.distanceToSqr(playerEntity);
          if(d < 16.0){
             PlayerArchetypeData profile = profile(playerEntity);

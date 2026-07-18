@@ -37,28 +37,36 @@ public class MetamorphHeadItem extends Item implements PolymerItem {
    
    @Override
    public void inventoryTick(ItemStack stack, ServerLevel world, Entity entity, @Nullable EquipmentSlot slot){
-      if(entity instanceof ServerPlayer player){
-         if(player.inventoryMenu.getCarried().is(ArchetypeRegistry.METAMORPH_HELMET_ITEM)){
-            player.inventoryMenu.setCarried(ItemStack.EMPTY);
-            return;
-         }
-         if(slot != EquipmentSlot.HEAD){
-            stack.copyAndClear();
-            return;
-         }
-         PlayerArchetypeData profile = AncestralArchetypes.profile(player);
-         if(!profile.isMetamorphed()){
-            stack.copyAndClear();
-            return;
-         }else{
-            MetamorphTypes type = profile.getMetamorph();
-            Identifier modelId = type.getBlock().asItem().getDefaultInstance().get(DataComponents.ITEM_MODEL);
-            stack.set(DataComponents.ITEM_MODEL, modelId);
-            archetypes$ITEM_DATA.putProperty(stack, METAMORPH_VISIBLE_MODEL, modelId.toString());
-            archetypes$ITEM_DATA.putProperty(stack, METAMORPH_HELMET_TYPE, type.toString());
-         }
+      // Non-player carriers should never hold this item.
+      if(!(entity instanceof ServerPlayer player)){
+         stack.copyAndClear();
+         return;
       }
-      stack.copyAndClear();
+      // Prevent players from carrying it in their cursor slot.
+      if(player.inventoryMenu.getCarried().is(ArchetypeRegistry.METAMORPH_HELMET_ITEM)){
+         player.inventoryMenu.setCarried(ItemStack.EMPTY);
+         return;
+      }
+      // Must be worn in the head slot, otherwise discard.
+      if(slot != EquipmentSlot.HEAD){
+         stack.copyAndClear();
+         return;
+      }
+      PlayerArchetypeData profile = AncestralArchetypes.profile(player);
+      if(!profile.isMetamorphed()){
+         stack.copyAndClear();
+         return;
+      }
+      // Player IS metamorphed and item IS in the head slot — update model data (only if it has changed,
+      // to avoid triggering the entity tracker and firing EQUIP game events every tick).
+      MetamorphTypes type = profile.getMetamorph();
+      Identifier modelId = type.getBlock().asItem().getDefaultInstance().get(DataComponents.ITEM_MODEL);
+      if(!modelId.equals(stack.get(DataComponents.ITEM_MODEL))){
+         stack.set(DataComponents.ITEM_MODEL, modelId);
+         archetypes$ITEM_DATA.putProperty(stack, METAMORPH_VISIBLE_MODEL, modelId.toString());
+         archetypes$ITEM_DATA.putProperty(stack, METAMORPH_HELMET_TYPE, type.toString());
+      }
+      // Do NOT fall through to copyAndClear() — the helmet should stay in the slot.
    }
    
    @Override
@@ -70,7 +78,7 @@ public class MetamorphHeadItem extends Item implements PolymerItem {
    public @Nullable Identifier getPolymerItemModel(ItemStack stack, PacketContext context, HolderLookup.Provider lookup){
       String id = archetypes$ITEM_DATA.getStringProperty(stack, METAMORPH_VISIBLE_MODEL);
       if(id.isEmpty()){
-         return BuiltInRegistries.ITEM.getResourceKey(getPolymerItem(stack,context)).get().identifier();
+         return BuiltInRegistries.ITEM.getResourceKey(getPolymerItem(stack, context)).get().identifier();
       }else{
          return Identifier.parse(id);
       }

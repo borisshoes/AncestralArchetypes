@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
-public class WingGliderItem extends GliderItem{
+public class WingGliderItem extends GliderItem {
    
    public WingGliderItem(Properties settings){
       super(ArchetypeRegistry.WING_GLIDER, ArchetypeRegistry.PARROT.getColor(), settings, ArchetypeRegistry.WING_GLIDER_TRIM_PATTERN);
@@ -48,14 +48,14 @@ public class WingGliderItem extends GliderItem{
             player.setDeltaMovement(velVec.add(deltaV));
             player.connection.send(new ClientboundSetEntityMotionPacket(player));
             PlayerArchetypeData profile = profile(player);
-
-            world.sendParticles(new DustParticleOptions(profile.getGliderColor(),player.getRandom().nextFloat()+0.5f),false, false,
+            
+            world.sendParticles(new DustParticleOptions(profile.getGliderColor(), player.getRandom().nextFloat() + 0.5f), false, false,
                   player.getX(), player.getY(), player.getZ(),
                   3, 0.15, 0.15, 0.15, 1);
             
             if(world.getServer().getTickCount() % 30 == 0){
-               SoundUtils.playSound(world,player.blockPosition(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 0.4f, 1.2f);
-               world.sendParticles(ParticleTypes.POOF,false, false,
+               SoundUtils.playSound(world, player.blockPosition(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 0.4f, 1.2f);
+               world.sendParticles(ParticleTypes.POOF, false, false,
                      player.getX(), player.getY(), player.getZ(),
                      10, 0.05, 0.05, 0.05, 0.25);
             }

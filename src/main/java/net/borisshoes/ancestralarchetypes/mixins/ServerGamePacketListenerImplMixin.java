@@ -31,10 +31,11 @@ public abstract class ServerGamePacketListenerImplMixin {
    @Unique
    private Vec3 lavaDelta = null;
    
-   @Unique private boolean hasInput = false;
+   @Unique
+   private boolean hasInput = false;
    
    @Inject(method = "handlePlayerInput", at = @At("HEAD"))
-   private void onPlayerInput(ServerboundPlayerInputPacket pkt, CallbackInfo ci) {
+   private void onPlayerInput(ServerboundPlayerInputPacket pkt, CallbackInfo ci){
       PlayerArchetypeData profile = AncestralArchetypes.profile(player);
       Input input = pkt.input();
       if(input.jump() && profile.hasAbility(ArchetypeRegistry.LEAP) && profile.getLeapCharge() > 0){
@@ -50,7 +51,7 @@ public abstract class ServerGamePacketListenerImplMixin {
    private double archetypes$lavaStrideX(double original){
       if(AncestralArchetypes.profile(player).hasAbility(ArchetypeRegistry.LAVA_WALKER) && player.getFluidHeight(FluidTags.LAVA) > 0.1 && !player.isShiftKeyDown() && hasInput){
          double delta = original - player.getX();
-         lavaDelta = new Vec3(delta,0,0);
+         lavaDelta = new Vec3(delta, 0, 0);
          return original;
       }
       return original;
@@ -58,25 +59,25 @@ public abstract class ServerGamePacketListenerImplMixin {
    
    @ModifyExpressionValue(method = "handleMovePlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;clampHorizontal(D)D", ordinal = 1))
    private double archetypes$lavaStrideZ(double original){
-      if(AncestralArchetypes.profile(player).hasAbility(ArchetypeRegistry.LAVA_WALKER) && player.getFluidHeight(FluidTags.LAVA) > 0.1 && !player.isShiftKeyDown()  && hasInput){
+      if(AncestralArchetypes.profile(player).hasAbility(ArchetypeRegistry.LAVA_WALKER) && player.getFluidHeight(FluidTags.LAVA) > 0.1 && !player.isShiftKeyDown() && hasInput){
          double delta = original - player.getZ();
          if(lavaDelta != null){
-            lavaDelta = new Vec3(lavaDelta.x(),0,delta);
+            lavaDelta = new Vec3(lavaDelta.x(), 0, delta);
          }
          return original;
       }
       return original;
    }
    
-   @Inject(method = "handleMovePlayer", at = @At(value = "INVOKE",target = "Lnet/minecraft/server/level/ServerPlayer;move(Lnet/minecraft/world/entity/MoverType;Lnet/minecraft/world/phys/Vec3;)V"))
+   @Inject(method = "handleMovePlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;move(Lnet/minecraft/world/entity/MoverType;Lnet/minecraft/world/phys/Vec3;)V"))
    private void archetypes$strideAndClimb(ServerboundMovePlayerPacket packet, CallbackInfo ci){
       PlayerArchetypeData profile = AncestralArchetypes.profile(player);
       if(profile.hasAbility(ArchetypeRegistry.LAVA_WALKER) && player.getFluidHeight(FluidTags.LAVA) > 0.1 && !player.isShiftKeyDown()){
          if(lavaDelta != null && hasInput){
             double speed = CONFIG.getDouble(ArchetypeRegistry.LAVA_WALKER_SPEED_MULTIPLIER) * player.getAttributeValue(Attributes.MOVEMENT_SPEED);
             Vec3 v = PLAYER_MOVEMENT_TRACKER.get(player).velocity();
-            Vec3 horiz = v.multiply(1,0,1).normalize().scale(speed);
-            Vec3 newVel = new Vec3(horiz.x,v.y,horiz.z);
+            Vec3 horiz = v.multiply(1, 0, 1).normalize().scale(speed);
+            Vec3 newVel = new Vec3(horiz.x, v.y, horiz.z);
             player.setDeltaMovement(newVel);
             player.fallDistance = 0.0F;
             player.connection.send(new ClientboundSetEntityMotionPacket(player));
@@ -85,7 +86,7 @@ public abstract class ServerGamePacketListenerImplMixin {
       }
       
       if(packet.horizontalCollision() && !player.getAbilities().flying && player.isShiftKeyDown() && profile.hasAbility(ArchetypeRegistry.CLIMBING)){
-         player.setDeltaMovement(new Vec3(player.getDeltaMovement().x(),0.2,player.getDeltaMovement().z()));
+         player.setDeltaMovement(new Vec3(player.getDeltaMovement().x(), 0.2, player.getDeltaMovement().z()));
          player.connection.send(new ClientboundSetEntityMotionPacket(player));
          player.connection.aboveGroundTickCount = 0;
       }

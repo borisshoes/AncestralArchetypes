@@ -29,8 +29,8 @@ public class MetamorphTNTShieldLoginCallback extends LoginCallback {
       // Double check that this is the correct player before running timer
       ServerPlayer player = netHandler.player;
       if(player.getStringUUID().equals(playerUUID)){
-         float removed = Math.max(0,player.getAbsorptionAmount()-hearts);
-         MinecraftUtils.removeMaxAbsorption(player, Identifier.fromNamespaceAndPath(AncestralArchetypes.MOD_ID, ArchetypeRegistry.METAMORPH.id()),hearts);
+         float removed = Math.max(0, player.getAbsorptionAmount() - hearts);
+         MinecraftUtils.removeMaxAbsorption(player, Identifier.fromNamespaceAndPath(AncestralArchetypes.MOD_ID, ArchetypeRegistry.METAMORPH.id()), hearts);
          player.setAbsorptionAmount(removed);
       }
    }
@@ -45,7 +45,7 @@ public class MetamorphTNTShieldLoginCallback extends LoginCallback {
    @Override
    public CompoundTag getData(){
       CompoundTag data = new CompoundTag();
-      data.putFloat("hearts",hearts);
+      data.putFloat("hearts", hearts);
       this.data = data;
       return this.data;
    }

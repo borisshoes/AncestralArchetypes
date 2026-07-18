@@ -44,10 +44,10 @@ import java.util.List;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.TONGUE;
 
-public class TongueItem extends AbilityItem{
+public class TongueItem extends AbilityItem {
    
    public TongueItem(Properties settings){
-      super(TONGUE,"Ū", settings);
+      super(TONGUE, "Ū", settings);
    }
    
    @Override
@@ -64,15 +64,15 @@ public class TongueItem extends AbilityItem{
       if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
       PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC), true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH, 0.25f, 0.8f);
          return InteractionResult.PASS;
       }
       
       double baseLength = AncestralArchetypes.CONFIG.getDouble(ArchetypeRegistry.TONGUE_RANGE);
       Vec3 playerPos = player.getEyePosition();
       Vec3 view = player.getForward();
-      MinecraftUtils.LasercastResult result = MinecraftUtils.lasercast(world,playerPos,view,baseLength,true,user);
+      MinecraftUtils.LasercastResult result = MinecraftUtils.lasercast(world, playerPos, view, baseLength, true, user);
       Vec3 animationTarget = playerPos.add(view.scale(baseLength));
       Entity hitEntity = null;
       
@@ -91,7 +91,7 @@ public class TongueItem extends AbilityItem{
             }));
             
             float damage = AncestralArchetypes.CONFIG.getFloat(ArchetypeRegistry.TONGUE_DAMAGE);
-            livingHit.hurtServer(player.level(),world.damageSources().playerAttack(player),damage);
+            livingHit.hurtServer(player.level(), world.damageSources().playerAttack(player), damage);
             
             if(profile.hasAbility(ArchetypeRegistry.BIOME_ADAPTIVE)){
                Holder<Biome> biome = world.getBiome(user.blockPosition());
@@ -118,7 +118,7 @@ public class TongueItem extends AbilityItem{
                      AttributeModifier.Operation.ADD_VALUE, player.getUUID()));
             }
             
-             // Tongue tip ends at the hit entity's center
+            // Tongue tip ends at the hit entity's center
             animationTarget = hit.position().add(0, hit.getBbHeight() / 2.0, 0);
             hitEntity = livingHit;
             found = true;
@@ -129,7 +129,7 @@ public class TongueItem extends AbilityItem{
       if(!found){
          AABB box = new AABB(playerPos, playerPos).inflate(baseLength + 0.5);
          List<ItemEntity> items = world.getEntities(EntityTypes.ITEM, box, (entity) -> itemInRange(entity.position(), playerPos, result.endPos(), 0.5));
-         items.sort(Comparator.comparingDouble((e) -> (double)e.distanceTo(user)));
+         items.sort(Comparator.comparingDouble((e) -> (double) e.distanceTo(user)));
          
          for(ItemEntity hit : items){
             double x = playerPos.x() - hit.getX();
@@ -150,7 +150,7 @@ public class TongueItem extends AbilityItem{
       
       int cooldown = CONFIG.getInt(ArchetypeRegistry.TONGUE_COOLDOWN);
       profile(player).setAbilityCooldown(this.ability, found ? cooldown : cooldown / 2);
-      SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.INK_SAC_USE, SoundSource.PLAYERS,1f, 1.5f);
+      SoundUtils.playSound(player.level(), player.blockPosition(), SoundEvents.INK_SAC_USE, SoundSource.PLAYERS, 1f, 1.5f);
       player.connection.send(new ClientboundContainerSetSlotPacket(player.inventoryMenu.containerId, player.inventoryMenu.incrementStateId(), player.getUsedItemHand() == InteractionHand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, player.getItemInHand(hand)));
       return InteractionResult.SUCCESS;
    }

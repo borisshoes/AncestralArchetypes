@@ -44,9 +44,9 @@ public class ChangeItem extends Item implements PolymerItem {
                      .withHoverEvent(new HoverEvent.ShowText(Component.translatable("text.ancestralarchetypes.change_hover")))
                      .withColor(ChatFormatting.AQUA)));
       }
-      player.getCooldowns().addCooldown(user.getItemInHand(hand),20);
-      user.getItemInHand(hand).consume(1,player);
-      SoundUtils.playSongToPlayer(player, SoundEvents.RESPAWN_ANCHOR_CHARGE,0.3f,1);
+      player.getCooldowns().addCooldown(user.getItemInHand(hand), 20);
+      user.getItemInHand(hand).consume(1, player);
+      SoundUtils.playSongToPlayer(player, SoundEvents.RESPAWN_ANCHOR_CHARGE, 0.3f, 1);
       return InteractionResult.SUCCESS;
    }
    

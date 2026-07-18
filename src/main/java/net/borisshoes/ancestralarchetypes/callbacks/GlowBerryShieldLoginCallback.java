@@ -31,11 +31,11 @@ public class GlowBerryShieldLoginCallback extends LoginCallback {
       // Double check that this is the correct player before running timer
       ServerPlayer player = netHandler.player;
       if(player.getStringUUID().equals(playerUUID)){
-         float removed = Math.max(0,player.getAbsorptionAmount()-hearts);
+         float removed = Math.max(0, player.getAbsorptionAmount() - hearts);
          if(player.getAbsorptionAmount() != 0){
             SoundUtils.playSongToPlayer(player, SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, 1.0f, .3f);
          }
-         MinecraftUtils.removeMaxAbsorption(player, Identifier.fromNamespaceAndPath(AncestralArchetypes.MOD_ID, ArchetypeRegistry.BERRY_EATER.id()),hearts);
+         MinecraftUtils.removeMaxAbsorption(player, Identifier.fromNamespaceAndPath(AncestralArchetypes.MOD_ID, ArchetypeRegistry.BERRY_EATER.id()), hearts);
          player.setAbsorptionAmount(removed);
       }
    }
@@ -50,7 +50,7 @@ public class GlowBerryShieldLoginCallback extends LoginCallback {
    @Override
    public CompoundTag getData(){
       CompoundTag data = new CompoundTag();
-      data.putFloat("hearts",hearts);
+      data.putFloat("hearts", hearts);
       this.data = data;
       return this.data;
    }

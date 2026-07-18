@@ -11,7 +11,7 @@ import net.minecraft.world.entity.animal.camel.Camel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-public class CamelSpiritMountItem extends SpiritMountItem{
+public class CamelSpiritMountItem extends SpiritMountItem {
    public CamelSpiritMountItem(Properties settings){
       super(ArchetypeRegistry.CAMEL_SPIRIT_MOUNT, "\uD83D\uDC2B", settings);
    }
@@ -24,7 +24,7 @@ public class CamelSpiritMountItem extends SpiritMountItem{
       camel.getAttribute(Attributes.JUMP_STRENGTH).setBaseValue(0.65f);
       camel.getAttribute(Attributes.SAFE_FALL_DISTANCE).setBaseValue(10.0f);
       camel.getAttribute(Attributes.STEP_HEIGHT).setBaseValue(2.125f);
-      camel.setItemSlot(EquipmentSlot.SADDLE,new ItemStack(Items.SADDLE));
+      camel.setItemSlot(EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
       camel.setHealth(60.0f);
       camel.setOwner(player);
       camel.setTamed(true);

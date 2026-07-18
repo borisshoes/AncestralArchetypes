@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 
-public class PortableCauldronItem extends AbilityItem{
+public class PortableCauldronItem extends AbilityItem {
    
    public PortableCauldronItem(Properties settings){
       super(ArchetypeRegistry.POTION_BREWER, "\uD83E\uDDEA", settings);
@@ -56,8 +56,8 @@ public class PortableCauldronItem extends AbilityItem{
       if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
       PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC), true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH, 0.25f, 0.8f);
          return InteractionResult.PASS;
       }
       
@@ -89,7 +89,7 @@ public class PortableCauldronItem extends AbilityItem{
             potionComp.forEachEffect(effect -> {
                totalDuration.addAndGet(effect.getDuration());
             }, 1);
-            profile.setAbilityCooldown(this.ability, (int) Math.max(CONFIG.getInt(ArchetypeRegistry.CAULDRON_INSTANT_EFFECT_COOLDOWN),totalDuration.get()*CONFIG.getDouble(ArchetypeRegistry.CAULDRON_THROWABLE_COOLDOWN_MODIFIER)));
+            profile.setAbilityCooldown(this.ability, (int) Math.max(CONFIG.getInt(ArchetypeRegistry.CAULDRON_INSTANT_EFFECT_COOLDOWN), totalDuration.get() * CONFIG.getDouble(ArchetypeRegistry.CAULDRON_THROWABLE_COOLDOWN_MODIFIER)));
          }
       }
       
@@ -102,13 +102,13 @@ public class PortableCauldronItem extends AbilityItem{
       PlayerArchetypeData profile = profile(player);
       ItemStack potionStack = profile.getPotionStack();
       PotionContents potionComp = potionStack.get(DataComponents.POTION_CONTENTS);
-      if (potionStack.is(Items.POTION) && potionComp != null) {
+      if(potionStack.is(Items.POTION) && potionComp != null){
          AtomicInteger totalDuration = new AtomicInteger();
          potionComp.forEachEffect(effect -> {
             totalDuration.addAndGet(effect.getDuration());
             player.addEffect(effect);
          }, 1);
-         profile.setAbilityCooldown(this.ability, (int) Math.max(CONFIG.getInt(ArchetypeRegistry.CAULDRON_INSTANT_EFFECT_COOLDOWN),totalDuration.get()*CONFIG.getDouble(ArchetypeRegistry.CAULDRON_DRINKABLE_COOLDOWN_MODIFIER)));
+         profile.setAbilityCooldown(this.ability, (int) Math.max(CONFIG.getInt(ArchetypeRegistry.CAULDRON_INSTANT_EFFECT_COOLDOWN), totalDuration.get() * CONFIG.getDouble(ArchetypeRegistry.CAULDRON_DRINKABLE_COOLDOWN_MODIFIER)));
       }
       
       player.connection.send(new ClientboundContainerSetSlotPacket(player.inventoryMenu.containerId, player.inventoryMenu.incrementStateId(), player.getUsedItemHand() == InteractionHand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, stack));
@@ -147,12 +147,12 @@ public class PortableCauldronItem extends AbilityItem{
             }
             
             if(!hasPotion){
-               stack.set(DataComponents.POTION_CONTENTS,potionStack.get(DataComponents.POTION_CONTENTS));
+               stack.set(DataComponents.POTION_CONTENTS, potionStack.get(DataComponents.POTION_CONTENTS));
             }else{
                Holder<Potion> profilePotion = potionStack.get(DataComponents.POTION_CONTENTS).potion().get();
                Holder<Potion> stackPotion = stack.get(DataComponents.POTION_CONTENTS).potion().get();
                if(profilePotion.value() != stackPotion.value()){
-                  stack.set(DataComponents.POTION_CONTENTS,potionStack.get(DataComponents.POTION_CONTENTS));
+                  stack.set(DataComponents.POTION_CONTENTS, potionStack.get(DataComponents.POTION_CONTENTS));
                }
             }
          }

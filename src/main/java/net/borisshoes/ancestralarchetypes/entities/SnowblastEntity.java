@@ -36,7 +36,10 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.archetypesI
 
 public class SnowblastEntity extends Snowball implements PolymerEntity {
    public static final ItemStack VIEW_STACK = new ItemStack(Items.SNOWBALL);
-   static{ VIEW_STACK.set(DataComponents.ITEM_MODEL, archetypesId("snow_blast_ball")); }
+   
+   static{
+      VIEW_STACK.set(DataComponents.ITEM_MODEL, archetypesId("snow_blast_ball"));
+   }
    
    public SnowblastEntity(EntityType<? extends SnowblastEntity> entityType, Level world){
       super(entityType, world);
@@ -44,7 +47,7 @@ public class SnowblastEntity extends Snowball implements PolymerEntity {
    
    public SnowblastEntity(Level world, LivingEntity owner, ItemStack itemStack){
       this(ArchetypeRegistry.SNOWBLAST_ENTITY, world);
-      setPos(owner.getX(), owner.getEyeY() - (double)0.1f, owner.getZ());
+      setPos(owner.getX(), owner.getEyeY() - (double) 0.1f, owner.getZ());
       setOwner(owner);
    }
    
@@ -56,35 +59,35 @@ public class SnowblastEntity extends Snowball implements PolymerEntity {
    @Override
    protected void onHit(HitResult hitResult){
       super.onHit(hitResult);
-    
+      
       double range = CONFIG.getDouble(ArchetypeRegistry.SNOW_BLAST_RANGE);
       float damage = (float) CONFIG.getDouble(ArchetypeRegistry.SNOW_BLAST_DAMAGE);
       int duration = CONFIG.getInt(ArchetypeRegistry.SNOW_BLAST_SLOWNESS_DURATION);
       int lvl = CONFIG.getInt(ArchetypeRegistry.SNOW_BLAST_SLOWNESS_STRENGTH);
-      AABB box = this.getBoundingBox().inflate(range*2);
+      AABB box = this.getBoundingBox().inflate(range * 2);
       
-      List<LivingEntity> living = level().getEntitiesOfClass(LivingEntity.class,box)
+      List<LivingEntity> living = level().getEntitiesOfClass(LivingEntity.class, box)
             .stream().filter(e -> e.distanceTo(this) <= range).toList();
       
-      SoundUtils.playSound(level(), BlockPos.containing(hitResult.getLocation()), SoundEvents.PLAYER_HURT_FREEZE, SoundSource.PLAYERS,2.0f,0.5f);
-      SoundUtils.playSound(level(), BlockPos.containing(hitResult.getLocation()), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS,0.5f,0.5f);
+      SoundUtils.playSound(level(), BlockPos.containing(hitResult.getLocation()), SoundEvents.PLAYER_HURT_FREEZE, SoundSource.PLAYERS, 2.0f, 0.5f);
+      SoundUtils.playSound(level(), BlockPos.containing(hitResult.getLocation()), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.5f, 0.5f);
       
       
       if(level() instanceof ServerLevel world){
-         for(BlockPos blockPos : BlockPos.withinManhattan(BlockPos.containing(hitResult.getLocation()), (int)range + 1, (int)range + 1, (int)range + 1)){
-            if(!blockPos.closerToCenterThan(hitResult.getLocation(),range)) continue;
+         for(BlockPos blockPos : BlockPos.withinManhattan(BlockPos.containing(hitResult.getLocation()), (int) range + 1, (int) range + 1, (int) range + 1)){
+            if(!blockPos.closerToCenterThan(hitResult.getLocation(), range)) continue;
             if(world.getBlockState(blockPos).is(Blocks.WATER)){
                world.setBlockAndUpdate(blockPos, Blocks.FROSTED_ICE.defaultBlockState());
             }
          }
          
-         world.sendParticles(ParticleTypes.SNOWFLAKE,hitResult.getLocation().x(),hitResult.getLocation().y(),hitResult.getLocation().z(),50,0.25,0.25,0.25,0.5);
-         world.sendParticles(ParticleTypes.ITEM_SNOWBALL,hitResult.getLocation().x(),hitResult.getLocation().y(),hitResult.getLocation().z(),50,0.25,0.25,0.25,0.5);
+         world.sendParticles(ParticleTypes.SNOWFLAKE, hitResult.getLocation().x(), hitResult.getLocation().y(), hitResult.getLocation().z(), 50, 0.25, 0.25, 0.25, 0.5);
+         world.sendParticles(ParticleTypes.ITEM_SNOWBALL, hitResult.getLocation().x(), hitResult.getLocation().y(), hitResult.getLocation().z(), 50, 0.25, 0.25, 0.25, 0.5);
          for(LivingEntity livingEntity : living){
-            livingEntity.hurtServer(world,new DamageSource(world.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(DamageTypes.FREEZE),this,this.getOwner()),damage);
-            livingEntity.addEffect(new MobEffectInstance(MobEffects.SLOWNESS,duration,lvl-1),this.getOwner());
-            world.sendParticles(ParticleTypes.SNOWFLAKE,livingEntity.getX(),livingEntity.getY()+livingEntity.getBbHeight()/2.0,livingEntity.getZ(),25,livingEntity.getBbWidth()/2.0,livingEntity.getBbHeight()/2.0,livingEntity.getBbWidth()/2.0,0.1);
-            world.sendParticles(ParticleTypes.ITEM_SNOWBALL,livingEntity.getX(),livingEntity.getY()+livingEntity.getBbHeight()/2.0,livingEntity.getZ(),25,livingEntity.getBbWidth()/2.0,livingEntity.getBbHeight()/2.0,livingEntity.getBbWidth()/2.0,0.1);
+            livingEntity.hurtServer(world, new DamageSource(world.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(DamageTypes.FREEZE), this, this.getOwner()), damage);
+            livingEntity.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, duration, lvl - 1), this.getOwner());
+            world.sendParticles(ParticleTypes.SNOWFLAKE, livingEntity.getX(), livingEntity.getY() + livingEntity.getBbHeight() / 2.0, livingEntity.getZ(), 25, livingEntity.getBbWidth() / 2.0, livingEntity.getBbHeight() / 2.0, livingEntity.getBbWidth() / 2.0, 0.1);
+            world.sendParticles(ParticleTypes.ITEM_SNOWBALL, livingEntity.getX(), livingEntity.getY() + livingEntity.getBbHeight() / 2.0, livingEntity.getZ(), 25, livingEntity.getBbWidth() / 2.0, livingEntity.getBbHeight() / 2.0, livingEntity.getBbWidth() / 2.0, 0.1);
 //            if(livingEntity.getBlockStateAtPos().isIn(BlockTags.REPLACEABLE)){
 //               world.setBlockState(livingEntity.getBlockPos(), Blocks.POWDER_SNOW.getDefaultState());
 //            }

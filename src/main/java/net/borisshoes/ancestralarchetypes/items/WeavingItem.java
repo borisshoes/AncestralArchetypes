@@ -26,7 +26,7 @@ import net.minecraft.world.phys.Vec3;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
-public class WeavingItem extends AbilityItem{
+public class WeavingItem extends AbilityItem {
    
    public WeavingItem(Properties settings){
       super(ArchetypeRegistry.WEAVING, "\uD83D\uDD78", settings);
@@ -46,12 +46,12 @@ public class WeavingItem extends AbilityItem{
       if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
       PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC), true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH, 0.25f, 0.8f);
          return InteractionResult.PASS;
       }
       
-      spawnCobwebBlock(player.level(),player);
+      spawnCobwebBlock(player.level(), player);
       
       profile(player).setAbilityCooldown(this.ability, CONFIG.getInt(ArchetypeRegistry.WEAVING_WEB_COOLDOWN));
       player.connection.send(new ClientboundContainerSetSlotPacket(player.inventoryMenu.containerId, player.inventoryMenu.incrementStateId(), player.getUsedItemHand() == InteractionHand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, player.getItemInHand(hand)));
@@ -63,7 +63,7 @@ public class WeavingItem extends AbilityItem{
       fallingBlockEntity.dropItem = false;
       world.addFreshEntity(fallingBlockEntity);
       Vec3 lookingDir = player.getLookAngle();
-      Vec3 vel = lookingDir.add(0,0.15,0).scale(0.5);
+      Vec3 vel = lookingDir.add(0, 0.15, 0).scale(0.5);
       fallingBlockEntity.setDeltaMovement(vel);
    }
 }

@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin({ThrowableItemProjectile.class})
 public interface ThrowableItemProjectileAccessor {
    @Accessor
-   static EntityDataAccessor<ItemStack> getDATA_ITEM_STACK() {
+   static EntityDataAccessor<ItemStack> getDATA_ITEM_STACK(){
       throw new UnsupportedOperationException();
    }
 }

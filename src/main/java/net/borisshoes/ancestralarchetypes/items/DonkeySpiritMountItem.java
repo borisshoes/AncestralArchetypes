@@ -11,9 +11,9 @@ import net.minecraft.world.entity.animal.equine.Donkey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-public class DonkeySpiritMountItem  extends SpiritMountItem{
+public class DonkeySpiritMountItem extends SpiritMountItem {
    public DonkeySpiritMountItem(Properties settings){
-      super(ArchetypeRegistry.DONKEY_SPIRIT_MOUNT, "\uD83E\uDECF",settings);
+      super(ArchetypeRegistry.DONKEY_SPIRIT_MOUNT, "\uD83E\uDECF", settings);
    }
    
    @Override
@@ -24,7 +24,7 @@ public class DonkeySpiritMountItem  extends SpiritMountItem{
       donkey.getAttribute(Attributes.JUMP_STRENGTH).setBaseValue(0.85f);
       donkey.getAttribute(Attributes.SAFE_FALL_DISTANCE).setBaseValue(10.0f);
       donkey.getAttribute(Attributes.STEP_HEIGHT).setBaseValue(1.75f);
-      donkey.setItemSlot(EquipmentSlot.SADDLE,new ItemStack(Items.SADDLE));
+      donkey.setItemSlot(EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
       donkey.setHealth(60.0f);
       donkey.setOwner(player);
       donkey.setTamed(true);

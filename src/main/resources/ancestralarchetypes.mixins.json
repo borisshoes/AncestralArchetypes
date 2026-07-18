@@ -6,6 +6,7 @@
   "mixins": [
     "AbstractHorseDonkeyMixin",
     "AbstractHorseMixin",
+    "AbstractSkeletonMixin",
     "AbstractThrownPotionMixin",
     "ArcanaItemUtilsMixin",
     "CakeBlockMixin",
@@ -16,6 +17,7 @@
     "FallingBlockEntityAccessor",
     "FarmBlockMixin",
     "FeastingCharmItemMixin",
+    "InteractionAccessor",
     "ItemEntityMixin",
     "ItemMixin",
     "LayeredCauldronBlockMixin",

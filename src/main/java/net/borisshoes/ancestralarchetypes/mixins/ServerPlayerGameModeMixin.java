@@ -25,7 +25,7 @@ public class ServerPlayerGameModeMixin {
    private ItemStack archetypes$silkTouch(ItemStack original){
       if(original.isEmpty() && AncestralArchetypes.profile(player).hasAbility(ArchetypeRegistry.SILK_TOUCH)){
          ItemStack silkStack = new ItemStack(Items.WOODEN_PICKAXE);
-         silkStack.enchant(MinecraftUtils.getEnchantment(Enchantments.SILK_TOUCH),1);
+         silkStack.enchant(MinecraftUtils.getEnchantment(Enchantments.SILK_TOUCH), 1);
          return silkStack;
       }
       return original;

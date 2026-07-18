@@ -60,7 +60,7 @@ public final class TongueAnimation {
       ANIMATIONS.put(player.getUUID(), anim);
    }
    
-
+   
    public static void tickAll(){
       if(ANIMATIONS.isEmpty()) return;
       Iterator<TongueAnimation> it = ANIMATIONS.values().iterator();

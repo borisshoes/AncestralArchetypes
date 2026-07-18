@@ -15,7 +15,7 @@ public class ServerLevelMixin {
    
    @Inject(method = "gameEvent(Lnet/minecraft/core/Holder;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/level/gameevent/GameEvent$Context;)V", at = @At("HEAD"))
    private void archetypes$echolocationDispatch(Holder<GameEvent> event, Vec3 pos, GameEvent.Context context, CallbackInfo ci){
-      EcholocationVibrationSystem.dispatchGameEvent((ServerLevel)(Object) this, event, pos, context);
+      EcholocationVibrationSystem.dispatchGameEvent((ServerLevel) (Object) this, event, pos, context);
    }
 }
 

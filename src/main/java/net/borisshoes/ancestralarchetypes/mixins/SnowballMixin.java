@@ -19,7 +19,7 @@ public class SnowballMixin {
    
    @Inject(method = "onHitEntity", at = @At("TAIL"))
    private void archetypes$snowballDamage(EntityHitResult entityHitResult, CallbackInfo ci){
-      Snowball snowball = (Snowball)(Object) this;
+      Snowball snowball = (Snowball) (Object) this;
       Entity entity = entityHitResult.getEntity();
       if(entity instanceof ServerPlayer player){
          PlayerArchetypeData profile = profile(player);

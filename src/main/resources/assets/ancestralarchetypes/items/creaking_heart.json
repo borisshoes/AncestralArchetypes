@@ -1,0 +1,27 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:custom_model_data",
+    "cases": [
+      {
+        "when": "on",
+        "model": {
+          "type": "minecraft:model",
+          "model": "ancestralarchetypes:item/creaking_heart_active"
+        }
+      },
+      {
+        "when": "off",
+        "model": {
+          "type": "minecraft:model",
+          "model": "ancestralarchetypes:item/creaking_heart_inactive"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "ancestralarchetypes:item/creaking_heart_inactive"
+    }
+  },
+  "hand_animation_on_swap": true
+}

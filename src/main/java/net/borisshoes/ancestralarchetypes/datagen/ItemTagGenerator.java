@@ -14,12 +14,12 @@ import net.minecraft.world.item.Item;
 import java.util.concurrent.CompletableFuture;
 
 public class ItemTagGenerator extends FabricTagsProvider.ItemTagsProvider {
-   public ItemTagGenerator(FabricPackOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
+   public ItemTagGenerator(FabricPackOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture){
       super(output, registriesFuture);
    }
    
    @Override
-   protected void addTags(HolderLookup.Provider lookup) {
+   protected void addTags(HolderLookup.Provider lookup){
       builder(ArchetypeRegistry.CARNIVORE_FOODS)
             .add(ItemIds.BEEF)
             .add(ItemIds.COOKED_BEEF)

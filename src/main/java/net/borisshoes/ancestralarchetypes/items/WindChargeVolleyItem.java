@@ -26,10 +26,10 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.WIND_CHARGE_VOLLEY;
 
-public class WindChargeVolleyItem extends AbilityItem{
+public class WindChargeVolleyItem extends AbilityItem {
    
    public WindChargeVolleyItem(Properties settings){
-      super(WIND_CHARGE_VOLLEY,"\uD83D\uDCA8", settings);
+      super(WIND_CHARGE_VOLLEY, "\uD83D\uDCA8", settings);
    }
    
    @Override
@@ -46,18 +46,18 @@ public class WindChargeVolleyItem extends AbilityItem{
       if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
       PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC), true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH, 0.25f, 0.8f);
          return InteractionResult.PASS;
       }
       
-      shootWindCharge(player,0.0f, 2.0f);
-      shootWindCharge(player,7.0f,0.75f);
-      shootWindCharge(player,7.0f,0.75f);
-      shootWindCharge(player,7.0f,0.75f);
-      shootWindCharge(player,7.0f,0.75f);
+      shootWindCharge(player, 0.0f, 2.0f);
+      shootWindCharge(player, 7.0f, 0.75f);
+      shootWindCharge(player, 7.0f, 0.75f);
+      shootWindCharge(player, 7.0f, 0.75f);
+      shootWindCharge(player, 7.0f, 0.75f);
       profile(player).setAbilityCooldown(this.ability, CONFIG.getInt(ArchetypeRegistry.WIND_CHARGE_COOLDOWN));
-      SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS,1f, 0.4f / (world.getRandom().nextFloat() * 0.4f + 0.8f));
+      SoundUtils.playSound(player.level(), player.blockPosition(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 1f, 0.4f / (world.getRandom().nextFloat() * 0.4f + 0.8f));
       player.connection.send(new ClientboundContainerSetSlotPacket(player.inventoryMenu.containerId, player.inventoryMenu.incrementStateId(), player.getUsedItemHand() == InteractionHand.MAIN_HAND ? 36 + player.getInventory().getSelectedSlot() : 45, player.getItemInHand(hand)));
       return InteractionResult.SUCCESS;
    }

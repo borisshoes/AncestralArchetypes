@@ -11,12 +11,12 @@ import net.minecraft.world.level.biome.Biomes;
 import java.util.concurrent.CompletableFuture;
 
 public class BiomeTagGenerator extends FabricTagsProvider<Biome> {
-   public BiomeTagGenerator(FabricPackOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
+   public BiomeTagGenerator(FabricPackOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture){
       super(output, Registries.BIOME, registriesFuture);
    }
    
    @Override
-   protected void addTags(HolderLookup.Provider lookup) {
+   protected void addTags(HolderLookup.Provider lookup){
       builder(ArchetypeRegistry.COLD_DAMAGE_EXCEPTION_BIOMES)
             .add(Biomes.THE_VOID)
       ;

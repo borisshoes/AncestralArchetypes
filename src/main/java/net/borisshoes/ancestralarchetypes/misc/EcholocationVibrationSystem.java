@@ -8,6 +8,7 @@ import eu.pb4.polymer.virtualentity.api.elements.DisplayElement;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import net.borisshoes.ancestralarchetypes.AncestralArchetypes;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
+import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.borislib.events.Event;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -133,7 +134,9 @@ public class EcholocationVibrationSystem implements VibrationSystem {
       }
    }
    
-   /** Thread-safe check (backed by the concurrent registry) for whether a player currently has an active echolocation system. */
+   /**
+    * Thread-safe check (backed by the concurrent registry) for whether a player currently has an active echolocation system.
+    */
    public static boolean isActive(UUID playerId){
       return ACTIVE_SYSTEMS.containsKey(playerId);
    }
@@ -157,8 +160,8 @@ public class EcholocationVibrationSystem implements VibrationSystem {
       Entity sourceEntity = context.sourceEntity();
       Entity projectileOwner = sourceEntity instanceof Projectile projectile ? projectile.getOwner() : null;
       BlockPos destinationPos = BlockPos.containing(destination);
-      float receivingDistance = (float)Math.sqrt(originPos.distSqr(destinationPos));
-      int travelTime = Math.max(1, user.calculateTravelTimeInTicks((float)sourcePosition.distanceTo(destination)));
+      float receivingDistance = (float) Math.sqrt(originPos.distSqr(destinationPos));
+      int travelTime = Math.max(1, user.calculateTravelTimeInTicks((float) sourcePosition.distanceTo(destination)));
       
       // If the queue is full, evict the least-imminent vibration to make room rather than dropping this new one
       if(this.pendingVibrations.size() >= MAX_PENDING_VIBRATIONS){
@@ -204,8 +207,10 @@ public class EcholocationVibrationSystem implements VibrationSystem {
    private static final class PendingVibration {
       private final Holder<GameEvent> event;
       private final BlockPos originPos;
-      @Nullable private final Entity sourceEntity;
-      @Nullable private final Entity projectileOwner;
+      @Nullable
+      private final Entity sourceEntity;
+      @Nullable
+      private final Entity projectileOwner;
       private final float receivingDistance;
       private int travelTime;
       
@@ -219,7 +224,9 @@ public class EcholocationVibrationSystem implements VibrationSystem {
       }
    }
    
-   /** Reimplementation of the private {@code VibrationSystem.Listener#isOccluded} occlusion check. */
+   /**
+    * Reimplementation of the private {@code VibrationSystem.Listener#isOccluded} occlusion check.
+    */
    private static boolean isOccluded(final Level level, final Vec3 origin, final Vec3 dest){
       Vec3 from = new Vec3(Mth.floor(origin.x) + 0.5, Mth.floor(origin.y) + 0.5, Mth.floor(origin.z) + 0.5);
       Vec3 to = new Vec3(Mth.floor(dest.x) + 0.5, Mth.floor(dest.y) + 0.5, Mth.floor(dest.z) + 0.5);
@@ -247,7 +254,7 @@ public class EcholocationVibrationSystem implements VibrationSystem {
       @Override
       public PositionSource getPositionSource(){
          ServerPlayer p = EcholocationVibrationSystem.this.player;
-         return new EntityPositionSource(p, p.getEyeHeight()/2.0f);
+         return new EntityPositionSource(p, p.getEyeHeight() / 2.0f);
       }
       
       @Override
@@ -267,7 +274,16 @@ public class EcholocationVibrationSystem implements VibrationSystem {
       
       @Override
       public boolean canReceiveVibration(final ServerLevel level, final BlockPos pos, final Holder<GameEvent> event, final GameEvent.Context context){
-         return !EcholocationVibrationSystem.this.player.isDeadOrDying() && level.getWorldBorder().isWithinBounds(pos);
+         if(EcholocationVibrationSystem.this.player.isDeadOrDying()) return false;
+         if(!level.getWorldBorder().isWithinBounds(pos)) return false;
+         Entity sourceEntity = context.sourceEntity();
+         if(sourceEntity instanceof ServerPlayer sourcePlayer){
+            PlayerArchetypeData profile = AncestralArchetypes.profile(sourcePlayer);
+            if(profile.hasAbility(ArchetypeRegistry.LIGHTWEIGHT) || profile.getMetamorph() == MetamorphTypes.WOOL){
+               return false;
+            }
+         }
+         return true;
       }
       
       @Override
@@ -331,13 +347,13 @@ public class EcholocationVibrationSystem implements VibrationSystem {
          pos = partner;
          state = level.getBlockState(pos);
       }
-      GlowedBlock existing = GLOWED_BLOCKS.get(GlowedBlock.getHash(level,pos,state));
+      GlowedBlock existing = GLOWED_BLOCKS.get(GlowedBlock.getHash(level, pos, state));
       if(existing != null){
          existing.addPlayer(player);
       }else{
          GlowedBlock newBlock = new GlowedBlock(level, pos, false);
          newBlock.addPlayer(player);
-         GLOWED_BLOCKS.put(newBlock.hashCode(),newBlock);
+         GLOWED_BLOCKS.put(newBlock.hashCode(), newBlock);
       }
    }
    
@@ -347,20 +363,45 @@ public class EcholocationVibrationSystem implements VibrationSystem {
     * {@link #glowBlock}, but the marker isn't tied to a block being present.
     */
    public static void glowDestroyedBlock(ServerLevel level, BlockPos pos, ServerPlayer player){
-      GlowedBlock existing = GLOWED_BLOCKS.get(GlowedBlock.getHash(level,pos,level.getBlockState(pos)));
+      GlowedBlock existing = GLOWED_BLOCKS.get(GlowedBlock.getHash(level, pos, level.getBlockState(pos)));
       if(existing != null){
          existing.addPlayer(player);
       }else{
          GlowedBlock newBlock = new GlowedBlock(level, pos, true);
          newBlock.addPlayer(player);
-         GLOWED_BLOCKS.put(newBlock.hashCode(),newBlock);
+         GLOWED_BLOCKS.put(newBlock.hashCode(), newBlock);
       }
    }
    
    private static void glowEntity(ServerPlayer player, @Nullable Entity entity){
       if(entity == null || player.getUUID().equals(entity.getUUID())) return;
+      if(entity instanceof ServerPlayer sourcePlayer){
+         PlayerArchetypeData profile = AncestralArchetypes.profile(sourcePlayer);
+         if(profile.hasAbility(ArchetypeRegistry.LIGHTWEIGHT) || profile.getMetamorph() == MetamorphTypes.WOOL){
+            return;
+         }
+      }
       ArchetypeUtils.addGlow(player, entity, TeamColor.DARK_AQUA);
       Event.addEvent(new EcholocationEntityGlowEvent(entity, player));
+   }
+   
+   /**
+    * Re-applies entity glow packets for every active {@link EcholocationEntityGlowEvent}.
+    *
+    * <p>This is called from {@link net.borisshoes.ancestralarchetypes.callbacks.TickCallback} at
+    * {@code ServerTickEvents.END_SERVER_TICK} — i.e. <em>after</em> the entity tracker has already flushed its
+    * per-player data updates for this tick. Because the tracker can send a FLAGS value that does not include the
+    * glowing bit (whenever any flag changes on the entity), our glow packet needs to be re-sent every couple of
+    * ticks so the client's final state for the tick always ends with the glow active.
+    */
+   public static void refreshEntityGlows(){
+      List<EcholocationEntityGlowEvent> events = Event.getEventsOfType(EcholocationEntityGlowEvent.class);
+      if(events.isEmpty()) return;
+      for(EcholocationEntityGlowEvent event : events){
+         if(event.entity == null || !event.entity.isAlive() || event.entity.isRemoved()) continue;
+         if(event.player == null || event.player.hasDisconnected()) continue;
+         ArchetypeUtils.addGlow(event.player, event.entity, TeamColor.DARK_AQUA);
+      }
    }
    
    public static void handleSoundAt(ServerPlayer player, double x, double y, double z){
@@ -370,6 +411,14 @@ public class EcholocationVibrationSystem implements VibrationSystem {
       Vec3 origin = new Vec3(x, y, z);
       double range = AncestralArchetypes.CONFIG.getDouble(ArchetypeRegistry.ECHOLOCATION_RANGE);
       if(player.getEyePosition().distanceToSqr(origin) > range * range) return;
+      
+      double lwRadius = SOUND_ENTITY_GLOW_RADIUS + 0.15;
+      boolean fromLightweight = level.getPlayers(p ->
+            !p.getUUID().equals(player.getUUID()) &&
+                  p.position().closerThan(origin, lwRadius) &&
+                  (AncestralArchetypes.profile(p).hasAbility(ArchetypeRegistry.LIGHTWEIGHT) || AncestralArchetypes.profile(p).getMetamorph() == MetamorphTypes.WOOL)
+      ).stream().findAny().isPresent();
+      if(fromLightweight) return;
       
       BlockPos pos = BlockPos.containing(origin);
       if(!level.getBlockState(pos).isAir()){
@@ -383,13 +432,18 @@ public class EcholocationVibrationSystem implements VibrationSystem {
          glowEntity(player, entity);
       }
    }
-
+   
    public static void handleEntitySound(ServerPlayer player, int entityId){
       ServerLevel level = player.level();
       Entity entity = level.getEntity(entityId);
-      if(entity != null){
-         handleSoundAt(player, entity.getX(), entity.getY(), entity.getZ());
+      if(entity == null) return;
+      if(entity instanceof ServerPlayer sourcePlayer){
+         PlayerArchetypeData profile = AncestralArchetypes.profile(sourcePlayer);
+         if(profile.hasAbility(ArchetypeRegistry.LIGHTWEIGHT) || profile.getMetamorph() == MetamorphTypes.WOOL){
+            return;
+         }
       }
+      handleSoundAt(player, entity.getX(), entity.getY(), entity.getZ());
    }
    
    /**
@@ -454,7 +508,9 @@ public class EcholocationVibrationSystem implements VibrationSystem {
          BlockBoundAttachment attachment = new BlockBoundAttachment(this.holder, level.getChunkAt(pos), this.state, pos, new Vec3(pos), true);
       }
       
-      /** Creates a glowing block display element for the (absolute) block position, offset within the holder. */
+      /**
+       * Creates a glowing block display element for the (absolute) block position, offset within the holder.
+       */
       private void addDisplay(BlockPos partPos){
          BlockDisplayElement blockDisplay = new BlockDisplayElement(toDisplayState(level.getBlockState(partPos)));
          blockDisplay.setGlowing(true);
@@ -472,7 +528,9 @@ public class EcholocationVibrationSystem implements VibrationSystem {
          this.parts.add(new DisplayPart(partPos, blockDisplay, true));
       }
       
-      /** Creates a billboarded glowing pickaxe marker centred in the block (used for destroyed blocks). */
+      /**
+       * Creates a billboarded glowing pickaxe marker centred in the block (used for destroyed blocks).
+       */
       private void addPickaxeMarker(){
          ItemDisplayElement itemDisplay = new ItemDisplayElement(Items.DIAMOND_PICKAXE);
          itemDisplay.setItemDisplayContext(ItemDisplayContext.FIXED);
@@ -491,6 +549,7 @@ public class EcholocationVibrationSystem implements VibrationSystem {
        * Re-syncs every block-bound display element to its live world block state. Doors/trapdoors opening and
        * closing, etc. are reflected immediately. Any block-bound part whose block has been broken (now air) is
        * removed. Non-block-bound parts (e.g. the destroyed-block pickaxe marker) are left untouched.
+       *
        * @return true if all parts are now gone (every glowed element was removed).
        */
       private boolean updateStates(){
@@ -530,15 +589,17 @@ public class EcholocationVibrationSystem implements VibrationSystem {
       }
       
       public static int getHash(ServerLevel level, BlockPos pos, BlockState state){
-         return Objects.hash(level.dimension().toString().hashCode(),pos.hashCode(),state.getBlock().toString().hashCode());
+         return Objects.hash(level.dimension().toString().hashCode(), pos.hashCode(), state.getBlock().toString().hashCode());
       }
       
       @Override
       public int hashCode(){
-         return getHash(level,pos,state);
+         return getHash(level, pos, state);
       }
       
-      /** A single glowing display element. Block-bound parts track a world block; markers are standalone. */
+      /**
+       * A single glowing display element. Block-bound parts track a world block; markers are standalone.
+       */
       private static final class DisplayPart {
          private final BlockPos partPos;
          private final DisplayElement element;
@@ -564,7 +625,7 @@ public class EcholocationVibrationSystem implements VibrationSystem {
       }
       
       void addPlayer(ServerPlayer player){
-         players.put(player,60);
+         players.put(player, 60);
          startWatching(player);
          if(getAttachment() != null) getAttachment().startWatching(player);
       }
@@ -604,7 +665,8 @@ public class EcholocationVibrationSystem implements VibrationSystem {
          List<ServerPlayer> toRemove = new ArrayList<>();
          for(ServerPlayer player : players.keySet()){
             int newTime = players.compute(player, (k, time) -> time - 1);
-            if(newTime <= 0 || player.isDeadOrDying() || player.hasDisconnected() || !player.level().dimension().equals(this.levelKey)) toRemove.add(player);
+            if(newTime <= 0 || player.isDeadOrDying() || player.hasDisconnected() || !player.level().dimension().equals(this.levelKey))
+               toRemove.add(player);
             if(newTime > maxTime) maxTime = newTime;
          }
          toRemove.forEach(this::removePlayer);

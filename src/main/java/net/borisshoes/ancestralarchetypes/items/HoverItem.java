@@ -36,7 +36,7 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.EQUIPMENT_ASSET_REGISTRY_KEY;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.SLOW_HOVER_ABILITY;
 
-public class HoverItem extends AbilityItem{
+public class HoverItem extends AbilityItem {
    public HoverItem(Properties settings){
       super(ArchetypeRegistry.SLOW_HOVER, "\uD83D\uDE81", settings);
    }
@@ -56,18 +56,18 @@ public class HoverItem extends AbilityItem{
       
       if(!(entity instanceof ServerPlayer player)) return;
       PlayerArchetypeData profile = profile(player);
-      double hoverPercentage = ((double)profile.getHoverTime() / profile.getMaxHoverTime());
+      double hoverPercentage = ((double) profile.getHoverTime() / profile.getMaxHoverTime());
       boolean onCooldown = profile.getAbilityCooldown(this.ability) > 0;
       if(onCooldown){
          stack.setDamageValue(stack.getMaxDamage() - 1);
       }else{
-         stack.setDamageValue((int) ((stack.getMaxDamage()-1) * (1-hoverPercentage)));
+         stack.setDamageValue((int) ((stack.getMaxDamage() - 1) * (1 - hoverPercentage)));
       }
       
       DyedItemColor dyedColorComponent = stack.get(DataComponents.DYED_COLOR);
       if(dyedColorComponent == null || dyedColorComponent.rgb() != profile.getHelmetColor()){
          stack.set(DataComponents.DYED_COLOR, new DyedItemColor(profile.getHelmetColor()));
-         stack.set(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT.withHidden(DataComponents.DYED_COLOR,true));
+         stack.set(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT.withHidden(DataComponents.DYED_COLOR, true));
       }
       
       boolean hovering = !player.isCreative() && VanillaAbilities.ALLOW_FLYING.getTracker(player).isEnabled() &&
@@ -77,13 +77,13 @@ public class HoverItem extends AbilityItem{
          int glideValue = (int) (hoverPercentage * 100);
          char[] unicodeChars = {'▁', '▂', '▃', '▅', '▆', '▇', '▌'};
          StringBuilder message = new StringBuilder("≈ ");
-         for (int i = 0; i < 10; i++) {
+         for(int i = 0; i < 10; i++){
             int segmentValue = glideValue - (i * 10);
-            if (segmentValue <= 0) {
+            if(segmentValue <= 0){
                message.append(unicodeChars[0]);
-            } else if (segmentValue >= 10) {
+            }else if(segmentValue >= 10){
                message.append(unicodeChars[unicodeChars.length - 1]);
-            } else {
+            }else{
                int charIndex = (int) ((double) segmentValue / 10 * (unicodeChars.length - 1));
                message.append(unicodeChars[charIndex]);
             }
@@ -116,8 +116,8 @@ public class HoverItem extends AbilityItem{
       if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
       PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC), true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH, 0.25f, 0.8f);
          return InteractionResult.PASS;
       }
       

@@ -202,7 +202,7 @@ public abstract class LivingEntityMixin {
             player.level().sendParticles(ParticleTypes.TOTEM_OF_UNDYING, player.getX(), player.getY() + player.getBbHeight() / 2, player.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
             makeSound(SoundEvents.ZOMBIE_VILLAGER_CURE);
             return true;
-         }else if(profile.hasAbility(ArchetypeRegistry.SULFUR_TOTEM) && profile.getDeathReductionSizeLevel() <= 1){
+         }else if(profile.hasAbility(ArchetypeRegistry.SULFUR_TOTEM) && profile.getDeathReductionSizeLevel() <= 0){
             profile.changeDeathReductionSizeLevel(player, false);
             player.level().sendParticles(ParticleTypes.TOTEM_OF_UNDYING, player.getX(), player.getY() + player.getBbHeight() / 2, player.getZ(), 100, 0.15, 0.15, 0.15, 0.3);
             makeSound(SoundEvents.ZOMBIE_VILLAGER_CURE);
@@ -260,6 +260,9 @@ public abstract class LivingEntityMixin {
             }else if(source.is(DamageTypeTags.IS_FIRE)){
                profile.metamorphIgniteFire(player);
             }
+         }else if(source.is(DamageTypeTags.BURN_FROM_STEPPING) && profile.getMetamorph() == MetamorphTypes.ICE){
+            cir.setReturnValue(false);
+            return;
          }
       }
    }

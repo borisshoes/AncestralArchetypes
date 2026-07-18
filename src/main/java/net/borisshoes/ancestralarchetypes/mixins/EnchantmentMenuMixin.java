@@ -23,12 +23,12 @@ public class EnchantmentMenuMixin {
    @ModifyArg(method = "lambda$slotsChanged$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;getEnchantmentCost(Lnet/minecraft/util/RandomSource;IILnet/minecraft/world/item/ItemStack;)I"), index = 2)
    private int archetypes$bookshelfMetamorph(int bookcases, @Local(argsOnly = true, name = "level") Level level, @Local(argsOnly = true, name = "pos") BlockPos pos){
       AtomicInteger cases = new AtomicInteger(bookcases);
-      List<ServerPlayer> players = level.getEntitiesOfClass(ServerPlayer.class,new AABB(pos).inflate(4));
+      List<ServerPlayer> players = level.getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(4));
       players.removeIf(player -> AncestralArchetypes.profile(player).getMetamorph() != MetamorphTypes.BOOKSHELF);
       players.forEach(player -> {
          float dist = Mth.sqrt((float) player.distanceToSqr(Vec3.atBottomCenterOf(pos)));
-         cases.addAndGet(Math.max(0,(int) (5 * (4 - dist))));
+         cases.addAndGet(Math.max(0, (int) (5 * (4 - dist))));
       });
-      return Math.max(bookcases,Math.min(20,cases.get())); // This CANNOT be replaced by clamp, the IDE is lying
+      return Math.max(bookcases, Math.min(20, cases.get())); // This CANNOT be replaced by clamp, the IDE is lying
    }
 }

@@ -54,26 +54,26 @@ public class LevitationBulletEntity extends Projectile implements PolymerEntity 
    }
    
    public LevitationBulletEntity(Level world, LivingEntity owner, Entity target, Direction.Axis axis){
-      this(ArchetypeRegistry.LEVITATION_BULLET_ENTITY,world);
+      this(ArchetypeRegistry.LEVITATION_BULLET_ENTITY, world);
       this.setOwner(owner);
       Vec3 vec3d = owner.getBoundingBox().getCenter();
       this.snapTo(vec3d.x, vec3d.y, vec3d.z, this.getYRot(), this.getXRot());
       this.target = EntityReference.of(target);
       this.direction = Direction.UP;
       this.changeTargetDirection(axis, target);
-      this.maxSpeed = this.getRandom().nextDouble()*0.25 + 0.5;
-      this.minSpeed = this.getRandom().nextDouble()*0.15 + 0.10;
+      this.maxSpeed = this.getRandom().nextDouble() * 0.25 + 0.5;
+      this.minSpeed = this.getRandom().nextDouble() * 0.15 + 0.10;
    }
    
    @Override
-   public SoundSource getSoundSource() {
+   public SoundSource getSoundSource(){
       return SoundSource.HOSTILE;
    }
    
    @Override
-   protected void addAdditionalSaveData(ValueOutput view) {
+   protected void addAdditionalSaveData(ValueOutput view){
       super.addAdditionalSaveData(view);
-      if (this.target != null) {
+      if(this.target != null){
          view.store("Target", UUIDUtil.CODEC, this.target.getUUID());
       }
       
@@ -84,12 +84,12 @@ public class LevitationBulletEntity extends Projectile implements PolymerEntity 
       view.putDouble("TXD", this.targetX);
       view.putDouble("TYD", this.targetY);
       view.putDouble("TZD", this.targetZ);
-      view.putDouble("MaxSpeed",this.maxSpeed);
-      view.putDouble("MinSpeed",this.minSpeed);
+      view.putDouble("MaxSpeed", this.maxSpeed);
+      view.putDouble("MinSpeed", this.minSpeed);
    }
    
    @Override
-   protected void readAdditionalSaveData(ValueInput view) {
+   protected void readAdditionalSaveData(ValueInput view){
       super.readAdditionalSaveData(view);
       this.stepCount = view.getIntOr("Steps", 0);
       this.burstTicks = view.getIntOr("BurstCD", 0);
@@ -97,34 +97,34 @@ public class LevitationBulletEntity extends Projectile implements PolymerEntity 
       this.targetX = view.getDoubleOr("TXD", 0.0);
       this.targetY = view.getDoubleOr("TYD", 0.0);
       this.targetZ = view.getDoubleOr("TZD", 0.0);
-      this.maxSpeed = view.getDoubleOr("MaxSpeed",50.0);
-      this.minSpeed = view.getDoubleOr("MinSpeed",15.0);
-      this.direction = (Direction)view.read("Dir", Direction.LEGACY_ID_CODEC).orElse(null);
+      this.maxSpeed = view.getDoubleOr("MaxSpeed", 50.0);
+      this.minSpeed = view.getDoubleOr("MinSpeed", 15.0);
+      this.direction = (Direction) view.read("Dir", Direction.LEGACY_ID_CODEC).orElse(null);
       this.target = EntityReference.read(view, "Target");
    }
    
    @Override
-   protected void defineSynchedData(SynchedEntityData.Builder builder) {
+   protected void defineSynchedData(SynchedEntityData.Builder builder){
    }
    
    @Override
-   public Direction getDirection() {
+   public Direction getDirection(){
       return this.direction;
    }
    
-   private void setDirection(@Nullable Direction direction) {
+   private void setDirection(@Nullable Direction direction){
       this.direction = direction;
    }
    
    @Override
-   public void checkDespawn() {
-      if (this.level().getDifficulty() == Difficulty.PEACEFUL) {
+   public void checkDespawn(){
+      if(this.level().getDifficulty() == Difficulty.PEACEFUL){
          this.discard();
       }
    }
    
    @Override
-   protected double getDefaultGravity() {
+   protected double getDefaultGravity(){
       return 0.04;
    }
    
@@ -186,14 +186,16 @@ public class LevitationBulletEntity extends Projectile implements PolymerEntity 
       this.setPos(this.position().add(vec3d));
       this.applyEffectsFromBlocks();
       if(this.portalProcess != null && this.portalProcess.isInsidePortalThisTick()) this.handlePortal();
-      if(hitResult != null && this.isAlive() && hitResult.getType() != HitResult.Type.MISS) this.hitTargetOrDeflectSelf(hitResult);
+      if(hitResult != null && this.isAlive() && hitResult.getType() != HitResult.Type.MISS)
+         this.hitTargetOrDeflectSelf(hitResult);
       ProjectileUtil.rotateTowardsMovement(this, 0.5F);
       if(this.level().isClientSide()){
          this.level().addParticle(ParticleTypes.END_ROD, this.getX() - vec3d.x, this.getY() - vec3d.y + 0.15, this.getZ() - vec3d.z, 0.0, 0.0, 0.0);
       }else if(entity != null){
          if(this.stepCount > 0){
             this.stepCount--;
-            if(this.stepCount == 0) this.changeTargetDirection(this.direction == null ? null : this.direction.getAxis(), entity);
+            if(this.stepCount == 0)
+               this.changeTargetDirection(this.direction == null ? null : this.direction.getAxis(), entity);
          }
          if(this.direction != null){
             BlockPos blockPos = this.blockPosition();
@@ -259,7 +261,8 @@ public class LevitationBulletEntity extends Projectile implements PolymerEntity 
          }
          if(bestDir == null){
             Direction dir = Direction.getRandom(this.random);
-            for(int i = 8; i > 0 && !this.level().noCollision(this, this.getBoundingBox().move(dir.getStepX(), dir.getStepY(), dir.getStepZ())); i--) dir = Direction.getRandom(this.random);
+            for(int i = 8; i > 0 && !this.level().noCollision(this, this.getBoundingBox().move(dir.getStepX(), dir.getStepY(), dir.getStepZ())); i--)
+               dir = Direction.getRandom(this.random);
             bestDir = dir;
          }
          pick = bestDir;
@@ -284,82 +287,82 @@ public class LevitationBulletEntity extends Projectile implements PolymerEntity 
       }
       this.needsSync = true;
       int base = 6 + this.random.nextInt(6);
-      int extra = Math.min(14, (int)(l * 1.25));
+      int extra = Math.min(14, (int) (l * 1.25));
       this.stepCount = base + extra;
    }
    
    
    @Override
-   protected boolean isAffectedByBlocks() {
+   protected boolean isAffectedByBlocks(){
       return !this.isRemoved();
    }
    
    @Override
-   protected boolean canHitEntity(Entity entity) {
+   protected boolean canHitEntity(Entity entity){
       return super.canHitEntity(entity) && !entity.noPhysics;
    }
    
    @Override
-   public boolean isOnFire() {
+   public boolean isOnFire(){
       return false;
    }
    
    @Override
-   public boolean shouldRenderAtSqrDistance(double distance) {
+   public boolean shouldRenderAtSqrDistance(double distance){
       return distance < 16384.0;
    }
    
    @Override
-   public float getLightLevelDependentMagicValue() {
+   public float getLightLevelDependentMagicValue(){
       return 1.0F;
    }
    
    @Override
-   protected void onHitEntity(EntityHitResult entityHitResult) {
+   protected void onHitEntity(EntityHitResult entityHitResult){
       super.onHitEntity(entityHitResult);
       Entity entity = entityHitResult.getEntity();
       Entity entity2 = this.getOwner();
-      LivingEntity livingEntity = entity2 instanceof LivingEntity ? (LivingEntity)entity2 : null;
+      LivingEntity livingEntity = entity2 instanceof LivingEntity ? (LivingEntity) entity2 : null;
       DamageSource damageSource = this.damageSources().mobProjectile(this, livingEntity);
       boolean bl = entity.hurtOrSimulate(damageSource, (float) CONFIG.getDouble(ArchetypeRegistry.LEVITATION_BULLET_DAMAGE));
-      if (bl) {
-         if (this.level() instanceof ServerLevel serverWorld) {
+      if(bl){
+         if(this.level() instanceof ServerLevel serverWorld){
             EnchantmentHelper.doPostAttackEffects(serverWorld, entity, damageSource);
          }
          
-         if (entity instanceof LivingEntity livingEntity2) {
-            livingEntity2.addEffect(new MobEffectInstance(MobEffects.LEVITATION, CONFIG.getInt(ArchetypeRegistry.LEVITATION_BULLET_DURATION), CONFIG.getInt(ArchetypeRegistry.LEVITATION_BULLET_LEVEL)-1), MoreObjects.firstNonNull(entity2, this));
+         if(entity instanceof LivingEntity livingEntity2){
+            livingEntity2.addEffect(new MobEffectInstance(MobEffects.LEVITATION, CONFIG.getInt(ArchetypeRegistry.LEVITATION_BULLET_DURATION), CONFIG.getInt(ArchetypeRegistry.LEVITATION_BULLET_LEVEL) - 1), MoreObjects.firstNonNull(entity2, this));
          }
       }
    }
    
    private void explode(){
       if(this.isRemoved()) return;
-      ((ServerLevel)this.level()).sendParticles(ParticleTypes.EXPLOSION, this.getX(), this.getY(), this.getZ(), 2, 0.2, 0.2, 0.2, 0.0);
+      ((ServerLevel) this.level()).sendParticles(ParticleTypes.EXPLOSION, this.getX(), this.getY(), this.getZ(), 2, 0.2, 0.2, 0.2, 0.0);
       this.playSound(SoundEvents.SHULKER_BULLET_HIT, 1.0F, 1.0F);
       double range = 1.5;
-      List<LivingEntity> living = level().getEntitiesOfClass(LivingEntity.class,this.getBoundingBox().inflate(range*2)).stream().filter(e -> e.distanceTo(this) <= range).toList();
+      List<LivingEntity> living = level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(range * 2)).stream().filter(e -> e.distanceTo(this) <= range).toList();
       for(LivingEntity livingEntity : living){
-         livingEntity.addEffect(new MobEffectInstance(MobEffects.LEVITATION,CONFIG.getInt(ArchetypeRegistry.LEVITATION_BULLET_DURATION), CONFIG.getInt(ArchetypeRegistry.LEVITATION_BULLET_LEVEL)-1),MoreObjects.firstNonNull(this.getOwner(), this));
+         livingEntity.addEffect(new MobEffectInstance(MobEffects.LEVITATION, CONFIG.getInt(ArchetypeRegistry.LEVITATION_BULLET_DURATION), CONFIG.getInt(ArchetypeRegistry.LEVITATION_BULLET_LEVEL) - 1), MoreObjects.firstNonNull(this.getOwner(), this));
       }
    }
    
    @Override
-   protected void onHitBlock(BlockHitResult blockHitResult) {
+   protected void onHitBlock(BlockHitResult blockHitResult){
       super.onHitBlock(blockHitResult);
       explode();
       discard();
    }
    
-   private void destroy() {
+   private void destroy(){
       this.discard();
       this.level().gameEvent(GameEvent.ENTITY_DAMAGE, this.position(), GameEvent.Context.of(this));
    }
    
    @Override
-   protected void onHit(HitResult hitResult) {
+   protected void onHit(HitResult hitResult){
       if(hitResult.getType() == HitResult.Type.ENTITY){
-         EntityHitResult entityHitResult = (EntityHitResult)hitResult;
+         EntityHitResult entityHitResult = (EntityHitResult) hitResult;
          Entity entity = entityHitResult.getEntity();
          if(entity instanceof LevitationBulletEntity) return;
       }
@@ -368,17 +371,17 @@ public class LevitationBulletEntity extends Projectile implements PolymerEntity 
    }
    
    @Override
-   public boolean isPickable() {
+   public boolean isPickable(){
       return true;
    }
    
    @Override
-   public boolean hurtClient(DamageSource source) {
+   public boolean hurtClient(DamageSource source){
       return true;
    }
    
    @Override
-   public boolean hurtServer(ServerLevel world, DamageSource source, float amount) {
+   public boolean hurtServer(ServerLevel world, DamageSource source, float amount){
       this.playSound(SoundEvents.SHULKER_BULLET_HURT, 1.0F, 1.0F);
       world.sendParticles(ParticleTypes.CRIT, this.getX(), this.getY(), this.getZ(), 15, 0.2, 0.2, 0.2, 0.0);
       this.destroy();
@@ -386,7 +389,7 @@ public class LevitationBulletEntity extends Projectile implements PolymerEntity 
    }
    
    @Override
-   public void recreateFromPacket(ClientboundAddEntityPacket packet) {
+   public void recreateFromPacket(ClientboundAddEntityPacket packet){
       super.recreateFromPacket(packet);
       this.setDeltaMovement(packet.getMovement());
    }

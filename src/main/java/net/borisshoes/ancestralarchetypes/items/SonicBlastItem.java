@@ -36,7 +36,7 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.SONIC_BLAST;
 
-public class SonicBlastItem extends AbilityItem{
+public class SonicBlastItem extends AbilityItem {
    public SonicBlastItem(Properties settings){
       super(SONIC_BLAST, "\uD83D\uDD0A", settings);
    }
@@ -51,8 +51,8 @@ public class SonicBlastItem extends AbilityItem{
       if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
       PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC), true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH, 0.25f, 0.8f);
          return InteractionResult.PASS;
       }
       player.startUsingItem(hand);
@@ -64,11 +64,11 @@ public class SonicBlastItem extends AbilityItem{
       if(!(user instanceof ServerPlayer player)) return;
       int useTime = this.getUseDuration(stack, user) - remainingUseTicks;
       int maxWindup = CONFIG.getInt(ArchetypeRegistry.SONIC_BLAST_CHARGE_DURATION);
-      float windup = Mth.clamp((float) useTime / maxWindup,0, 1);
+      float windup = Mth.clamp((float) useTime / maxWindup, 0, 1);
       
       if(windup > 0.25){
          PlayerArchetypeData profile = AncestralArchetypes.profile(player);
-         double percentage = (windup-0.25) / 0.75;
+         double percentage = (windup - 0.25) / 0.75;
          MutableComponent leapMessage = Component.literal("");
          leapMessage.append(Component.literal("\uD83D\uDD0A [").withColor(profile.getSubArchetype().getColor()));
          for(int i = 0; i < 20; i++){
@@ -83,10 +83,10 @@ public class SonicBlastItem extends AbilityItem{
       }
       if(windup > 0.10){
          if(remainingUseTicks % 15 == 0){
-            SoundUtils.playSound(player.level(),player.blockPosition(),SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 3.0F, 0.5f*windup+0.625f);
+            SoundUtils.playSound(player.level(), player.blockPosition(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 3.0F, 0.5f * windup + 0.625f);
          }
          if(remainingUseTicks % 8 == 0){
-            player.level().sendParticles(ParticleTypes.SONIC_BOOM, player.getX(), player.getY() + player.getBbHeight()/2, player.getZ(), 1, 0.3F, 0.3F, 0.3F, 0.0F);
+            player.level().sendParticles(ParticleTypes.SONIC_BOOM, player.getX(), player.getY() + player.getBbHeight() / 2, player.getZ(), 1, 0.3F, 0.3F, 0.3F, 0.0F);
          }
       }
       
@@ -96,7 +96,7 @@ public class SonicBlastItem extends AbilityItem{
    }
    
    @Override
-   public boolean releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks) {
+   public boolean releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks){
       if(!(user instanceof ServerPlayer player)) return false;
       int useTime = this.getUseDuration(stack, user) - remainingUseTicks;
       float maxDamage = CONFIG.getFloat(ArchetypeRegistry.SONIC_BLAST_DAMAGE);
@@ -106,38 +106,38 @@ public class SonicBlastItem extends AbilityItem{
       int maxWindup = CONFIG.getInt(ArchetypeRegistry.SONIC_BLAST_CHARGE_DURATION);
       int cooldown = CONFIG.getInt(ArchetypeRegistry.SONIC_BLAST_COOLDOWN);
       
-      float windup = Mth.clamp((float) useTime / maxWindup,0, 1);
+      float windup = Mth.clamp((float) useTime / maxWindup, 0, 1);
       if(windup < 0.25) return false;
       float damage = windup * maxDamage;
-      float range = Mth.clamp(windup*1.5f,0,1) * maxRange;
-      float width = Mth.clamp(windup*2f,0,1) * maxWidth;
+      float range = Mth.clamp(windup * 1.5f, 0, 1) * maxRange;
+      float width = Mth.clamp(windup * 2f, 0, 1) * maxWidth;
       float knockback = 1.5f * (windup > 0.75f ? 1.0f : 0.5f) * maxKnockbackMod;
       
-      SoundUtils.playSound(player.level(),player.blockPosition(),SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 3.0F, 1.0F);
+      SoundUtils.playSound(player.level(), player.blockPosition(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 3.0F, 1.0F);
       
       ParticleEffectUtils.animatedLightningBolt(player.level(),
-            player.getEyePosition(),player.getEyePosition().add(player.getLookAngle().scale(range)),
-            (int) range, width / 4.0, ParticleTypes.SONIC_BOOM,3,1,
-            0.25,0.0f,false,0,10);
+            player.getEyePosition(), player.getEyePosition().add(player.getLookAngle().scale(range)),
+            (int) range, width / 4.0, ParticleTypes.SONIC_BOOM, 3, 1,
+            0.25, 0.0f, false, 0, 10);
       
-      final double closeW = width/2.0;
+      final double closeW = width / 2.0;
       final double farW = width;
-      double mul = 1.5*range;
-      Vec3 boxStart = player.position().subtract(mul,mul,mul);
-      Vec3 boxEnd = player.position().add(mul,mul,mul);
-      AABB rangeBox = new AABB(boxStart,boxEnd);
-      List<Entity> entities = player.level().getEntities(player,rangeBox, e -> e instanceof LivingEntity);
+      double mul = 1.5 * range;
+      Vec3 boxStart = player.position().subtract(mul, mul, mul);
+      Vec3 boxEnd = player.position().add(mul, mul, mul);
+      AABB rangeBox = new AABB(boxStart, boxEnd);
+      List<Entity> entities = player.level().getEntities(player, rangeBox, e -> e instanceof LivingEntity);
       for(Entity e : entities){
          if(!(e instanceof LivingEntity entity)) continue;
-         if(MathUtils.inCone(player.getEyePosition(),player.getLookAngle(),range,closeW,farW,e.getEyePosition())){
+         if(MathUtils.inCone(player.getEyePosition(), player.getLookAngle(), range, closeW, farW, e.getEyePosition())){
             Vec3 source = player.getEyePosition();
             Vec3 delta = entity.getEyePosition().subtract(source);
             Vec3 normalize = delta.normalize();
             
-            DamageSource dmgSource = player.damageSources().source(ArchetypeRegistry.SONIC_BOOM,player,player);
-            if (entity.hurtServer(player.level(), dmgSource, damage)) {
-               double knockbackVertical = (double)0.5F * ((double)1.0F - entity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE)) * knockback;
-               double knockbackHorizontal = (double)2.5F * ((double)1.0F - entity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE)) * knockback;
+            DamageSource dmgSource = player.damageSources().source(ArchetypeRegistry.SONIC_BOOM, player, player);
+            if(entity.hurtServer(player.level(), dmgSource, damage)){
+               double knockbackVertical = (double) 0.5F * ((double) 1.0F - entity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE)) * knockback;
+               double knockbackHorizontal = (double) 2.5F * ((double) 1.0F - entity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE)) * knockback;
                
                Vec3 velocity = new Vec3(normalize.x() * knockbackHorizontal, normalize.y() * knockbackVertical, normalize.z() * knockbackHorizontal);
                entity.push(velocity);

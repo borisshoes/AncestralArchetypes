@@ -26,7 +26,7 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 import static net.borisshoes.ancestralarchetypes.ArchetypeRegistry.GUARDIAN_RAY;
 
-public class GuardianRayItem extends AbilityItem{
+public class GuardianRayItem extends AbilityItem {
    public GuardianRayItem(Properties settings){
       super(GUARDIAN_RAY, "⇏", settings);
    }
@@ -41,8 +41,8 @@ public class GuardianRayItem extends AbilityItem{
       if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
       PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC), true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH, 0.25f, 0.8f);
          return InteractionResult.PASS;
       }
       player.startUsingItem(hand);
@@ -57,26 +57,27 @@ public class GuardianRayItem extends AbilityItem{
       int duration = CONFIG.getInt(ArchetypeRegistry.GUARDIAN_RAY_DURATION);
       
       MinecraftUtils.LasercastResult lasercast = MinecraftUtils.lasercast(world, player.getEyePosition(), player.getForward(), 25, false, player);
-      ArchetypeParticles.guardianRay(player.level(),lasercast.startPos().subtract(0,player.getBbHeight()/3,0),lasercast.endPos(), useTime);
+      ArchetypeParticles.guardianRay(player.level(), lasercast.startPos().subtract(0, player.getBbHeight() / 3, 0), lasercast.endPos(), useTime);
       
       if(useTime < windup){ // Windup
-         if(useTime % 5 == 0) SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.GUARDIAN_ATTACK, SoundSource.PLAYERS,0.3f, 0.5f + 1.2f*((float) useTime / windup));
-      }else if(useTime < (windup+duration)){ // Shoot
-         if(useTime == windup) {
-            SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.GUARDIAN_AMBIENT_LAND, SoundSource.PLAYERS,1.2f, 0.8f);
-            SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS,1.2f, 1.2f);
+         if(useTime % 5 == 0)
+            SoundUtils.playSound(player.level(), player.blockPosition(), SoundEvents.GUARDIAN_ATTACK, SoundSource.PLAYERS, 0.3f, 0.5f + 1.2f * ((float) useTime / windup));
+      }else if(useTime < (windup + duration)){ // Shoot
+         if(useTime == windup){
+            SoundUtils.playSound(player.level(), player.blockPosition(), SoundEvents.GUARDIAN_AMBIENT_LAND, SoundSource.PLAYERS, 1.2f, 0.8f);
+            SoundUtils.playSound(player.level(), player.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.2f, 1.2f);
          }
          
          float damage = (float) CONFIG.getDouble(ArchetypeRegistry.GUARDIAN_RAY_DAMAGE);
          if(useTime % 15 == 0){
             for(Entity hit : lasercast.sortedHits()){
-               hit.hurtServer(player.level(), player.damageSources().indirectMagic(player,player), damage);
+               hit.hurtServer(player.level(), player.damageSources().indirectMagic(player, player), damage);
             }
          }
          
          if(useTime % 20 == 0){
             SoundUtils.playSound(player.level(), player.blockPosition(), SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 1.2f, 1.2f);
-            SoundUtils.playSound(player.level(),player.blockPosition(), SoundEvents.GUARDIAN_AMBIENT_LAND, SoundSource.PLAYERS,0.75f, 0.7f);
+            SoundUtils.playSound(player.level(), player.blockPosition(), SoundEvents.GUARDIAN_AMBIENT_LAND, SoundSource.PLAYERS, 0.75f, 0.7f);
          }
       }else{ // Reset
          player.releaseUsingItem();
@@ -84,7 +85,7 @@ public class GuardianRayItem extends AbilityItem{
    }
    
    @Override
-   public boolean releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks) {
+   public boolean releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks){
       if(!(user instanceof ServerPlayer player)) return false;
       int useTime = this.getUseDuration(stack, user) - remainingUseTicks;
       int windup = CONFIG.getInt(ArchetypeRegistry.GUARDIAN_RAY_WINDUP);
@@ -92,7 +93,7 @@ public class GuardianRayItem extends AbilityItem{
       int cooldown = CONFIG.getInt(ArchetypeRegistry.GUARDIAN_RAY_COOLDOWN);
       
       if(useTime > windup){
-         profile(player).setAbilityCooldown(this.ability, (int) Math.max(0.25*cooldown,cooldown*(1 - ((double) (useTime - windup) / duration))));
+         profile(player).setAbilityCooldown(this.ability, (int) Math.max(0.25 * cooldown, cooldown * (1 - ((double) (useTime - windup) / duration))));
       }
       return false;
    }

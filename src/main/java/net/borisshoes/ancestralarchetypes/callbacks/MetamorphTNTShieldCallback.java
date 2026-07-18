@@ -26,10 +26,10 @@ public class MetamorphTNTShieldCallback extends TickTimerCallback {
       try{
          ServerPlayer player1 = player.level().getServer().getPlayerList().getPlayer(player.getUUID());
          if(player1 == null){
-            BorisLib.addLoginCallback(new MetamorphTNTShieldLoginCallback(player,hearts));
+            BorisLib.addLoginCallback(new MetamorphTNTShieldLoginCallback(player, hearts));
          }else{
-            float removed = Math.max(0,player1.getAbsorptionAmount()-hearts);
-            MinecraftUtils.removeMaxAbsorption(player1, archetypesId(ArchetypeRegistry.METAMORPH.id()),hearts);
+            float removed = Math.max(0, player1.getAbsorptionAmount() - hearts);
+            MinecraftUtils.removeMaxAbsorption(player1, archetypesId(ArchetypeRegistry.METAMORPH.id()), hearts);
             player1.setAbsorptionAmount(removed);
          }
       }catch(Exception e){

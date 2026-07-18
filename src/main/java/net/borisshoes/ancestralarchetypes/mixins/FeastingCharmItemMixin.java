@@ -43,7 +43,7 @@ public class FeastingCharmItemMixin {
       if(entity instanceof ServerPlayer player){
          PlayerArchetypeData profile = profile(player);
          if(profile.hasAbility(ArchetypeRegistry.CHOCOLATE_ALLERGY) && stack.is(ArchetypeRegistry.CHOCOLATE_ALLERGY_FOODS)){
-            player.addEffect(new MobEffectInstance(MobEffects.POISON, CONFIG.getInt(ArchetypeRegistry.CHOCOLATE_ALLERGY_DURATION),CONFIG.getInt(ArchetypeRegistry.CHOCOLATE_ALLERGY_AMPLIFIER),true,true,true),player);
+            player.addEffect(new MobEffectInstance(MobEffects.POISON, CONFIG.getInt(ArchetypeRegistry.CHOCOLATE_ALLERGY_DURATION), CONFIG.getInt(ArchetypeRegistry.CHOCOLATE_ALLERGY_AMPLIFIER), true, true, true), player);
          }
       }
    }

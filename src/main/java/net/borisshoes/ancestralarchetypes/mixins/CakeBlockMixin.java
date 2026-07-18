@@ -35,7 +35,7 @@ public class CakeBlockMixin {
          return false;
       }
       if(data.hasAbility(ArchetypeRegistry.CHOCOLATE_ALLERGY) && new ItemStack(Items.CAKE).is(ArchetypeRegistry.CHOCOLATE_ALLERGY_FOODS)){
-         player.addEffect(new MobEffectInstance(MobEffects.POISON, CONFIG.getInt(ArchetypeRegistry.CHOCOLATE_ALLERGY_DURATION),CONFIG.getInt(ArchetypeRegistry.CHOCOLATE_ALLERGY_AMPLIFIER),true,true,true),player);
+         player.addEffect(new MobEffectInstance(MobEffects.POISON, CONFIG.getInt(ArchetypeRegistry.CHOCOLATE_ALLERGY_DURATION), CONFIG.getInt(ArchetypeRegistry.CHOCOLATE_ALLERGY_AMPLIFIER), true, true, true), player);
       }
       return true;
    }

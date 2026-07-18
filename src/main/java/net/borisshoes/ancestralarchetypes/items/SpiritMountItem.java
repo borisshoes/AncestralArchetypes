@@ -26,7 +26,7 @@ import java.util.UUID;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.MOD_ID;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
-public abstract class SpiritMountItem extends AbilityItem{
+public abstract class SpiritMountItem extends AbilityItem {
    
    public SpiritMountItem(ArchetypeAbility ability, String character, Properties settings){
       super(ability, character, settings);
@@ -46,8 +46,8 @@ public abstract class SpiritMountItem extends AbilityItem{
       if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
       PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC), true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH, 0.25f, 0.8f);
          return InteractionResult.PASS;
       }
       
@@ -56,7 +56,7 @@ public abstract class SpiritMountItem extends AbilityItem{
          if(mountId != null){
             Entity entity = player.level().getEntity(mountId);
             if(entity != null && entity.isAlive()){
-               profile.setMountHealth(this.ability, ((LivingEntity)entity).getHealth());
+               profile.setMountHealth(this.ability, ((LivingEntity) entity).getHealth());
                entity.discard();
                profile.setMountEntity(this.ability, null);
                profile.setAbilityCooldown(ability, 20);
@@ -66,7 +66,7 @@ public abstract class SpiritMountItem extends AbilityItem{
          if(mountId != null){
             Entity entity = player.level().getEntity(mountId);
             if(entity != null && entity.isAlive()){
-               profile.setMountHealth(this.ability, ((LivingEntity)entity).getHealth());
+               profile.setMountHealth(this.ability, ((LivingEntity) entity).getHealth());
                entity.discard();
                profile.setMountEntity(this.ability, null);
                profile.setAbilityCooldown(ability, 20);
@@ -77,8 +77,8 @@ public abstract class SpiritMountItem extends AbilityItem{
          if(player.onGround()){
             spawnMount(player);
          }else{
-            player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.spirit_mount_in_air").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
-            SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+            player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.spirit_mount_in_air").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC), true);
+            SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH, 0.25f, 0.8f);
             return InteractionResult.PASS;
          }
       }
@@ -104,15 +104,15 @@ public abstract class SpiritMountItem extends AbilityItem{
       newMount.addTag(getSpiritMountTag());
       newMount.setYRot(player.getYRot());
       newMount.setXRot(player.getXRot());
-      profile.setMountEntity(this.ability,newMount.getUUID());
-      player.startRiding(newMount,true,true);
-      player.connection.send(new ClientboundPlayerRotationPacket(y,false,p,false));
-      SoundUtils.playSongToPlayer(player, SoundEvents.HORSE_GALLOP,0.3f,1);
+      profile.setMountEntity(this.ability, newMount.getUUID());
+      player.startRiding(newMount, true, true);
+      player.connection.send(new ClientboundPlayerRotationPacket(y, false, p, false));
+      SoundUtils.playSongToPlayer(player, SoundEvents.HORSE_GALLOP, 0.3f, 1);
    }
    
    protected abstract LivingEntity getMountEntity(ServerPlayer player);
    
-   public  String getSpiritMountTag(){
-      return "$"+MOD_ID+".spirit_mount."+this.ability.id();
+   public String getSpiritMountTag(){
+      return "$" + MOD_ID + ".spirit_mount." + this.ability.id();
    }
 }

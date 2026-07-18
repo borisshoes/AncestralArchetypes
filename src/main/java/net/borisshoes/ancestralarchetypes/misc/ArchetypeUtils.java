@@ -75,6 +75,7 @@ public class ArchetypeUtils {
             Equippable equip = stack.get(DataComponents.EQUIPPABLE);
             DynamicOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, BorisLib.SERVER.registryAccess());
             CompoundTag tag = (CompoundTag) Equippable.CODEC.encodeStart(ops, equip).getOrThrow();
+            tag.putString("asset_id", assetId);
             stack.set(DataComponents.EQUIPPABLE, Equippable.CODEC.parse(ops, tag).getOrThrow());
          }catch(Exception e){
             AncestralArchetypes.LOGGER.error("Error decoding metamorph helmet asset id: {}", assetId);
@@ -84,7 +85,6 @@ public class ArchetypeUtils {
       archetypes$ITEM_DATA.removeProperty(stack, METAMORPH_VISIBLE_MODEL);
       archetypes$ITEM_DATA.removeProperty(stack, METAMORPH_HIDDEN_ASSET);
       archetypes$ITEM_DATA.removeProperty(stack, METAMORPH_HELMET_TYPE);
-      System.out.println("Set Model to "+hiddenHelmetModel);
    }
    
    public static void addGlow(ServerPlayer viewer, Entity target, TeamColor color){
@@ -95,10 +95,11 @@ public class ArchetypeUtils {
       team.setSeeFriendlyInvisibles(false);
       team.getPlayers().add(target.getScoreboardName());
       byte flags = target.getEntityData().get(EntityAccessor.getFLAGS());
-      byte glowing = (byte)(flags | (1 << 6));
+      byte glowing = (byte) (flags | (1 << 6));
       List<SynchedEntityData.DataValue<?>> entries = List.of(SynchedEntityData.DataValue.create(EntityAccessor.getFLAGS(), glowing));
       viewer.connection.send(new ClientboundSetEntityDataPacket(target.getId(), entries));
-      viewer.connection.send(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(team,true));
+      viewer.connection.send(ClientboundSetPlayerTeamPacket.createRemovePacket(team));
+      viewer.connection.send(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(team, true));
    }
    
    public static void removeGlow(ServerPlayer viewer, Entity target){
@@ -141,7 +142,7 @@ public class ArchetypeUtils {
       return false;
    }
    
-   public static Pair<Integer,Integer> getNearbyPackHunterAllies(ServerPlayer player){
+   public static Pair<Integer, Integer> getNearbyPackHunterAllies(ServerPlayer player){
       double range = AncestralArchetypes.CONFIG.getDouble(ArchetypeRegistry.PACK_HUNTER_RANGE);
       boolean allyUnteamedWithRogue = AncestralArchetypes.CONFIG.getBoolean(ArchetypeRegistry.PACK_HUNTER_ALLY_UNTEAMED_WITH_ROGUE);
       boolean allyTeamedWithRogue = AncestralArchetypes.CONFIG.getBoolean(ArchetypeRegistry.PACK_HUNTER_ALLY_TEAMED_WITH_ROGUE);

@@ -53,12 +53,12 @@ public abstract class AbilityItem extends Item implements PolymerItem {
             int cooldown = profile.getAbilityCooldown(this.ability);
             if(cooldown > 0){
                if(!player.getCooldowns().isOnCooldown(stack) || player.level().getServer().getTickCount() % 20 == 0){
-                  player.getCooldowns().addCooldown(stack,100000000);
+                  player.getCooldowns().addCooldown(stack, 100000000);
                }
                if((slot == EquipmentSlot.MAINHAND || slot == EquipmentSlot.OFFHAND) && player.level().getServer().getTickCount() % 2 == 0){
-                  TextUtils.energyBar(player, 1.0-profile.getAbilityCooldownPercent(this.ability), 10,
-                        Component.literal(textCharacter+" ").withColor(profile.getSubArchetype().getColor()),
-                        Component.literal(" "+textCharacter).withColor(profile.getSubArchetype().getColor()),
+                  TextUtils.energyBar(player, 1.0 - profile.getAbilityCooldownPercent(this.ability), 10,
+                        Component.literal(textCharacter + " ").withColor(profile.getSubArchetype().getColor()),
+                        Component.literal(" " + textCharacter).withColor(profile.getSubArchetype().getColor()),
                         (style) -> style.withColor(profile.getSubArchetype().getColor()));
 //                  StringBuilder builder = new StringBuilder(textCharacter+" ");
 //                  int value = (int) ((1.0-profile.getAbilityCooldownPercent(this.ability)) * 100);
@@ -79,7 +79,7 @@ public abstract class AbilityItem extends Item implements PolymerItem {
                }
             }else{
                if(player.getCooldowns().isOnCooldown(stack)){
-                  player.getCooldowns().addCooldown(stack,0);
+                  player.getCooldowns().addCooldown(stack, 0);
                }
             }
          }
@@ -92,10 +92,10 @@ public abstract class AbilityItem extends Item implements PolymerItem {
    
    @Override
    public @Nullable Identifier getPolymerItemModel(ItemStack stack, PacketContext context, HolderLookup.Provider lookup){
-       if(PolymerResourcePackUtils.hasMainPack(context)){
-          return archetypesId(this.ability.id());
-       }else{
-          return BuiltInRegistries.ITEM.getResourceKey(getPolymerItem(stack,context)).get().identifier();
-       }
+      if(PolymerResourcePackUtils.hasMainPack(context)){
+         return archetypesId(this.ability.id());
+      }else{
+         return BuiltInRegistries.ITEM.getResourceKey(getPolymerItem(stack, context)).get().identifier();
+      }
    }
 }

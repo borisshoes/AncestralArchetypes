@@ -30,7 +30,7 @@ public class FleeFelidGoal<T extends LivingEntity> extends AvoidEntityGoal<T> {
       this.toAvoid = getServerLevel(this.mob).getNearestEntity(
             this.mob.level().getEntitiesOfClass(this.avoidClass, this.mob.getBoundingBox().inflate((double) this.maxDist, 3.0, (double) this.maxDist), (livingEntity) -> true),
             TargetingConditions.forCombat()
-                  .range((double)this.maxDist)
+                  .range((double) this.maxDist)
                   .selector((entity, world) -> predicateOnAvoidEntity.test(entity) && avoidPredicate.test(entity)),
             this.mob, this.mob.getX(), this.mob.getY(), this.mob.getZ());
       if(this.toAvoid == null){

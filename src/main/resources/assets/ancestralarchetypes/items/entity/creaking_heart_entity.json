@@ -1,0 +1,27 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:custom_model_data",
+    "cases": [
+      {
+        "when": "damaged",
+        "model": {
+          "type": "minecraft:model",
+          "model": "ancestralarchetypes:entity/creaking_heart_entity_damaged"
+        }
+      },
+      {
+        "when": "weakened",
+        "model": {
+          "type": "minecraft:model",
+          "model": "ancestralarchetypes:entity/creaking_heart_entity_weakened"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "ancestralarchetypes:entity/creaking_heart_entity_full"
+    }
+  },
+  "hand_animation_on_swap": true
+}

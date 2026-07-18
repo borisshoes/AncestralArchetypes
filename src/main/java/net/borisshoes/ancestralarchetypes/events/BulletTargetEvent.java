@@ -11,7 +11,7 @@ public class BulletTargetEvent extends Event {
    public final LivingEntity target;
    
    public BulletTargetEvent(ServerPlayer player, LivingEntity target){
-      super(archetypesId("bullet_target"),5);
+      super(archetypesId("bullet_target"), 5);
       this.player = player;
       this.target = target;
    }

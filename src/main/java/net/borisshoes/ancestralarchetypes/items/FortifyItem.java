@@ -27,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.CONFIG;
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
-public class FortifyItem extends AbilityItem{
+public class FortifyItem extends AbilityItem {
    public FortifyItem(Properties settings){
       super(ArchetypeRegistry.FORTIFY, "⌛", settings);
    }
@@ -73,11 +73,11 @@ public class FortifyItem extends AbilityItem{
       if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
       PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC), true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH, 0.25f, 0.8f);
          return InteractionResult.PASS;
       }
-      SoundUtils.playSound(world,player.blockPosition(), SoundEvents.IRON_GOLEM_REPAIR, SoundSource.PLAYERS,1f,1.5f);
+      SoundUtils.playSound(world, player.blockPosition(), SoundEvents.IRON_GOLEM_REPAIR, SoundSource.PLAYERS, 1f, 1.5f);
       profile.setFortifyActive(true);
       player.startUsingItem(hand);
       return InteractionResult.SUCCESS;
@@ -89,17 +89,17 @@ public class FortifyItem extends AbilityItem{
       PlayerArchetypeData profile = profile(player);
       float remainingTime = profile.getFortifyTime();
       
-      double fortifyPercentage = ((double)profile.getFortifyTime() / profile.getMaxFortifyTime());
+      double fortifyPercentage = ((double) profile.getFortifyTime() / profile.getMaxFortifyTime());
       int fortifyValue = (int) (fortifyPercentage * 100);
       char[] unicodeChars = {'▁', '▂', '▃', '▅', '▆', '▇', '▌'};
       StringBuilder message = new StringBuilder("\uD83D\uDEE1 ");
-      for (int i = 0; i < 10; i++) {
+      for(int i = 0; i < 10; i++){
          int segmentValue = fortifyValue - (i * 10);
-         if (segmentValue <= 0) {
+         if(segmentValue <= 0){
             message.append(unicodeChars[0]);
-         } else if (segmentValue >= 10) {
+         }else if(segmentValue >= 10){
             message.append(unicodeChars[unicodeChars.length - 1]);
-         } else {
+         }else{
             int charIndex = (int) ((double) segmentValue / 10 * (unicodeChars.length - 1));
             message.append(unicodeChars[charIndex]);
          }
@@ -110,12 +110,12 @@ public class FortifyItem extends AbilityItem{
       if(remainingTime < 1 || profile.getAbilityCooldown(this.ability) > 0){
          player.releaseUsingItem();
          profile.setFortifyActive(false);
-         SoundUtils.playSound(world,player.blockPosition(), SoundEvents.IRON_GOLEM_DAMAGE, SoundSource.PLAYERS,1f,0.75f);
+         SoundUtils.playSound(world, player.blockPosition(), SoundEvents.IRON_GOLEM_DAMAGE, SoundSource.PLAYERS, 1f, 0.75f);
       }
    }
    
    @Override
-   public boolean releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks) {
+   public boolean releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks){
       if(!(user instanceof ServerPlayer player)) return false;
       PlayerArchetypeData profile = profile(player);
       profile.setAbilityCooldown(this.ability, CONFIG.getInt(ArchetypeRegistry.FORTIFY_COOLDOWN));

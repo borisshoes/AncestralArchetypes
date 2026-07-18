@@ -30,7 +30,7 @@ import net.minecraft.world.level.Level;
 
 import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 
-public abstract class GliderItem extends AbilityItem{
+public abstract class GliderItem extends AbilityItem {
    public final int textColor;
    public final ResourceKey<TrimPattern> trimKey;
    
@@ -51,18 +51,18 @@ public abstract class GliderItem extends AbilityItem{
       
       if(!(entity instanceof ServerPlayer player)) return;
       PlayerArchetypeData profile = profile(player);
-      double glidePercentage = ((double)profile.getGlideTime() / profile.getMaxGlideTime());
+      double glidePercentage = ((double) profile.getGlideTime() / profile.getMaxGlideTime());
       boolean onCooldown = profile.getAbilityCooldown(this.ability) > 0;
       if(onCooldown){
          stack.setDamageValue(stack.getMaxDamage() - 1);
       }else{
-         stack.setDamageValue((int) ((stack.getMaxDamage()-1) * (1-glidePercentage)));
+         stack.setDamageValue((int) ((stack.getMaxDamage() - 1) * (1 - glidePercentage)));
       }
       
       DyedItemColor dyedColorComponent = stack.get(DataComponents.DYED_COLOR);
       if(dyedColorComponent == null || dyedColorComponent.rgb() != profile.getGliderColor()){
          stack.set(DataComponents.DYED_COLOR, new DyedItemColor(profile.getGliderColor()));
-         stack.set(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT.withHidden(DataComponents.DYED_COLOR,true));
+         stack.set(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT.withHidden(DataComponents.DYED_COLOR, true));
       }
       
       ArmorTrim armorTrim = stack.get(DataComponents.TRIM);
@@ -81,13 +81,13 @@ public abstract class GliderItem extends AbilityItem{
          int glideValue = (int) (glidePercentage * 100);
          char[] unicodeChars = {'▁', '▂', '▃', '▅', '▆', '▇', '▌'};
          StringBuilder message = new StringBuilder("≈ ");
-         for (int i = 0; i < 10; i++) {
+         for(int i = 0; i < 10; i++){
             int segmentValue = glideValue - (i * 10);
-            if (segmentValue <= 0) {
+            if(segmentValue <= 0){
                message.append(unicodeChars[0]);
-            } else if (segmentValue >= 10) {
+            }else if(segmentValue >= 10){
                message.append(unicodeChars[unicodeChars.length - 1]);
-            } else {
+            }else{
                int charIndex = (int) ((double) segmentValue / 10 * (unicodeChars.length - 1));
                message.append(unicodeChars[charIndex]);
             }
@@ -102,8 +102,8 @@ public abstract class GliderItem extends AbilityItem{
       if(!(user instanceof ServerPlayer player)) return InteractionResult.PASS;
       PlayerArchetypeData profile = profile(player);
       if(profile.getAbilityCooldown(this.ability) > 0){
-         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC),true);
-         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH,0.25f,0.8f);
+         player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.ability_on_cooldown").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC), true);
+         SoundUtils.playSongToPlayer(player, SoundEvents.FIRE_EXTINGUISH, 0.25f, 0.8f);
          return InteractionResult.PASS;
       }
       

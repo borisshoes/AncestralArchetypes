@@ -28,13 +28,13 @@ public class GlowBerryShieldCallback extends TickTimerCallback {
       try{
          ServerPlayer player1 = player.level().getServer().getPlayerList().getPlayer(player.getUUID());
          if(player1 == null){
-            BorisLib.addLoginCallback(new GlowBerryShieldLoginCallback(player,hearts));
+            BorisLib.addLoginCallback(new GlowBerryShieldLoginCallback(player, hearts));
          }else{
-            float removed = Math.max(0,player1.getAbsorptionAmount()-hearts);
+            float removed = Math.max(0, player1.getAbsorptionAmount() - hearts);
             if(player1.getAbsorptionAmount() != 0){
                SoundUtils.playSongToPlayer(player1, SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, 1.0f, .3f);
             }
-            MinecraftUtils.removeMaxAbsorption(player1, archetypesId(ArchetypeRegistry.WAX_SHIELD.id()),hearts);
+            MinecraftUtils.removeMaxAbsorption(player1, archetypesId(ArchetypeRegistry.WAX_SHIELD.id()), hearts);
             player1.setAbsorptionAmount(removed);
          }
       }catch(Exception e){

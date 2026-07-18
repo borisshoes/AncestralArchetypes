@@ -22,12 +22,12 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.*;
 
 public class EntityUseCallback {
    public static InteractionResult useEntity(Player playerEntity, Level world, InteractionHand hand, Entity entity, EntityHitResult entityHitResult){
-      InteractionResult mountCheck = mountCheck(playerEntity,entity);
+      InteractionResult mountCheck = mountCheck(playerEntity, entity);
       if(mountCheck != InteractionResult.PASS && mountCheck != InteractionResult.TRY_WITH_EMPTY_HAND){
          return mountCheck;
       }
       
-      InteractionResult rideableCheck = rideableCheck(playerEntity,entity);
+      InteractionResult rideableCheck = rideableCheck(playerEntity, entity);
       if(rideableCheck != InteractionResult.PASS && mountCheck != InteractionResult.TRY_WITH_EMPTY_HAND){
          return rideableCheck;
       }
@@ -36,7 +36,8 @@ public class EntityUseCallback {
    }
    
    private static InteractionResult rideableCheck(Player playerEntity, Entity entity){
-      if(!(playerEntity instanceof ServerPlayer user && entity instanceof ServerPlayer ridden)) return InteractionResult.PASS;
+      if(!(playerEntity instanceof ServerPlayer user && entity instanceof ServerPlayer ridden))
+         return InteractionResult.PASS;
       if(!AncestralArchetypes.profile(ridden).hasAbility(ArchetypeRegistry.RIDEABLE)) return InteractionResult.PASS;
       
       int passengers = user.countPlayerPassengers();
@@ -46,7 +47,8 @@ public class EntityUseCallback {
       if(CONFIG.getBoolean(ArchetypeRegistry.RIDEABLE_TEAM_ONLY)){
          PlayerTeam riddenTeam = ridden.getTeam();
          if(riddenTeam != null){
-            if(user.getTeam() == null || !ridden.getTeam().getName().equals(user.getTeam().getName())) return InteractionResult.FAIL;
+            if(user.getTeam() == null || !ridden.getTeam().getName().equals(user.getTeam().getName()))
+               return InteractionResult.FAIL;
          }
       }
       user.startRiding(ridden);
@@ -54,7 +56,7 @@ public class EntityUseCallback {
    }
    
    private static InteractionResult mountCheck(Player playerEntity, Entity entity){
-      List<String> tags = entity.entityTags().stream().filter(s -> s.contains("$"+MOD_ID+".spirit_mount")).toList();
+      List<String> tags = entity.entityTags().stream().filter(s -> s.contains("$" + MOD_ID + ".spirit_mount")).toList();
       boolean spiritMount = !tags.isEmpty();
       if(!spiritMount) return InteractionResult.PASS;
       
@@ -63,7 +65,8 @@ public class EntityUseCallback {
          rider = camel.getControllingPassenger();
       }
       
-      if((!(entity instanceof OwnableEntity tameable) || !(tameable.getOwner() instanceof ServerPlayer player))) return InteractionResult.FAIL;
+      if((!(entity instanceof OwnableEntity tameable) || !(tameable.getOwner() instanceof ServerPlayer player)))
+         return InteractionResult.FAIL;
       if(!player.equals(playerEntity) && (rider == null || !rider.equals(player))) return InteractionResult.FAIL;
       if(player.isShiftKeyDown()){
          if(tags.getFirst().contains(ArchetypeRegistry.DONKEY_SPIRIT_MOUNT.id())){
