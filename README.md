@@ -176,7 +176,7 @@ The following commands can be used to adjust configurable settings in the Ancest
 * `/archetypes config metamorphEatDuration` The time it takes to consume the Metamorph trigger item, in ticks. (default: 100)
 * `/archetypes config metamorphGoldRegenRate` The regeneration rate per moon phase when metamorphed into Gold. (default: 0.25)
 * `/archetypes config metamorphIceFreezeRange` The range at which entities are frozen when metamorphed into Ice. (default: 4.0)
-* `/archetypes config metamorphIceFrictionReduction` The movement friction reduction applied when metamorphed into Ice. (default: 0.02)
+* `/archetypes config metamorphIceFrictionReduction` The movement friction reduction applied when metamorphed into Ice. (default: 0.9)
 * `/archetypes config metamorphIceDragReduction` The air drag reduction when metamorphed into Ice. (default: 0.5)
 * `/archetypes config metamorphIronBlastModifier` The blast damage modifier when metamorphed into Iron. (default: 0.75)
 * `/archetypes config metamorphIronKnockbackModifier` The knockback modifier when metamorphed into Iron. (default: 0.5)

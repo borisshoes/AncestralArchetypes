@@ -283,8 +283,8 @@ public class TickCallback {
          ItemStack activeStack = player.getUseItem();
          if(activeStack.is(Items.SPYGLASS)){
             MinecraftUtils.LasercastResult lasercast = MinecraftUtils.lasercast(player.level(), player.getEyePosition(), player.getForward(), player.level().getServer().getPlayerList().getViewDistance() * 16, true, player);
-            for(Entity entity : lasercast.sortedHits()){
-               if(entity instanceof ServerPlayer target){
+            for(MinecraftUtils.LasercastEntityHit entity : lasercast.sortedHits()){
+               if(entity.entity() instanceof ServerPlayer target){
                   if(SPYGLASS_REVEAL_EVENTS.stream().anyMatch(event -> event.isReset() && event.getTarget().equals(target) && event.getInspector().equals(player))){
                      continue;
                   }

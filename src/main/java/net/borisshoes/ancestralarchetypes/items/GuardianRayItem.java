@@ -70,8 +70,8 @@ public class GuardianRayItem extends AbilityItem {
          
          float damage = (float) CONFIG.getDouble(ArchetypeRegistry.GUARDIAN_RAY_DAMAGE);
          if(useTime % 15 == 0){
-            for(Entity hit : lasercast.sortedHits()){
-               hit.hurtServer(player.level(), player.damageSources().indirectMagic(player, player), damage);
+            for(MinecraftUtils.LasercastEntityHit hit : lasercast.sortedHits()){
+               hit.entity().hurtServer(player.level(), player.damageSources().indirectMagic(player, player), damage);
             }
          }
          

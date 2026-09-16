@@ -347,6 +347,7 @@ public class PlayerArchetypeData implements StorableData {
          abilities.remove(ArchetypeRegistry.BOUNCY);
          abilities.remove(ArchetypeRegistry.JUMPY);
       }else if(activeMetamorph == MetamorphTypes.WOOL || activeMetamorph == MetamorphTypes.ICE){
+         abilities.add(ArchetypeRegistry.LIGHTWEIGHT);
          abilities.remove(ArchetypeRegistry.BOUNCY);
       }
    }

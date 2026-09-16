@@ -45,6 +45,11 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+
+    maven {
+        name = "Boris Maven"
+        url = "https://maven.borisshoes.net/releases"
+    }
 }
 
 configurations.all {
@@ -59,7 +64,7 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    include(implementation("maven.modrinth:boris-lib:${project.borislib_maven_version}"))
+    implementation("net.borisshoes:BorisLib:${project.borislib_version}")
     include(implementation("eu.pb4:sgui:${project.sgui_version}"))
     include(implementation("eu.pb4:polymer-core:${project.polymer_version}"))
     include(implementation("eu.pb4:polymer-blocks:${project.polymer_version}"))
@@ -72,26 +77,21 @@ dependencies {
     include(implementation("me.lucko:fabric-permissions-api:${project.fabric_permissions_api_version}"))
     include(implementation("io.github.ladysnake:PlayerAbilityLib:${pal_version}"))
 
-    // Use dev-SNAPSHOT to match what JitPack actually publishes in the metadata
-//    modCompileOnly("com.github.borisshoes:arcananovum:dev-SNAPSHOT") {
-//        changing = true
-//    }
-    compileOnly ("maven.modrinth:arcana-novum:${project.arcana_version}")
-    //compileOnly files("libs/arcananovum-4.0.0+26.1-DEV.1.jar")
+    compileOnly ("net.borisshoes:ArcanaNovum:${project.arcana_version}")
 }
 
 processResources {
     inputs.property "version", project.version
     inputs.property "minecraft_version", project.minecraft_version
     inputs.property "loader_version", project.loader_version
-    inputs.property "borislib_mod_version", project.borislib_mod_version
+    inputs.property "borislib_version", project.borislib_version
     filteringCharset "UTF-8"
 
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
                 "minecraft_version": project.minecraft_version,
                 "loader_version": project.loader_version,
-                "borislib_mod_version": project.borislib_mod_version
+                "borislib_version": project.borislib_version
     }
 }
 
@@ -128,16 +128,17 @@ jar {
 publishing {
     publications {
         create("mavenJava", MavenPublication) {
-            artifactId = project.archives_base_name
             from components.java
         }
     }
-
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
     repositories {
-        // Add repositories to publish to here.
-        // Notice: This block does NOT have the same function as the block in the top level.
-        // The repositories here will be used for publishing your artifact, not for
-        // retrieving dependencies.
+        maven {
+            name = "borisMaven"
+            url = "https://maven.borisshoes.net/releases"
+            credentials {
+                username = System.getenv("MAVEN_NAME")
+                password = System.getenv("MAVEN_SECRET")
+            }
+        }
     }
 }

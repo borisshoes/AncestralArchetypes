@@ -31,7 +31,13 @@
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric-api": "*",
-    "minecraft": ">=${minecraft_version}",
-    "borislib": ">=${borislib_mod_version}"
+    "minecraft": "~${minecraft_version}",
+    "borislib": ">=${borislib_version}"
+  },
+  "custom": {
+    "mc-publish": {
+      "modrinth": "xHHbHfVj",
+      "curseforge": 1331020
+    }
   }
 }

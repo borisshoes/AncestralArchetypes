@@ -292,7 +292,7 @@ public class ArchetypeRegistry {
          new IntConfigValue("metamorphAbilityDuration", 6000, new IntConfigValue.IntLimits(0))));
    
    public static final IConfigSetting<?> METAMORPH_ICE_FRICTION_REDUCTION = registerConfigSetting(new ConfigSetting<>(
-         new DoubleConfigValue("metamorphIceFrictionReduction", 0.02, new DoubleConfigValue.DoubleLimits(0, 1))));
+         new DoubleConfigValue("metamorphIceFrictionReduction", 0.9, new DoubleConfigValue.DoubleLimits(0, 1))));
    
    public static final IConfigSetting<?> METAMORPH_ICE_FREEZE_RANGE = registerConfigSetting(new ConfigSetting<>(
          new DoubleConfigValue("metamorphIceFreezeRange", 4.0, new DoubleConfigValue.DoubleLimits(0, 128))));
@@ -849,7 +849,7 @@ public class ArchetypeRegistry {
    public static final Archetype GOLEM = register(new Archetype("golem", new ItemStackTemplate(Items.CHISELED_STONE_BRICKS), 0xa0a0ab));
    public static final Archetype INFERNAL = register(new Archetype("infernal", new ItemStackTemplate(Items.CRIMSON_NYLIUM), 0xe03f24));
    public static final Archetype SENTINEL = register(new Archetype("sentinel", new ItemStackTemplate(Items.DARK_OAK_LOG), 0x0a580a));
-   public static final Archetype SWAMPER = register(new Archetype("swamper", new ItemStackTemplate(Items.SLIME_BLOCK), 0x4dca70));
+   public static final Archetype SWAMPER = register(new Archetype("swamper", new ItemStackTemplate(Items.MANGROVE_LEAVES), 0x4dca70));
    public static final Archetype WINDSWEPT = register(new Archetype("windswept", new ItemStackTemplate(Items.FEATHER), 0x98c9c6));
    
    public static final SubArchetype AXOLOTL = register(new SubArchetype("axolotl", EntityTypes.AXOLOTL, new ItemStackTemplate(Items.AXOLOTL_BUCKET), 0xe070ed, AQUARIAN, REGEN_WHEN_LOW, GOOD_SWIMMER, DRIES_OUT, IMPALE_VULNERABLE, SLIPPERY));
@@ -868,7 +868,7 @@ public class ArchetypeRegistry {
    public static final SubArchetype IRON_GOLEM = register(new SubArchetype("iron_golem", EntityTypes.IRON_GOLEM, new ItemStackTemplate(Items.IRON_BLOCK), 0xbebebe, GOLEM, IRON_EATER, GIANT_SIZED, REDUCED_KNOCKBACK, LONG_ARMS, HARD_HITTER, NO_REGEN, HEALTH_BASED_SPRINT, PROJECTILE_RESISTANT));
    public static final SubArchetype BLAZE = register(new SubArchetype("blaze", EntityTypes.BLAZE, new ItemStackTemplate(Items.BLAZE_ROD), 0xe88a0f, INFERNAL, FIREBALL_VOLLEY, SLOW_FALLER, BLAZING_STRIKE, FIRE_IMMUNE, DAMAGED_BY_COLD));
    public static final SubArchetype WITHER_SKELETON = register(new SubArchetype("wither_skeleton", EntityTypes.WITHER_SKELETON, new ItemStackTemplate(Items.WITHER_SKELETON_SKULL), 0x423c3c, INFERNAL, WITHERING, TALL_SIZED, FIRE_IMMUNE, DAMAGED_BY_COLD));
-   public static final SubArchetype STRIDER = register(new SubArchetype("strider", EntityTypes.STRIDER, new ItemStackTemplate(Items.STRING), 0x943019, INFERNAL, RIDEABLE, LAVA_WALKER, FUNGUS_SPEED_BOOST, FIRE_IMMUNE, DAMAGED_BY_COLD));
+   public static final SubArchetype STRIDER = register(new SubArchetype("strider", EntityTypes.STRIDER, new ItemStackTemplate(Items.WARPED_FUNGUS_ON_A_STICK), 0x943019, INFERNAL, RIDEABLE, LAVA_WALKER, FUNGUS_SPEED_BOOST, FIRE_IMMUNE, DAMAGED_BY_COLD));
    public static final SubArchetype WITCH = register(new SubArchetype("witch", EntityTypes.WITCH, new ItemStackTemplate(Items.CAULDRON), 0x7a0fe8, SWAMPER, POTION_BREWER, MOONLIT_WITCH, ANTIVENOM));
    public static final SubArchetype CAVE_SPIDER = register(new SubArchetype("cave_spider", EntityTypes.CAVE_SPIDER, new ItemStackTemplate(Items.COBWEB), 0x1a7264, SWAMPER, HALF_SIZED, SOFT_HITTER, CLIMBING, VENOMOUS, LIGHTWEIGHT, MOONLIT_CAVE_SPIDER, WEAVING, RESILIENT_JOINTS, ANTIVENOM));
    public static final SubArchetype FROG = register(new SubArchetype("frog", EntityTypes.FROG, new ItemStackTemplate(Items.VERDANT_FROGLIGHT), 0x467243, SWAMPER, HALF_SIZED, SOFT_HITTER, MOONLIT_FROG, RESILIENT_JOINTS, ANTIVENOM, LEAP, BIOME_ADAPTIVE, TONGUE));

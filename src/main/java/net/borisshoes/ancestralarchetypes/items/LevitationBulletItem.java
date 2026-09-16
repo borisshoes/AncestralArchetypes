@@ -109,11 +109,9 @@ public class LevitationBulletItem extends AbilityItem {
       Vec3 look = user.getLookAngle().normalize();
       int viewChunks = world.getServer().getPlayerList().getViewDistance();
       double maxRange = viewChunks * 16.0;
-      Optional<LivingEntity> entity = MinecraftUtils.lasercast(world, eye, look, maxRange, false, user)
-            .sortedHits().stream().filter(e -> e instanceof LivingEntity && eye.distanceToSqr(e.position()) <= maxRange * maxRange)
-            .map(e -> (LivingEntity) e).findFirst();
-      if(entity.isPresent()){
-         return entity.get();
+      Optional<MinecraftUtils.LasercastEntityHit> closest = MinecraftUtils.lasercast(world, eye, look, maxRange, false, user, 0.1, -1, e -> e instanceof LivingEntity && eye.distanceToSqr(e.position()) <= maxRange * maxRange).sortedHits().stream().findFirst();
+      if(closest.isPresent()){
+         return (LivingEntity) closest.get().entity();
       }
       double maxAngleDeg = 5.0;
       double bestScore = Double.POSITIVE_INFINITY;

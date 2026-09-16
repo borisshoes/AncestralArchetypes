@@ -77,16 +77,16 @@ public class TongueItem extends AbilityItem {
       Entity hitEntity = null;
       
       boolean found = false;
-      for(Entity hit : result.sortedHits()){
-         if(hit instanceof LivingEntity livingHit){
-            double x = playerPos.x() - hit.getX();
-            double y = playerPos.y() - hit.getY();
-            double z = playerPos.z() - hit.getZ();
+      for(MinecraftUtils.LasercastEntityHit hit : result.sortedHits()){
+         if(hit.entity() instanceof LivingEntity livingHit){
+            double x = playerPos.x() - livingHit.getX();
+            double y = playerPos.y() - livingHit.getY();
+            double z = playerPos.z() - livingHit.getZ();
             double speed = .1;
             double heightMod = .08;
             BorisLib.addTickTimerCallback(player.level(), new GenericTimer(1, () -> {
-               hit.setDeltaMovement(x * speed, y * speed + Math.sqrt(Math.sqrt(x * x + y * y + z * z)) * heightMod, z * speed);
-               if(hit instanceof ServerPlayer targetPlayer)
+               livingHit.setDeltaMovement(x * speed, y * speed + Math.sqrt(Math.sqrt(x * x + y * y + z * z)) * heightMod, z * speed);
+               if(livingHit instanceof ServerPlayer targetPlayer)
                   targetPlayer.connection.send(new ClientboundSetEntityMotionPacket(targetPlayer));
             }));
             
@@ -119,7 +119,7 @@ public class TongueItem extends AbilityItem {
             }
             
             // Tongue tip ends at the hit entity's center
-            animationTarget = hit.position().add(0, hit.getBbHeight() / 2.0, 0);
+            animationTarget = livingHit.position().add(0, livingHit.getBbHeight() / 2.0, 0);
             hitEntity = livingHit;
             found = true;
             break;
