@@ -5,6 +5,7 @@ import net.minecraft.data.AtlasIds;
 import net.minecraft.network.chat.contents.objects.AtlasSprite;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.minecraft.world.item.enchantment.effects.ReplaceDisk;
 import net.minecraft.world.level.block.Block;
@@ -39,7 +40,7 @@ public enum MetamorphTypes {
                      BlockPredicate.unobstructed()
                )
          ),
-         BlockStateProvider.simple(Blocks.FROSTED_ICE),
+         BlockStateProvider.holderOf(Blocks.FROSTED_ICE),
          Optional.of(GameEvent.BLOCK_PLACE)
    );
    

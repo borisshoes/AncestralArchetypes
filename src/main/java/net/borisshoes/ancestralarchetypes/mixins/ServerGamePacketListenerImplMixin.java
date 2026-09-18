@@ -47,7 +47,7 @@ public abstract class ServerGamePacketListenerImplMixin {
       }
    }
    
-   @ModifyExpressionValue(method = "handleMovePlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;clampHorizontal(D)D", ordinal = 0))
+   @ModifyExpressionValue(method = "handlePlayerPositionChange", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;clampHorizontal(D)D", ordinal = 0))
    private double archetypes$lavaStrideX(double original){
       if(AncestralArchetypes.profile(player).hasAbility(ArchetypeRegistry.LAVA_WALKER) && player.getFluidHeight(FluidTags.LAVA) > 0.1 && !player.isShiftKeyDown() && hasInput){
          double delta = original - player.getX();
@@ -57,7 +57,7 @@ public abstract class ServerGamePacketListenerImplMixin {
       return original;
    }
    
-   @ModifyExpressionValue(method = "handleMovePlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;clampHorizontal(D)D", ordinal = 1))
+   @ModifyExpressionValue(method = "handlePlayerPositionChange", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;clampHorizontal(D)D", ordinal = 1))
    private double archetypes$lavaStrideZ(double original){
       if(AncestralArchetypes.profile(player).hasAbility(ArchetypeRegistry.LAVA_WALKER) && player.getFluidHeight(FluidTags.LAVA) > 0.1 && !player.isShiftKeyDown() && hasInput){
          double delta = original - player.getZ();
@@ -69,8 +69,8 @@ public abstract class ServerGamePacketListenerImplMixin {
       return original;
    }
    
-   @Inject(method = "handleMovePlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;move(Lnet/minecraft/world/entity/MoverType;Lnet/minecraft/world/phys/Vec3;)V"))
-   private void archetypes$strideAndClimb(ServerboundMovePlayerPacket packet, CallbackInfo ci){
+   @Inject(method = "handlePlayerPositionChange", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;move(Lnet/minecraft/world/entity/MoverType;Lnet/minecraft/world/phys/Vec3;)V"))
+   private void archetypes$strideAndClimb(double requestedX, double requestedY, double requestedZ, float requestedYRot, float requestedXRot, boolean isOnGround, boolean horizontalCollision, CallbackInfo ci){
       PlayerArchetypeData profile = AncestralArchetypes.profile(player);
       if(profile.hasAbility(ArchetypeRegistry.LAVA_WALKER) && player.getFluidHeight(FluidTags.LAVA) > 0.1 && !player.isShiftKeyDown()){
          if(lavaDelta != null && hasInput){
@@ -85,7 +85,7 @@ public abstract class ServerGamePacketListenerImplMixin {
          }
       }
       
-      if(packet.horizontalCollision() && !player.getAbilities().flying && player.isShiftKeyDown() && profile.hasAbility(ArchetypeRegistry.CLIMBING)){
+      if(horizontalCollision && !player.getAbilities().flying && player.isShiftKeyDown() && profile.hasAbility(ArchetypeRegistry.CLIMBING)){
          player.setDeltaMovement(new Vec3(player.getDeltaMovement().x(), 0.2, player.getDeltaMovement().z()));
          player.connection.send(new ClientboundSetEntityMotionPacket(player));
          player.connection.aboveGroundTickCount = 0;

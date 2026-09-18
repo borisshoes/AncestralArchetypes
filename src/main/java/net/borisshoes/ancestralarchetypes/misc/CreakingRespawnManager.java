@@ -164,7 +164,7 @@ public final class CreakingRespawnManager {
    private static void startCutscene(ServerPlayer player, CreakingHeartEntity heart, int durationTicks){
       Vec3 focus = heart.position().add(0, heart.getBbHeight() / 2.0, 0);
       CameraPath path = buildOrbitPath(focus, durationTicks);
-      SequenceManager.start(player, new CreakingRespawnCutscene(player.getUUID(), path, Math.max(1, durationTicks)));
+      SequenceManager.start(player, new CreakingRespawnCutscene(player.getUUID(), path, Math.max(1, durationTicks), heart.level().dimension()));
    }
    
    private static void finalizeToHeart(ServerPlayer player, PlayerArchetypeData profile, CreakingHeartEntity heart){

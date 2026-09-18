@@ -2,6 +2,8 @@ package net.borisshoes.ancestralarchetypes.misc;
 
 import net.borisshoes.borislib.sequences.CameraPath;
 import net.borisshoes.borislib.sequences.CutsceneSequence;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 
 import java.util.UUID;
 
@@ -16,7 +18,7 @@ import java.util.UUID;
  */
 public class CreakingRespawnCutscene extends CutsceneSequence {
    
-   public CreakingRespawnCutscene(UUID playerUUID, CameraPath path, int durationTicks){
-      super(playerUUID, path, durationTicks, false);
+   public CreakingRespawnCutscene(UUID playerUUID, CameraPath path, int durationTicks, ResourceKey<Level> dimension){
+      super(playerUUID, path, durationTicks, false, dimension);
    }
 }

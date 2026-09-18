@@ -16,8 +16,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(FarmlandBlock.class)
 public class FarmBlockMixin {
    
-   @Inject(method = "turnToDirt", at = @At(value = "HEAD"), cancellable = true)
-   private static void archetypes$stopTrample(Entity entity, BlockState state, Level world, BlockPos pos, CallbackInfo ci){
+   @Inject(method = "fallOn", at = @At(value = "HEAD"), cancellable = true)
+   private static void archetypes$stopTrample(Level level, BlockState state, BlockPos pos, Entity entity, double fallDistance, CallbackInfo ci){
       if(entity instanceof ServerPlayer player && AncestralArchetypes.profile(player).hasAbility(ArchetypeRegistry.LIGHTWEIGHT)){
          ci.cancel();
       }

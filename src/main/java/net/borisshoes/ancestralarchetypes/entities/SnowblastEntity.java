@@ -74,7 +74,7 @@ public class SnowblastEntity extends Snowball implements PolymerEntity {
       
       
       if(level() instanceof ServerLevel world){
-         for(BlockPos blockPos : BlockPos.withinManhattan(BlockPos.containing(hitResult.getLocation()), (int) range + 1, (int) range + 1, (int) range + 1)){
+         for(BlockPos blockPos : BlockPos.withinManhattan(BlockPos.containing(hitResult.getLocation()), (int) range + 1)){
             if(!blockPos.closerToCenterThan(hitResult.getLocation(), range)) continue;
             if(world.getBlockState(blockPos).is(Blocks.WATER)){
                world.setBlockAndUpdate(blockPos, Blocks.FROSTED_ICE.defaultBlockState());

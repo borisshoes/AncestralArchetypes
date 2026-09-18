@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.AbstractThrownPotion;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,8 +20,8 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.profile;
 @Mixin(AbstractThrownPotion.class)
 public class AbstractThrownPotionMixin {
    
-   @Inject(method = "onHitAsWater", at = @At("HEAD"))
-   private void archetypes$waterDamage(ServerLevel world, CallbackInfo ci){
+   @Inject(method = "affectEntitiesAround", at = @At("HEAD"))
+   private void archetypes$waterDamage(ServerLevel world, PotionContents potion, CallbackInfo ci){
       AbstractThrownPotion entity = (AbstractThrownPotion) (Object) this;
       AABB box = entity.getBoundingBox().inflate(4.0, 2.0, 4.0);
       for(ServerPlayer playerEntity : world.getEntitiesOfClass(ServerPlayer.class, box, (e) -> true)){

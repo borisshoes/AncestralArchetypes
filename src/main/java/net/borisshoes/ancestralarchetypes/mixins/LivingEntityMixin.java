@@ -405,12 +405,12 @@ public abstract class LivingEntityMixin {
    
    
    @ModifyReturnValue(method = "getVisibilityPercent", at = @At("RETURN"))
-   private double archetypes$attackRangeScale(double original, Entity attacker){
+   private double archetypes$attackRangeScale(double original, final ServerLevel serverLevel, final @Nullable Entity targetingEntity){
       LivingEntity livingEntity = (LivingEntity) (Object) this;
       if(!CONFIG.getBoolean(ArchetypeRegistry.IGNORED_BY_MOB_TYPE)) return original;
-      if(livingEntity instanceof ServerPlayer player){
+      if(livingEntity instanceof ServerPlayer player && targetingEntity != null){
          PlayerArchetypeData profile = profile(player);
-         if(profile.getSubArchetype() != null && profile.getSubArchetype().getEntityType() != null && profile.getSubArchetype().getEntityType().equals(attacker.getType())){
+         if(profile.getSubArchetype() != null && profile.getSubArchetype().getEntityType() != null && profile.getSubArchetype().getEntityType().equals(targetingEntity.getType())){
             return original * 0.01;
          }
       }

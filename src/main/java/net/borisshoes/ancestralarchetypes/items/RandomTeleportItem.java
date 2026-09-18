@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -78,7 +79,7 @@ public class RandomTeleportItem extends AbilityItem {
          }
          
          Vec3 vec3d = user.position();
-         if(user.randomTeleport(d, e, f, true)){
+         if(user.randomTeleport(d, e, f, true, BlockTags.CONSUMABLE_DOES_NOT_TELEPORT_TO)){
             world.gameEvent(GameEvent.TELEPORT, vec3d, GameEvent.Context.of(user));
             SoundSource soundCategory;
             SoundEvent soundEvent;
