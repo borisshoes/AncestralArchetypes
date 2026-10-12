@@ -6,7 +6,11 @@ import net.borisshoes.ancestralarchetypes.AncestralArchetypes;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.mixins.EntityAccessor;
 import net.borisshoes.borislib.BorisLib;
+import net.borisshoes.borislib.conditions.Condition;
+import net.borisshoes.borislib.conditions.ConditionInstance;
+import net.borisshoes.borislib.conditions.Conditions;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -18,6 +22,7 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.scores.PlayerTeam;
@@ -32,6 +37,27 @@ import static net.borisshoes.ancestralarchetypes.AncestralArchetypes.archetypes$
 import static net.borisshoes.ancestralarchetypes.items.MetamorphHeadItem.*;
 
 public class ArchetypeUtils {
+   // Slows to a crawl without the full root of an infinite Torpor, so jumping still works
+   public static final float STUN_TORPOR = 999f;
+
+   // Refreshes the condition behind a passive ability, it lapses half a second after the last call
+   public static void passiveCondition(ServerPlayer player, Holder<Condition> condition, String id, float value, AttributeModifier.Operation operation){
+      if(!(value > 0)) return;
+      Conditions.addCondition(player.level().getServer(), player, new ConditionInstance(
+            condition, AncestralArchetypes.archetypesId(id), 10, value,
+            true, false, true,
+            operation, null));
+   }
+
+   // Applies a multiplier as a compounding percentage of the amplifier above 1, or of the attenuator below 1
+   public static void passiveMultiplier(ServerPlayer player, Holder<Condition> amplifier, Holder<Condition> attenuator, String id, double multiplier){
+      if(multiplier > 1){
+         passiveCondition(player, amplifier, id, (float) (multiplier - 1), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+      }else{
+         passiveCondition(player, attenuator, id, (float) (1 - Math.max(0, multiplier)), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+      }
+   }
+
    public static void addMetamorphHelmetTags(ItemStack stack, MetamorphTypes type){
       if(stack.isEmpty()) return;
       try{

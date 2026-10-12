@@ -7,6 +7,7 @@ import net.borisshoes.ancestralarchetypes.entities.CreakingHeartEntity;
 import net.borisshoes.borislib.utils.SoundUtils;
 import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -28,6 +29,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -103,7 +105,8 @@ public class CreakingHeartItem extends AbilityItem {
          CreakingHeartEntity newHeart = ArchetypeRegistry.CREAKING_HEART_ENTITY.create(world, new EntitySpawnRequest(EntitySpawnReason.SPAWN_ITEM_USE, true));
          if(newHeart != null){
             newHeart.setOwner(player);
-            newHeart.snapTo(player.position().add(0, player.getBbHeight() / 2, 0));
+            // Center the heart in the block at the player's eyes so it never overlaps neighboring walls
+            newHeart.snapTo(Vec3.atBottomCenterOf(BlockPos.containing(player.getEyePosition())));
             player.level().tryAddFreshEntityWithPassengers(newHeart);
             profile(player).setAbilityCooldown(this.ability, CONFIG.getInt(ArchetypeRegistry.CREAKING_HEART_COOLDOWN));
             world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.CREAKING_HEART_SPAWN, SoundSource.NEUTRAL, 2F, 0.3F + world.getRandom().nextFloat() * 0.3F);

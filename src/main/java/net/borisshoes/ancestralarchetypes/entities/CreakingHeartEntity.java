@@ -12,6 +12,7 @@ import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.ancestralarchetypes.mixins.InteractionAccessor;
 import net.borisshoes.borislib.conditions.ConditionInstance;
+import net.borisshoes.borislib.conditions.ConditionMath;
 import net.borisshoes.borislib.conditions.Conditions;
 import net.borisshoes.borislib.utils.AlgoUtils;
 import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
@@ -211,7 +212,7 @@ public class CreakingHeartEntity extends LivingEntity implements PolymerEntity, 
                   Conditions.addCondition(player.level().getServer(), player, new ConditionInstance(
                         Conditions.FORTITUDE,
                         archetypesId("creaking_fortitude"),
-                        10, -resist,
+                        10, ConditionMath.reductionToMagnitude(Mth.clamp(resist, 0, 1)),
                         true, false, true,
                         AttributeModifier.Operation.ADD_VALUE, null));
                   Conditions.addCondition(player.level().getServer(), player, new ConditionInstance(
@@ -229,7 +230,7 @@ public class CreakingHeartEntity extends LivingEntity implements PolymerEntity, 
                         archetypesId("creaking_range_slow"),
                         10, slow,
                         false, false, true,
-                        AttributeModifier.Operation.ADD_VALUE, null));
+                        AttributeModifier.Operation.ADD_MULTIPLIED_BASE, null));
                   if(rangeWarnCooldown <= 0){
                      player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.creaking_heart_leaving_range").withColor(TextColor.RED.getValue()), false);
                      rangeWarnCooldown = 100;
@@ -384,20 +385,24 @@ public class CreakingHeartEntity extends LivingEntity implements PolymerEntity, 
       if(owningEntity instanceof ServerPlayer player && !player.hasDisconnected()){
          float slow = CONFIG.getFloat(ArchetypeRegistry.CREAKING_HEART_SLOWNESS);
          int slowDur = CONFIG.getInt(ArchetypeRegistry.CREAKING_HEART_SLOWNESS_DURATION);
-         float weak = -CONFIG.getFloat(ArchetypeRegistry.CREAKING_HEART_WEAKNESS);
+         float weak = CONFIG.getFloat(ArchetypeRegistry.CREAKING_HEART_WEAKNESS);
          int weakDur = CONFIG.getInt(ArchetypeRegistry.CREAKING_HEART_WEAKNESS_DURATION);
-         Conditions.addCondition(player.level().getServer(), player, new ConditionInstance(
-               Conditions.TORPOR,
-               archetypesId("creaking_slow"),
-               slowDur, slow,
-               true, true, false,
-               AttributeModifier.Operation.ADD_VALUE, null));
-         Conditions.addCondition(player.level().getServer(), player, new ConditionInstance(
-               Conditions.FEEBLE,
-               archetypesId("creaking_weak"),
-               weakDur, weak,
-               true, true, false,
-               AttributeModifier.Operation.ADD_VALUE, null));
+         if(slowDur > 0){
+            Conditions.addCondition(player.level().getServer(), player, new ConditionInstance(
+                  Conditions.TORPOR,
+                  archetypesId("creaking_slow"),
+                  slowDur, slow,
+                  true, true, false,
+                  AttributeModifier.Operation.ADD_MULTIPLIED_BASE, null));
+         }
+         if(weakDur > 0){
+            Conditions.addCondition(player.level().getServer(), player, new ConditionInstance(
+                  Conditions.FEEBLE,
+                  archetypesId("creaking_weak"),
+                  weakDur, weak,
+                  true, true, false,
+                  AttributeModifier.Operation.ADD_MULTIPLIED_BASE, null));
+         }
          
          MutableComponent text;
          if(source.getEntity() != null){

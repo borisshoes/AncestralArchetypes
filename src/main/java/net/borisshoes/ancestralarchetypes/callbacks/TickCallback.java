@@ -9,7 +9,9 @@ import net.borisshoes.ancestralarchetypes.items.AbilityItem;
 import net.borisshoes.ancestralarchetypes.misc.*;
 import net.borisshoes.ancestralarchetypes.mixins.EntityAccessor;
 import net.borisshoes.borislib.conditions.ConditionInstance;
+import net.borisshoes.borislib.conditions.ConditionMath;
 import net.borisshoes.borislib.conditions.Conditions;
+import net.borisshoes.borislib.conditions.NearsightCondition;
 import net.borisshoes.borislib.tracker.PlayerMovementEntry;
 import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.borisshoes.borislib.utils.SoundUtils;
@@ -88,7 +90,10 @@ public class TickCallback {
          }
          
          if(profile.hasAbility(ArchetypeRegistry.REGEN_WHEN_LOW) && player.getHealth() < player.getMaxHealth() / 2.0 && !player.isDeadOrDying()){
-            player.heal((float) CONFIG.getDouble(ArchetypeRegistry.REGENERATION_RATE));
+            // Config is health per tick, Rejuvenation is health per second
+            ArchetypeUtils.passiveCondition(player, Conditions.REJUVENATION, "regen_when_low", (float) CONFIG.getDouble(ArchetypeRegistry.REGENERATION_RATE) * 20, AttributeModifier.Operation.ADD_VALUE);
+         }else{
+            Conditions.removeCondition(server, player, Conditions.REJUVENATION, archetypesId("regen_when_low"));
          }
          
          if(profile.hasAbility(ArchetypeRegistry.HEALTH_BASED_SPRINT)){
@@ -130,7 +135,10 @@ public class TickCallback {
                            LivingEntity.PLAYER_NOT_WEARING_DISGUISE_ITEM.test(player) && player.isLookingAtMe(p, 1 - Math.cos(Math.toRadians(CONFIG.getDouble(ArchetypeRegistry.SHY_VIEWING_ANGLE) / 2.0)), true, false, player.getEyeY()) &&
                            LivingEntity.PLAYER_NOT_WEARING_DISGUISE_ITEM.test(p) && p.isLookingAtMe(player, 1 - Math.cos(Math.toRadians(CONFIG.getDouble(ArchetypeRegistry.SHY_NOTICING_ANGLE) / 2.0)), false, false, p.getEyeY())
                ).isEmpty()){
-                  player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 6, 9, false, false, true));
+                  Conditions.addCondition(server, player, new ConditionInstance(
+                        Conditions.TORPOR, archetypesId("shy"), 6, ArchetypeUtils.STUN_TORPOR,
+                        true, false, true,
+                        AttributeModifier.Operation.ADD_VALUE, null));
                }
             }
          }
@@ -369,9 +377,9 @@ public class TickCallback {
             Conditions.addCondition(player.level().getServer(), player, new ConditionInstance(
                   Conditions.FEEBLE,
                   archetypesId("daylight_weakness"),
-                  100, -CONFIG.getFloat(ArchetypeRegistry.DAYLIGHT_WEAK_WEAKNESS),
+                  100, CONFIG.getFloat(ArchetypeRegistry.DAYLIGHT_WEAK_WEAKNESS),
                   true, false, true,
-                  AttributeModifier.Operation.ADD_VALUE, null));
+                  AttributeModifier.Operation.ADD_MULTIPLIED_BASE, null));
          }
       }
       
@@ -379,7 +387,7 @@ public class TickCallback {
          Conditions.addCondition(player.level().getServer(), player, new ConditionInstance(
                Conditions.NEARSIGHT,
                archetypesId("nearsight"),
-               100, CONFIG.getFloat(ArchetypeRegistry.NEARSIGHT_RANGE),
+               100, NearsightCondition.magnitudeForRadius(CONFIG.getFloat(ArchetypeRegistry.NEARSIGHT_RANGE)),
                false, false, true,
                AttributeModifier.Operation.ADD_VALUE, null));
       }
@@ -391,11 +399,12 @@ public class TickCallback {
          int moonLevel = Math.abs(-curPhase + 4); // 0 - new moon, 4 - full moon
          
          if(moonLevel == 2){
-            player.addEffect(new MobEffectInstance(MobEffects.SPEED, 210, 0, false, false, true));
+            ArchetypeUtils.passiveCondition(player, Conditions.CELERITY, "moonlit_cave_spider", CONFIG.getFloat(ArchetypeRegistry.MOONLIT_CAVE_SPIDER_SPEED), AttributeModifier.Operation.ADD_VALUE);
          }else if(moonLevel == 3){
-            player.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 210, 0, false, false, true));
+            ArchetypeUtils.passiveCondition(player, Conditions.MIGHT, "moonlit_cave_spider", CONFIG.getFloat(ArchetypeRegistry.MOONLIT_CAVE_SPIDER_STRENGTH), AttributeModifier.Operation.ADD_VALUE);
          }else if(moonLevel == 4){
-            player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 210, 0, false, false, true));
+            // Config is health per tick, Rejuvenation is health per second
+            ArchetypeUtils.passiveCondition(player, Conditions.REJUVENATION, "moonlit_cave_spider", CONFIG.getFloat(ArchetypeRegistry.MOONLIT_CAVE_SPIDER_REGEN_RATE) * 20, AttributeModifier.Operation.ADD_VALUE);
          }
       }
       
@@ -406,7 +415,38 @@ public class TickCallback {
          MobEffectInstance fireRes = new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 210, 0, false, false, true);
          player.addEffect(fireRes);
       }else if(profile.getMetamorph() == MetamorphTypes.GOLD){
-         player.heal((float) CONFIG.getDouble(ArchetypeRegistry.METAMORPH_GOLD_REGEN_RATE));
+         // Config is health per 5 ticks, Rejuvenation is health per second
+         ArchetypeUtils.passiveCondition(player, Conditions.REJUVENATION, "metamorph_gold", (float) CONFIG.getDouble(ArchetypeRegistry.METAMORPH_GOLD_REGEN_RATE) * 4, AttributeModifier.Operation.ADD_VALUE);
+      }
+
+      damageTaken(profile, player);
+   }
+
+   private static void damageTaken(PlayerArchetypeData profile, ServerPlayer player){
+      if(profile.hasAbility(ArchetypeRegistry.SLIPPERY) && player.isInWaterOrRain()){
+         double modifier = CONFIG.getDouble(profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER) ? ArchetypeRegistry.GREAT_SWIMMER_SLIPPERY_DAMAGE_MODIFIER : ArchetypeRegistry.SLIPPERY_DAMAGE_MODIFIER);
+         ArchetypeUtils.passiveCondition(player, Conditions.FORTITUDE, "slippery", ConditionMath.reductionToMagnitude((float) Mth.clamp(1 - modifier, 0, 1)), AttributeModifier.Operation.ADD_VALUE);
+      }
+
+      if(profile.hasAbility(ArchetypeRegistry.VULNERABLE_IN_WATER) && player.isInWaterOrRain()){
+         ArchetypeUtils.passiveCondition(player, Conditions.VULNERABILITY, "vulnerable_in_water", CONFIG.getFloat(ArchetypeRegistry.VULNERABLE_IN_WATER_VULNERABILITY), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+      }
+      if(profile.hasAbility(ArchetypeRegistry.VULNERABLE_IN_COLD) && !player.hasEffect(MobEffects.WATER_BREATHING)){
+         Holder<Biome> biome = player.level().getBiome(player.blockPosition());
+         float temp = biome.value().getBaseTemperature();
+         boolean shouldFreeze = (biome.is(ArchetypeRegistry.COLD_DAMAGE_INCLUDE_BIOMES) ||
+               (temp < 0.1 && !biome.is(ArchetypeRegistry.COLD_DAMAGE_EXCEPTION_BIOMES))) && !(player.isCreative() || player.isSpectator());
+         if(shouldFreeze){
+            ArchetypeUtils.passiveCondition(player, Conditions.VULNERABILITY, "vulnerable_in_cold", CONFIG.getFloat(ArchetypeRegistry.VULNERABLE_IN_COLD_VULNERABILITY), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+         }
+      }
+      if(profile.hasAbility(ArchetypeRegistry.VULNERABLE_WHEN_DRY) && !player.hasEffect(MobEffects.FIRE_RESISTANCE)){
+         Holder<Biome> biome = player.level().getBiome(player.blockPosition());
+         boolean shouldDryOut = (biome.is(ArchetypeRegistry.DRY_OUT_INCLUDE_BIOMES) || (!biome.value().hasPrecipitation() && !biome.is(ArchetypeRegistry.DRY_OUT_EXCEPTION_BIOMES))) &&
+               !player.isInWater() && !(player.isCreative() || player.isSpectator()) && !player.getItemBySlot(EquipmentSlot.HEAD).is(Items.TURTLE_HELMET);
+         if(shouldDryOut){
+            ArchetypeUtils.passiveCondition(player, Conditions.VULNERABILITY, "vulnerable_when_dry", CONFIG.getFloat(ArchetypeRegistry.VULNERABLE_WHEN_DRY_VULNERABILITY), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+         }
       }
    }
    
@@ -421,28 +461,38 @@ public class TickCallback {
          MinecraftUtils.attributeEffect(player, Attributes.WATER_MOVEMENT_EFFICIENCY, 1f, AttributeModifier.Operation.ADD_VALUE, archetypesId("swim_buff"), true);
       }
       
-      if(profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER) && player.isInWaterOrRain()){
-         MinecraftUtils.attributeEffect(player, Attributes.MOVEMENT_SPEED, CONFIG.getDouble(ArchetypeRegistry.GREAT_SWIMMER_MOVE_SPEED_MODIFIER), AttributeModifier.Operation.ADD_MULTIPLIED_BASE, archetypesId("great_swimmer"), false);
+      MinecraftServer server = player.level().getServer();
+      float swimSpeed = CONFIG.getFloat(ArchetypeRegistry.GREAT_SWIMMER_MOVE_SPEED_MODIFIER);
+      boolean greatSwimming = profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER) && player.isInWaterOrRain();
+      if(greatSwimming && swimSpeed > 0){
+         ArchetypeUtils.passiveCondition(player, Conditions.CELERITY, "great_swimmer", swimSpeed, AttributeModifier.Operation.ADD_VALUE);
       }else{
-         MinecraftUtils.attributeEffect(player, Attributes.MOVEMENT_SPEED, CONFIG.getDouble(ArchetypeRegistry.GREAT_SWIMMER_MOVE_SPEED_MODIFIER), AttributeModifier.Operation.ADD_MULTIPLIED_BASE, archetypesId("great_swimmer"), true);
+         Conditions.removeCondition(server, player, Conditions.CELERITY, archetypesId("great_swimmer"));
       }
-      
-      MinecraftUtils.attributeEffect(player, Attributes.MOVEMENT_SPEED, -1, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, archetypesId("fortify"), !profile.isFortifyActive());
-      MinecraftUtils.attributeEffect(player, Attributes.JUMP_STRENGTH, -1, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, archetypesId("fortify"), !profile.isFortifyActive());
+      if(greatSwimming && swimSpeed < 0){ // The config allows a negative modifier
+         ArchetypeUtils.passiveCondition(player, Conditions.TORPOR, "great_swimmer", Math.min(1, -swimSpeed), AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+      }else{
+         Conditions.removeCondition(server, player, Conditions.TORPOR, archetypesId("great_swimmer"));
+      }
+
+      if(profile.isFortifyActive()){
+         ArchetypeUtils.passiveCondition(player, Conditions.TORPOR, "fortify", Float.POSITIVE_INFINITY, AttributeModifier.Operation.ADD_VALUE);
+      }else{
+         Conditions.removeCondition(server, player, Conditions.TORPOR, archetypesId("fortify"));
+      }
       
       Entity vehicle = player.getVehicle();
       boolean gaveReach = false;
       if(vehicle != null){
          if(!vehicle.entityTags().stream().filter(s -> s.contains("$" + MOD_ID + ".spirit_mount")).toList().isEmpty()){
-            MinecraftUtils.attributeEffect(player, Attributes.BLOCK_INTERACTION_RANGE, CONFIG.getDouble(ArchetypeRegistry.MOUNTED_RANGE), AttributeModifier.Operation.ADD_VALUE, archetypesId("mounted_reach"), false);
-            MinecraftUtils.attributeEffect(player, Attributes.ENTITY_INTERACTION_RANGE, CONFIG.getDouble(ArchetypeRegistry.MOUNTED_RANGE), AttributeModifier.Operation.ADD_VALUE, archetypesId("mounted_reach"), false);
+            reach(player, "mounted_reach", CONFIG.getDouble(ArchetypeRegistry.MOUNTED_RANGE));
             MinecraftUtils.attributeEffect(player, Attributes.SAFE_FALL_DISTANCE, 10, AttributeModifier.Operation.ADD_VALUE, archetypesId("mounted_fall"), false);
             gaveReach = true;
          }
       }
       if(!gaveReach){
-         MinecraftUtils.attributeEffect(player, Attributes.BLOCK_INTERACTION_RANGE, CONFIG.getDouble(ArchetypeRegistry.MOUNTED_RANGE), AttributeModifier.Operation.ADD_VALUE, archetypesId("mounted_reach"), true);
-         MinecraftUtils.attributeEffect(player, Attributes.ENTITY_INTERACTION_RANGE, CONFIG.getDouble(ArchetypeRegistry.MOUNTED_RANGE), AttributeModifier.Operation.ADD_VALUE, archetypesId("mounted_reach"), true);
+         Conditions.removeCondition(server, player, Conditions.SPAN, archetypesId("mounted_reach"));
+         Conditions.removeCondition(server, player, Conditions.LUNGE, archetypesId("mounted_reach"));
          MinecraftUtils.attributeEffect(player, Attributes.SAFE_FALL_DISTANCE, 10, AttributeModifier.Operation.ADD_VALUE, archetypesId("mounted_fall"), true);
       }
       
@@ -452,6 +502,12 @@ public class TickCallback {
       MinecraftUtils.attributeEffect(player, Attributes.AIR_DRAG_MODIFIER, -CONFIG.getFloat(ArchetypeRegistry.METAMORPH_ICE_DRAG_REDUCTION), AttributeModifier.Operation.ADD_VALUE, archetypesId("metamorph_ice_drag"), !shouldIceMetamorphInAir);
    }
    
+   // Span and Lunge are fractions of the base range, the configs are in blocks
+   private static void reach(ServerPlayer player, String id, double blocks){
+      ArchetypeUtils.passiveCondition(player, Conditions.SPAN, id, (float) (blocks / player.getAttributeBaseValue(Attributes.BLOCK_INTERACTION_RANGE)), AttributeModifier.Operation.ADD_VALUE);
+      ArchetypeUtils.passiveCondition(player, Conditions.LUNGE, id, (float) (blocks / player.getAttributeBaseValue(Attributes.ENTITY_INTERACTION_RANGE)), AttributeModifier.Operation.ADD_VALUE);
+   }
+
    public static void attributes(PlayerArchetypeData profile, ServerPlayer player){
       MinecraftUtils.attributeEffect(player, Attributes.AIR_DRAG_MODIFIER, -CONFIG.getFloat(ArchetypeRegistry.LIGHTWEIGHT_DRAG_REDUCTION), AttributeModifier.Operation.ADD_VALUE, archetypesId("lightweight_drag"), !profile.hasAbility(ArchetypeRegistry.LIGHTWEIGHT));
       MinecraftUtils.attributeEffect(player, Attributes.BOUNCINESS, CONFIG.getFloat(ArchetypeRegistry.BOUNCY_BOUNCINESS), AttributeModifier.Operation.ADD_VALUE, archetypesId("bouncy"), !profile.hasAbility(ArchetypeRegistry.BOUNCY));
@@ -470,10 +526,13 @@ public class TickCallback {
       MinecraftUtils.attributeEffect(player, Attributes.SCALE, 0.75, AttributeModifier.Operation.ADD_MULTIPLIED_BASE, archetypesId("massive_sized"), !profile.hasAbility(ArchetypeRegistry.MASSIVE_SIZED));
       MinecraftUtils.attributeEffect(player, Attributes.MAX_HEALTH, 1, AttributeModifier.Operation.ADD_MULTIPLIED_BASE, archetypesId("massive_sized"), !profile.hasAbility(ArchetypeRegistry.MASSIVE_SIZED));
       
-      MinecraftUtils.attributeEffect(player, Attributes.ENTITY_INTERACTION_RANGE, CONFIG.getDouble(ArchetypeRegistry.LONG_ARMS_RANGE), AttributeModifier.Operation.ADD_VALUE, archetypesId("long_arms"), !profile.hasAbility(ArchetypeRegistry.LONG_ARMS));
-      MinecraftUtils.attributeEffect(player, Attributes.BLOCK_INTERACTION_RANGE, CONFIG.getDouble(ArchetypeRegistry.LONG_ARMS_RANGE), AttributeModifier.Operation.ADD_VALUE, archetypesId("long_arms"), !profile.hasAbility(ArchetypeRegistry.LONG_ARMS));
-      
-      MinecraftUtils.attributeEffect(player, Attributes.MOVEMENT_SPEED, CONFIG.getDouble(ArchetypeRegistry.SPEEDY_SPEED_BOOST), AttributeModifier.Operation.ADD_MULTIPLIED_BASE, archetypesId("speedy"), !profile.hasAbility(ArchetypeRegistry.SPEEDY));
+      if(profile.hasAbility(ArchetypeRegistry.LONG_ARMS)){
+         reach(player, "long_arms", CONFIG.getDouble(ArchetypeRegistry.LONG_ARMS_RANGE));
+      }
+
+      if(profile.hasAbility(ArchetypeRegistry.SPEEDY)){
+         ArchetypeUtils.passiveCondition(player, Conditions.CELERITY, "speedy", CONFIG.getFloat(ArchetypeRegistry.SPEEDY_SPEED_BOOST), AttributeModifier.Operation.ADD_VALUE);
+      }
       
       MinecraftUtils.attributeEffect(player, Attributes.SNEAKING_SPEED, CONFIG.getDouble(ArchetypeRegistry.SNEAKY_SPEED_BOOST), AttributeModifier.Operation.ADD_MULTIPLIED_BASE, archetypesId("sneaky"), !profile.hasAbility(ArchetypeRegistry.SNEAKY));
       
@@ -482,7 +541,18 @@ public class TickCallback {
       
       MinecraftUtils.attributeEffect(player, Attributes.ATTACK_KNOCKBACK, CONFIG.getDouble(ArchetypeRegistry.HARD_HITTER_KNOCKBACK_INCREASE), AttributeModifier.Operation.ADD_VALUE, archetypesId("hard_hitter"), !profile.hasAbility(ArchetypeRegistry.HARD_HITTER));
       
-      MinecraftUtils.attributeEffect(player, Attributes.ATTACK_SPEED, CONFIG.getDouble(ArchetypeRegistry.HASTY_ATTACK_SPEED_INCREASE), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, archetypesId("hasty"), !profile.hasAbility(ArchetypeRegistry.HASTY));
+      if(profile.hasAbility(ArchetypeRegistry.HASTY)){
+         ArchetypeUtils.passiveCondition(player, Conditions.FERVOR, "hasty", CONFIG.getFloat(ArchetypeRegistry.HASTY_ATTACK_SPEED_INCREASE), AttributeModifier.Operation.ADD_VALUE);
+         ArchetypeUtils.passiveMultiplier(player, Conditions.ALACRITY, Conditions.LETHARGY, "hasty", CONFIG.getDouble(ArchetypeRegistry.HASTY_MINING_MODIFIER));
+      }
+
+      double knockbackTaken = 1;
+      if(profile.hasAbility(ArchetypeRegistry.INCREASED_KNOCKBACK)) knockbackTaken *= CONFIG.getDouble(ArchetypeRegistry.KNOCKBACK_INCREASE);
+      if(profile.hasAbility(ArchetypeRegistry.LIGHTWEIGHT)) knockbackTaken *= CONFIG.getDouble(ArchetypeRegistry.LIGHTWEIGHT_INCREASED_KNOCKBACK);
+      if(profile.hasAbility(ArchetypeRegistry.REDUCED_KNOCKBACK)) knockbackTaken *= CONFIG.getDouble(ArchetypeRegistry.KNOCKBACK_DECREASE);
+      if(profile.getMetamorph() == MetamorphTypes.NETHERITE) knockbackTaken *= CONFIG.getDouble(ArchetypeRegistry.METAMORPH_NETHERITE_KNOCKBACK_MODIFIER);
+      if(profile.getMetamorph() == MetamorphTypes.IRON) knockbackTaken *= CONFIG.getDouble(ArchetypeRegistry.METAMORPH_IRON_KNOCKBACK_MODIFIER);
+      ArchetypeUtils.passiveMultiplier(player, Conditions.FALTER, Conditions.POISE, "knockback_taken", knockbackTaken);
       
       MinecraftUtils.attributeEffect(player, Attributes.SAFE_FALL_DISTANCE, CONFIG.getDouble(ArchetypeRegistry.RESILIENT_JOINTS_EXTRA_FALL_BLOCKS), AttributeModifier.Operation.ADD_VALUE, archetypesId("resilient_joints"), !profile.hasAbility(ArchetypeRegistry.RESILIENT_JOINTS));
       
@@ -540,7 +610,7 @@ public class TickCallback {
          }
       }else{
          Conditions.removeCondition(player.level().getServer(), player, Conditions.MIGHT, archetypesId("pack_hunter_might"));
-         MinecraftUtils.attributeEffect(player, Attributes.MOVEMENT_SPEED, 0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE, archetypesId("pack_hunter_speed"), true);
+         Conditions.removeCondition(player.level().getServer(), player, Conditions.CELERITY, archetypesId("pack_hunter_celerity"));
       }
       
       if(profile.hasAbility(ArchetypeRegistry.SKIDDISH) && ArchetypeUtils.shouldProcSkiddish(player)){
@@ -548,8 +618,8 @@ public class TickCallback {
          double speed = CONFIG.getDouble(ArchetypeRegistry.SKIDDISH_SPEED);
          Conditions.addCondition(player.level().getServer(), player, new ConditionInstance(
                Conditions.FEEBLE, archetypesId("skiddish_feeble"), 10,
-               (float) -weakness, true, true, true,
-               AttributeModifier.Operation.ADD_VALUE, null
+               (float) weakness, true, false, true,
+               AttributeModifier.Operation.ADD_MULTIPLIED_BASE, null
          ));
          Conditions.addCondition(player.level().getServer(), player, new ConditionInstance(
                Conditions.CELERITY, archetypesId("skiddish_celerity"), 10,

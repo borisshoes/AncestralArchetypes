@@ -90,12 +90,14 @@ public class ItemMixin {
             float speedBoost = CONFIG.getFloat(ArchetypeRegistry.FUNGUS_SPEED_BOOST_MULTIPLIER);
             int speedTime = CONFIG.getInt(ArchetypeRegistry.FUNGUS_SPEED_BOOST_DURATION);
             
-            Conditions.addCondition(playerEntity.level().getServer(), playerEntity, new ConditionInstance(
-                  Conditions.CELERITY,
-                  archetypesId("fungus_speed"),
-                  speedTime, speedBoost,
-                  true, true, false,
-                  AttributeModifier.Operation.ADD_VALUE, null));
+            if(speedTime > 0){
+               Conditions.addCondition(playerEntity.level().getServer(), playerEntity, new ConditionInstance(
+                     Conditions.CELERITY,
+                     archetypesId("fungus_speed"),
+                     speedTime, speedBoost,
+                     true, true, false,
+                     AttributeModifier.Operation.ADD_VALUE, null));
+            }
          }
          
          if(profile.hasAbility(ArchetypeRegistry.BERRY_EATER) && stack.is(Items.SWEET_BERRIES)){
@@ -104,19 +106,23 @@ public class ItemMixin {
             float damageBoost = CONFIG.getFloat(ArchetypeRegistry.BERRY_EATER_SWEET_STRENGTH);
             float regenRate = CONFIG.getFloat(ArchetypeRegistry.BERRY_EATER_SWEET_REGEN_RATE);
             
-            Conditions.addCondition(playerEntity.level().getServer(), playerEntity, new ConditionInstance(
-                  Conditions.MIGHT,
-                  archetypesId("sweet_berry_might"),
-                  damageTime, damageBoost,
-                  true, true, false,
-                  AttributeModifier.Operation.ADD_VALUE, null));
+            if(damageTime > 0){
+               Conditions.addCondition(playerEntity.level().getServer(), playerEntity, new ConditionInstance(
+                     Conditions.MIGHT,
+                     archetypesId("sweet_berry_might"),
+                     damageTime, damageBoost,
+                     true, true, false,
+                     AttributeModifier.Operation.ADD_VALUE, null));
+            }
             
-            Conditions.addCondition(playerEntity.level().getServer(), playerEntity, new ConditionInstance(
-                  Conditions.REJUVENATION,
-                  archetypesId("sweet_berry_regen"),
-                  regenTime, regenRate,
-                  true, true, false,
-                  AttributeModifier.Operation.ADD_VALUE, null));
+            if(regenTime > 0){
+               Conditions.addCondition(playerEntity.level().getServer(), playerEntity, new ConditionInstance(
+                     Conditions.REJUVENATION,
+                     archetypesId("sweet_berry_regen"),
+                     regenTime, regenRate * 20, // Config is health per tick, Rejuvenation is health per second
+                     true, true, false,
+                     AttributeModifier.Operation.ADD_VALUE, null));
+            }
          }
          
          if(profile.hasAbility(ArchetypeRegistry.BERRY_EATER) && stack.is(Items.GLOW_BERRIES)){
@@ -125,12 +131,14 @@ public class ItemMixin {
             float speedBoost = CONFIG.getFloat(ArchetypeRegistry.BERRY_EATER_GLOW_SPEED);
             float absAmount = CONFIG.getFloat(ArchetypeRegistry.BERRY_EATER_GLOW_ABSORPTION);
             
-            Conditions.addCondition(playerEntity.level().getServer(), playerEntity, new ConditionInstance(
-                  Conditions.CELERITY,
-                  archetypesId("glow_berry_speed"),
-                  speedTime, speedBoost,
-                  true, true, false,
-                  AttributeModifier.Operation.ADD_VALUE, null));
+            if(speedTime > 0){
+               Conditions.addCondition(playerEntity.level().getServer(), playerEntity, new ConditionInstance(
+                     Conditions.CELERITY,
+                     archetypesId("glow_berry_speed"),
+                     speedTime, speedBoost,
+                     true, true, false,
+                     AttributeModifier.Operation.ADD_VALUE, null));
+            }
             
             float curAbs = playerEntity.getAbsorptionAmount();
             float addedAbs = absAmount;

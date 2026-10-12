@@ -8,7 +8,9 @@
     "BorisShoes"
   ],
   "contact": {
-    "repo": "https://github.com/Boris/Archetypes"
+    "homepage": "https://modrinth.com/mod/ancestral-archetypes",
+    "sources": "https://github.com/borisshoes/AncestralArchetypes",
+    "issues": "https://github.com/borisshoes/AncestralArchetypes/issues"
   },
   "license": "OSL-3.0",
   "icon": "assets/ancestralarchetypes/icon.png",

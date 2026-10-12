@@ -1,74 +1,465 @@
-![Ancestral Archetypes](https://github.com/borisshoes/AncestralArchetypes/blob/main/non-mod-resources/Logo_Trans_Medium.png?raw=true)
+<div align="center">
 
-A server-sided Origins-style mod where players pick mob-based Archetypes to gain different abilities.
-The mod is highly configurable and balanced around a competitive environment. This mod also has full translation support.
+![Ancestral Archetypes](non-mod-resources/Banner.png)
 
-[![Ancestral Archetypes](https://img.shields.io/badge/dynamic/json?labelColor=black&color=grey&label=&query=title&url=https://api.modrinth.com/v2/project/xHHbHfVj&style=flat&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAJPUExURQAAABvZahWnUha1WAYzGQlHIxvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZav///9ScwmYAAADDdFJOUwAAAAAAAA8zW3uOYwIBK3rB6Pn+ml18KiGL5HEDquOIH07R/UzKz2zu+uLHIibtafWkVCMNBRqg7/RQuT8EQbvT+5ETDBSU/NAgCSdZlcQKii7mtxJY5fF/7D1SRkB+EcWh4UilOOtPMdTCR1PqN969vmGDCw7G4DSSsAcGHrSPr3bds5CEwDKoXumcZdwcG4KmjayX32A79pjOqRjIFoXynVYVgPi6qxDnL78p2obVJFquNbGZCPdyvHPZ1yhuh8s+iRzcsrEAAAABYktHRMQUDBvhAAAAB3RJTUUH5wQXDwgZWDUtiQAAAqRJREFUOMttU/k7lFEU/k4L4hsxtNAnhRgiJZOiSfbI2oJpmRFCi2kV0aaNVLTIEpVISmnf97r/WO+534yZnqfzw73vOe+559xz7rmKIoVYvLx95vj6qUSqVBW3sGrwnxsQaAwSwcDz5i9g0wxPfmFIqJCyiEgLE4vDl7iD8PGlETotIqOQahlAdJTLA5sWY5JsbNzysHiihEBWViRqRDOlgyFmJVtMq5JWJ5vhvyZlLevrEmUILKl8PihtvYWcYt6QLmNwFjjEb4SSkZnlZLO5yJzcPBg35bODwZfPZxYwWbC5sKjYzwBUkssxSg1wKNsCtHUb89vTy3GwopBxDmcJ9YdDJYB1B9t2WmUtcbtkqt18Mxsp9irsezS2VEu+uka/mqUWSrFd2VsnhLEetoZ9TFv3HwCexdUdjBWi0aH4YTuEvtoPM3/EO1nnuTpEjD2qHIM54DhR0wmA5hZySzIntyknsbZyi8IB0tp07tRpBDKfgeWsdDjHDlFGRIjnl3O0t573gcMFUBeVS1gvlxB1dOZxv0pIu9IF01UDZRdjr1SuZQhxvbvnRrmsMePmrdsrGPRaKP8OLtmn9KM7A4N3xb8yNExUb5RlZt2btpZbXajzPoYkBaDKrtADp3HkYdloo56ndgx37UcHxSP0tIWBGH9cg1nx6TJFTNhS7eCfcA1PJ+GgDbLDs2GuX3V05Ohj0xYSBGumyq/yfApw4EWTRxPJqxQvIF6+ks9Gr0d4nN+8Nbhoi+NdJEwVSc6hVNvHOUvg+5qeDxoP3GQz6x8/qXLuZ6Op7SPy+gNTnydSELabk1Z8Mbs/hlr4dbobfUgxJMS3UdXza9H33jqnA3/OH41FCZ7/l7HW8vOXiWc9GvPf06D953/T2O/EP8HBNtcH0Zm/lqFNUgTAex4AAAAldEVYdGRhdGU6Y3JlYXRlADIwMjMtMDQtMjNUMTU6MDg6MjQrMDA6MDAE5dOaAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIzLTA0LTIzVDE1OjA4OjI0KzAwOjAwdbhrJgAAACh0RVh0ZGF0ZTp0aW1lc3RhbXAAMjAyMy0wNC0yM1QxNTowODoyNSswMDowMITaQU0AAAAASUVORK5CYII=)](https://modrinth.com/mod/ancestral-archetypes)
-[![Downloads](https://img.shields.io/badge/dynamic/json?labelColor=black&color=grey&label=&suffix=%20downloads&query=downloads&url=https://api.modrinth.com/v2/project/xHHbHfVj&style=flat&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAJPUExURQAAABvZahWnUha1WAYzGQlHIxvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZav///9ScwmYAAADDdFJOUwAAAAAAAA8zW3uOYwIBK3rB6Pn+ml18KiGL5HEDquOIH07R/UzKz2zu+uLHIibtafWkVCMNBRqg7/RQuT8EQbvT+5ETDBSU/NAgCSdZlcQKii7mtxJY5fF/7D1SRkB+EcWh4UilOOtPMdTCR1PqN969vmGDCw7G4DSSsAcGHrSPr3bds5CEwDKoXumcZdwcG4KmjayX32A79pjOqRjIFoXynVYVgPi6qxDnL78p2obVJFquNbGZCPdyvHPZ1yhuh8s+iRzcsrEAAAABYktHRMQUDBvhAAAAB3RJTUUH5wQXDwgZWDUtiQAAAqRJREFUOMttU/k7lFEU/k4L4hsxtNAnhRgiJZOiSfbI2oJpmRFCi2kV0aaNVLTIEpVISmnf97r/WO+534yZnqfzw73vOe+559xz7rmKIoVYvLx95vj6qUSqVBW3sGrwnxsQaAwSwcDz5i9g0wxPfmFIqJCyiEgLE4vDl7iD8PGlETotIqOQahlAdJTLA5sWY5JsbNzysHiihEBWViRqRDOlgyFmJVtMq5JWJ5vhvyZlLevrEmUILKl8PihtvYWcYt6QLmNwFjjEb4SSkZnlZLO5yJzcPBg35bODwZfPZxYwWbC5sKjYzwBUkssxSg1wKNsCtHUb89vTy3GwopBxDmcJ9YdDJYB1B9t2WmUtcbtkqt18Mxsp9irsezS2VEu+uka/mqUWSrFd2VsnhLEetoZ9TFv3HwCexdUdjBWi0aH4YTuEvtoPM3/EO1nnuTpEjD2qHIM54DhR0wmA5hZySzIntyknsbZyi8IB0tp07tRpBDKfgeWsdDjHDlFGRIjnl3O0t573gcMFUBeVS1gvlxB1dOZxv0pIu9IF01UDZRdjr1SuZQhxvbvnRrmsMePmrdsrGPRaKP8OLtmn9KM7A4N3xb8yNExUb5RlZt2btpZbXajzPoYkBaDKrtADp3HkYdloo56ndgx37UcHxSP0tIWBGH9cg1nx6TJFTNhS7eCfcA1PJ+GgDbLDs2GuX3V05Ohj0xYSBGumyq/yfApw4EWTRxPJqxQvIF6+ks9Gr0d4nN+8Nbhoi+NdJEwVSc6hVNvHOUvg+5qeDxoP3GQz6x8/qXLuZ6Op7SPy+gNTnydSELabk1Z8Mbs/hlr4dbobfUgxJMS3UdXza9H33jqnA3/OH41FCZ7/l7HW8vOXiWc9GvPf06D953/T2O/EP8HBNtcH0Zm/lqFNUgTAex4AAAAldEVYdGRhdGU6Y3JlYXRlADIwMjMtMDQtMjNUMTU6MDg6MjQrMDA6MDAE5dOaAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIzLTA0LTIzVDE1OjA4OjI0KzAwOjAwdbhrJgAAACh0RVh0ZGF0ZTp0aW1lc3RhbXAAMjAyMy0wNC0yM1QxNTowODoyNSswMDowMITaQU0AAAAASUVORK5CYII=)](https://modrinth.com/mod/ancestral-archetypes)
-[![Followers](https://img.shields.io/badge/dynamic/json?labelColor=black&color=grey&label=&suffix=%20followers&query=followers&url=https://api.modrinth.com/v2/project/xHHbHfVj&style=flat&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAJPUExURQAAABvZahWnUha1WAYzGQlHIxvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZahvZav///9ScwmYAAADDdFJOUwAAAAAAAA8zW3uOYwIBK3rB6Pn+ml18KiGL5HEDquOIH07R/UzKz2zu+uLHIibtafWkVCMNBRqg7/RQuT8EQbvT+5ETDBSU/NAgCSdZlcQKii7mtxJY5fF/7D1SRkB+EcWh4UilOOtPMdTCR1PqN969vmGDCw7G4DSSsAcGHrSPr3bds5CEwDKoXumcZdwcG4KmjayX32A79pjOqRjIFoXynVYVgPi6qxDnL78p2obVJFquNbGZCPdyvHPZ1yhuh8s+iRzcsrEAAAABYktHRMQUDBvhAAAAB3RJTUUH5wQXDwgZWDUtiQAAAqRJREFUOMttU/k7lFEU/k4L4hsxtNAnhRgiJZOiSfbI2oJpmRFCi2kV0aaNVLTIEpVISmnf97r/WO+534yZnqfzw73vOe+559xz7rmKIoVYvLx95vj6qUSqVBW3sGrwnxsQaAwSwcDz5i9g0wxPfmFIqJCyiEgLE4vDl7iD8PGlETotIqOQahlAdJTLA5sWY5JsbNzysHiihEBWViRqRDOlgyFmJVtMq5JWJ5vhvyZlLevrEmUILKl8PihtvYWcYt6QLmNwFjjEb4SSkZnlZLO5yJzcPBg35bODwZfPZxYwWbC5sKjYzwBUkssxSg1wKNsCtHUb89vTy3GwopBxDmcJ9YdDJYB1B9t2WmUtcbtkqt18Mxsp9irsezS2VEu+uka/mqUWSrFd2VsnhLEetoZ9TFv3HwCexdUdjBWi0aH4YTuEvtoPM3/EO1nnuTpEjD2qHIM54DhR0wmA5hZySzIntyknsbZyi8IB0tp07tRpBDKfgeWsdDjHDlFGRIjnl3O0t573gcMFUBeVS1gvlxB1dOZxv0pIu9IF01UDZRdjr1SuZQhxvbvnRrmsMePmrdsrGPRaKP8OLtmn9KM7A4N3xb8yNExUb5RlZt2btpZbXajzPoYkBaDKrtADp3HkYdloo56ndgx37UcHxSP0tIWBGH9cg1nx6TJFTNhS7eCfcA1PJ+GgDbLDs2GuX3V05Ohj0xYSBGumyq/yfApw4EWTRxPJqxQvIF6+ks9Gr0d4nN+8Nbhoi+NdJEwVSc6hVNvHOUvg+5qeDxoP3GQz6x8/qXLuZ6Op7SPy+gNTnydSELabk1Z8Mbs/hlr4dbobfUgxJMS3UdXza9H33jqnA3/OH41FCZ7/l7HW8vOXiWc9GvPf06D953/T2O/EP8HBNtcH0Zm/lqFNUgTAex4AAAAldEVYdGRhdGU6Y3JlYXRlADIwMjMtMDQtMjNUMTU6MDg6MjQrMDA6MDAE5dOaAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIzLTA0LTIzVDE1OjA4OjI0KzAwOjAwdbhrJgAAACh0RVh0ZGF0ZTp0aW1lc3RhbXAAMjAyMy0wNC0yM1QxNTowODoyNSswMDowMITaQU0AAAAASUVORK5CYII=)](https://modrinth.com/mod/ancestral-archetypes)
-<br/>
-[![Ancestral Archetypes](https://cf.way2muchnoise.eu/title/1331020.svg)](https://minecraft.curseforge.com/projects/ancestral-archetypes)
-[![Downloads](https://cf.way2muchnoise.eu/full_1331020_downloads.svg)](https://minecraft.curseforge.com/projects/ancestral-archetypes)
-[![Versions](https://cf.way2muchnoise.eu/versions/For%20MC_1331020_all.svg)](https://minecraft.curseforge.com/projects/ancestral-archetypes)
-<br/>
-<a href="https://modrinth.com/mod/fabric-api">
-<img src="https://i.imgur.com/Ol1Tcf8.png" alt="Requires Fabric API" width="100">
-</a>
-<b> ![Server, Optional Client](https://img.shields.io/badge/environment-server%2c%20opt%20client-c65135?style=flat-square) This mod only needs to be installed on a server.
-<br/>
-[![](https://dcbadge.limes.pink/api/server/https://discord.gg/dTKPeNEg6r)](https://discord.gg/dTKPeNEg6r) <b> Join Our Discord Server!
+# Pick one of 30+ Mobs and gain unique abilities!
 
-## Archetype Summaries
-[![Archetype Summaries](https://github.com/borisshoes/AncestralArchetypes/blob/main/non-mod-resources/Full%20Infographic.png?raw=true)](https://github.com/borisshoes/AncestralArchetypes/blob/main/non-mod-resources/Full%20Infographic.png)
+**Server-Side Origins-inspired mod for Fabric.**
 
-|                                                                                                                                                                                                          |                                                                                                                                                                                                                          |                                                                                                                                                                                                           |
-|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| <div align="center"><strong>Mod Spotlight / Tutorial</strong></div><a href="https://www.youtube.com/watch?v=QApJcu1rpD0"><img alt="Mod Tutorial" src="https://img.youtube.com/vi/QApJcu1rpD0/0.jpg"></a> | <div align="center"><strong>Version 1.2.0 Changes Showcase</strong></div><a href="https://www.youtube.com/watch?v=ZWrzjhnXP8E"><img alt="1.2.0 Changes Showcase" src="https://img.youtube.com/vi/ZWrzjhnXP8E/0.jpg"></a> | <div align="center"><strong>Version 1.3.0 Changes Showcase</strong></div><a href="https://youtu.be/8HL_ekXbSds"><img alt="1.3.0 Changes Showcase" src="https://img.youtube.com/vi/8HL_ekXbSds/0.jpg"></a> |
+[![Modrinth Downloads](https://img.shields.io/modrinth/dt/xHHbHfVj?style=for-the-badge&logo=modrinth&logoColor=white&label=Modrinth&color=00AF5C)](https://modrinth.com/mod/ancestral-archetypes)
+[![CurseForge Downloads](https://img.shields.io/curseforge/dt/1331020?style=for-the-badge&logo=curseforge&logoColor=white&label=CurseForge&color=F16436)](https://www.curseforge.com/minecraft/mc-mods/ancestral-archetypes)
+[![Minecraft Version](https://img.shields.io/modrinth/game-versions/xHHbHfVj?style=for-the-badge&label=Minecraft&color=00B7EB)](https://modrinth.com/mod/ancestral-archetypes/versions)
+[![Latest Release](https://img.shields.io/github/v/release/borisshoes/AncestralArchetypes?style=for-the-badge&label=Release&color=00B7EB)](https://github.com/borisshoes/AncestralArchetypes/releases/latest)
 
-## Texture Pack
-The server has the ability to automatically generate and serve the mod's texture pack to your players when they connect. To do this, you must enable auto-host. This is super easy to do in a few steps:
-1. Launch the server with the mod installed at least once to generate the configs
-2. Go into the 'config' folder of the server, there should be a folder called 'polymer', and inside that there should be a file called 'auto-host.json'
-3. In 'auto-host.json', in the first few lines there will be a line that says `"enabled": false`, change this to true.
-4. (Optional) You can also set the value to make the resource pack required by players, or set the "message" line to inform players why the resource pack is important to download when they are prompted to have it be auto downloaded.
+[![Discord](https://img.shields.io/discord/1403978074550439966?style=for-the-badge&logo=discord&logoColor=white&label=Discord&color=5865F2)](https://discord.gg/dTKPeNEg6r)
+[![Requires Fabric API](https://img.shields.io/badge/Requires-Fabric_API-DBD0B4?style=for-the-badge)](https://modrinth.com/mod/fabric-api)
+[![Server-side](https://img.shields.io/badge/Environment-Server--side-C65135?style=for-the-badge)](#installation)
 
-If everything is done correctly, then players will automatically load into the server with the resource pack installed.
+</div>
+
+Ancestral Archetypes is an Origins-style Fabric mod that only needs to be installed on the server. Each player picks an Archetype based on a Minecraft mob and plays with that mob's abilities and drawbacks. The mod is highly configurable and balanced around a competitive environment.
+
+## Contents
+- [Features](#features)
+- [Getting Started](#getting-started)
+- [Archetypes](#archetypes)
+- [Videos](#videos)
+- [Installation](#installation)
+- [Customizing Archetypes](#customizing-archetypes)
+- [Commands](#commands)
+- [Admin Configuration Commands](#admin-configuration-commands)
+- [Permission Nodes](#permission-nodes)
+- [Building from Source](#building-from-source)
+- [Support and Contributing](#support-and-contributing)
+- [Try My Other Mods!](#try-my-other-mods)
+- [License](#license)
+
+The Admin Configuration Commands section is long. Use the outline button at the top right of this file on GitHub, or your browser's search, to jump to a specific setting.
+
+## Features
+- **30 playable mobs in 11 Archetypes**, from Axolotl and Fox to Warden and Ender Dragon, each with its own strengths and drawbacks.
+- **Around 100 abilities.** Fire volleys of fireballs, teleport like an Enderman, glide on wings, ride a soulbound Spirit Mount, burrow through the ground or brew free potions.
+- **Meaningful weaknesses.** Aquarians dry out on land, Infernals freeze in the cold, Golems cannot regenerate naturally. Every pick is a trade-off.
+- **Balanced for multiplayer.** Designed around a competitive environment, with team-aware abilities and a spyglass mechanic for scouting what other players are.
+- **In-game GUIs.** Players browse and pick Archetypes from a menu, and can read every ability with its exact numbers.
+- **Built for servers.** No client mods, a resource pack served by the server, 200+ config options that can be changed without a restart, and a permission node for every command.
+- **Make it your own.** Admins can add or remove abilities on any Archetype with a command, including [variant abilities](#customizing-archetypes) that no Archetype uses by default.
+- **Full translation support** through language files.
+
+## Getting Started
+1. **Pick an Archetype.** Run `/archetypes changeArchetype` to open the selection menu and choose your mob. New players can do this once by default, so read before you pick!
+2. **Learn your abilities.** `/archetypes abilities` lists what your mob can do, with the exact values your server uses.
+3. **Get your Ability Items.** Active abilities are used through items. `/archetypes items` gives them to you, and gives them back if you lose them.
+4. **Scout other players.** Look at a player through a spyglass for a few seconds to reveal their Archetype.
+
+Not sure what to pick? `/archetypes list` lets you browse every Archetype and its abilities without choosing one.
+
+**Changing Archetypes.** Each change uses up one of your allowed changes. Server admins can give more with `/archetypes addChanges`, hand out the **Archetype Changer** item (`ancestralarchetypes:change_item`), or turn on `canAlwaysChangeArchetype` to remove the limit. `archetypeChangeCooldown` adds a waiting period between changes.
+
+The Archetype Changer has no recipe on purpose. Server owners decide how players get it, for example by adding a crafting recipe, loot table entry or trade for `ancestralarchetypes:change_item` with a datapack.
+
+**Customizing your look.** Centaurs can rename their mount with `/archetypes setMountName` and Horses can pick a coat with `/archetypes setHorseVariant`. Parrots and Ender Dragons can recolor their wings with `/archetypes setGliderColor`, and Ghastlings their helmet with `/archetypes setHelmetColor`.
+
+## Archetypes
+There are 30 mobs to play as, grouped into 11 Archetypes. Mobs in the same Archetype share a theme and usually a weakness.
+
+| Archetype | Mobs | Theme |
+|---|---|---|
+| **Aquarians** | Axolotl, Guardian, Salmon | Masters of water that struggle on dry land. |
+| **Canids** | Fox, Wolf | Two sides of the social coin: Wolves grow stronger in a pack, Foxes do better alone. |
+| **Centaurs** | Horse, Donkey, Camel | Riders bonded to a soulbound Spirit Mount. |
+| **Enderians** | Enderman, Shulker, Ender Dragon | Teleporting beings of the End that fear water. |
+| **Felids** | Cat, Ocelot | Quick, quiet and always landing on their feet. |
+| **Gelatians** | Slime, Magma Cube, Sulfur Cube | Bouncy cubes that shrink instead of dying. |
+| **Golems** | Copper Golem, Tuff Golem, Iron Golem | Constructs that eat metal and stone instead of food. |
+| **Infernals** | Blaze, Wither Skeleton, Strider | Fireproof natives of the Nether that hate the cold. |
+| **Sentinels** | Creaking, Warden | Guardians of the dark with powerful, risky abilities. |
+| **Swampers** | Witch, Cave Spider, Frog | Swamp dwellers empowered by the moon. |
+| **Windswepts** | Breeze, Parrot, Ghastling | Light, airborne creatures that never fall hard. |
+
+Expand an Archetype below for the full list of what each mob gets. ➕ is a benefit, ➖ is a drawback and 🔹 is neutral. The exact numbers behind every ability are shown in game by `/archetypes abilities <archetype>`, and are all [configurable](#admin-configuration-commands).
+
+<details>
+<summary><b>Aquarians</b>: Axolotl, Guardian, Salmon. Masters of water that struggle on dry land.</summary>
+
+<a href="non-mod-resources/Aquarian%20Infographic.png"><img src="non-mod-resources/Aquarian%20Infographic.png" alt="Aquarian infographic" width="420"></a>
+
+**Axolotl**
+- ➕ Regenerates below half health
+- ➕ Gains slight resistance in water and rain
+- ➕ Has Conduit Power, Aqua Affinity and Depth Strider
+- ➖ Takes bonus damage from Impaling
+- ➖ Takes damage in dry biomes without Fire Resistance or a Turtle Shell
+
+**Guardian**
+- ➕ Has a powerful piercing Ray attack
+- ➕ Reflects a portion of damage taken
+- ➕ Gains slight resistance in water and rain
+- ➕ Has Conduit Power, Aqua Affinity and Depth Strider
+- ➖ Takes bonus damage from Impaling
+- ➖ Takes damage in dry biomes without Fire Resistance or a Turtle Shell
+
+**Salmon**
+- ➕ Gains heavy resistance in water and rain
+- ➕ Has enhanced Conduit Power, Aqua Affinity and Depth Strider
+- ➖ Takes bonus damage from Impaling
+- ➖ Takes damage in dry biomes without Fire Resistance or a Turtle Shell
+
+</details>
+
+<details>
+<summary><b>Canids</b>: Fox, Wolf. Two sides of the social coin: Wolves grow stronger in a pack, Foxes do better alone.</summary>
+
+<a href="non-mod-resources/Canid%20Infographic.png"><img src="non-mod-resources/Canid%20Infographic.png" alt="Canid infographic" width="420"></a>
+
+**Fox**
+- ➕ Permanent speed increase
+- ➕ Eating sweet berries grants regeneration and strength
+- ➕ Eating glow berries grants speed and absorption
+- 🔹 Nearby enemy players increase speed but reduce damage dealt
+- 🔹 1.5 blocks tall
+- ➖ 25% less max health
+- ➖ Can only eat meat or berries
+
+**Wolf**
+- ➕ Nearby allies grant stacking strength and speed
+- ➕ Scares skeletons
+- ➖ Can only eat meat
+
+</details>
+
+<details>
+<summary><b>Centaurs</b>: Horse, Donkey, Camel. Riders bonded to a soulbound Spirit Mount.</summary>
+
+<a href="non-mod-resources/Centaur%20Infographic.png"><img src="non-mod-resources/Centaur%20Infographic.png" alt="Centaur infographic" width="420"></a>
+
+**Horse**
+- ➕ Gains a soulbound, heavily armored, agile horse mount
+- ➕ When Mounted: extra reach, every hit crits, can mine normally
+- ➖ Briefly stunned by damage
+
+**Donkey**
+- ➕ Gains a soulbound donkey mount with 54 slots of soulbound storage
+- ➕ When Mounted: extra reach, every hit crits, can mine normally
+- ➖ Briefly stunned by damage
+
+**Camel**
+- ➕ Gains a soulbound camel mount with an extra seat and powerful lunge
+- ➕ When Mounted: extra reach, every hit crits, can mine normally
+- ➖ Briefly stunned by damage
+
+</details>
+
+<details>
+<summary><b>Enderians</b>: Enderman, Shulker, Ender Dragon. Teleporting beings of the End that fear water.</summary>
+
+<a href="non-mod-resources/Enderian%20Infographic.png"><img src="non-mod-resources/Enderian%20Infographic.png" alt="Enderian infographic" width="420"></a>
+
+**Enderman**
+- ➕ Can teleport to a targeted location or through walls
+- ➕ Hand-mined blocks are Silk Touched
+- ➕ Resistant to projectiles
+- ➕ Extra reach
+- 🔹 2.5 blocks tall
+- ➖ Frozen by direct eye contact
+- ➖ Damaged by water and rain without Water Breathing
+
+**Shulker**
+- ➕ Can fire a volley of tracking levitation bullets
+- ➕ Can teleport to a random nearby spot
+- ➕ Gains a small soulbound backpack
+- ➕ Can immobilize self for heavy resistance
+- ➖ Damaged by water and rain without Water Breathing
+
+**Ender Dragon**
+- ➕ Wings allow brief gliding
+- ➕ Can breathe Enderflame in an area or shoot a fireball
+- ➕ Can be ridden by other players
+- ➕ Extra reach
+- 🔹 3.5 blocks tall
+- 🔹 Reduced knockback taken
+- ➖ Damaged by water and rain without Water Breathing
+
+</details>
+
+<details>
+<summary><b>Felids</b>: Cat, Ocelot. Quick, quiet and always landing on their feet.</summary>
+
+<a href="non-mod-resources/Felid%20Infographic.png"><img src="non-mod-resources/Felid%20Infographic.png" alt="Felid infographic" width="420"></a>
+
+**Cat**
+- ➕ Immune to fall damage
+- ➕ Faster while sneaking
+- ➕ Permanent speed increase
+- ➕ Scares creepers and phantoms
+- ➖ Can only eat meat
+
+**Ocelot**
+- ➕ First hit on a mob deals bonus damage
+- ➕ Attacking a player from behind deals bonus damage
+- ➕ Permanent speed increase
+- ➕ Reduced fall damage taken
+- ➖ Can only eat meat
+
+</details>
+
+<details>
+<summary><b>Gelatians</b>: Slime, Magma Cube, Sulfur Cube. Bouncy cubes that shrink instead of dying.</summary>
+
+<a href="non-mod-resources/Gelatian%20Infographic.png"><img src="non-mod-resources/Gelatian%20Infographic.png" alt="Gelatian infographic" width="420"></a>
+
+**Slime**
+- ➕ Fatal damage reduces size and max health instead of killing, twice per life
+- ➕ Can eat slime balls to regrow
+- ➕ Increased jump strength
+- ➕ Bounces on terrain
+- ➖ Drastically increased hunger rate
+
+**Magma Cube**
+- ➕ Immune to fire
+- ➕ Melee attacks ignite enemies
+- ➕ Fatal damage reduces size and max health instead of killing, twice per life
+- ➕ Can eat magma cream to regrow
+- ➕ Increased jump strength
+- ➕ Bounces on terrain
+- ➖ Damaged by snowballs and cold biomes without Water Breathing
+- ➖ Drastically increased hunger rate
+
+**Sulfur Cube**
+- ➕ Can absorb blocks to gain their properties
+- ➕ Fatal damage reduces size and max health instead of killing, once per life
+- ➕ Can eat sulfur spikes to regrow
+- ➕ Increased jump strength
+- ➕ Bounces on terrain
+- ➖ Reduced melee damage
+- ➖ Drastically increased hunger rate
+- ➖ Cannot absorb blocks when small
+- ➖ Cannot activate sulfur totem when metamorphed
+
+</details>
+
+<details>
+<summary><b>Golems</b>: Copper Golem, Tuff Golem, Iron Golem. Constructs that eat metal and stone instead of food.</summary>
+
+<a href="non-mod-resources/Golem%20Infographic.png"><img src="non-mod-resources/Golem%20Infographic.png" alt="Golem infographic" width="420"></a>
+
+**Copper Golem**
+- ➕ Can apply Honeycomb for absorption
+- ➕ Resistant to projectiles
+- ➕ Can fall safely from higher
+- ➕ Can walk over crops, magma blocks and sculk safely
+- 🔹 1 block tall
+- 🔹 Eats Copper items to heal directly
+- 🔹 Sprint is based on health percentage
+- 🔹 Takes increased knockback
+- ➖ Halved max health
+- ➖ Reduced melee damage
+- ➖ No natural regeneration
+
+**Tuff Golem**
+- ➕ Permanent haste and attack speed
+- ➕ Resistant to projectiles
+- 🔹 Eats Tuff items to heal directly
+- 🔹 Sprint is based on health percentage
+- ➖ No natural regeneration
+
+**Iron Golem**
+- ➕ Deals extra melee damage and knockback
+- ➕ Doubled max health
+- ➕ Resistant to projectiles
+- ➕ Extra reach
+- 🔹 Eats Iron items to heal directly
+- 🔹 Sprint is based on health percentage
+- 🔹 Takes reduced knockback
+- 🔹 3 blocks tall
+- ➖ No natural regeneration
+
+</details>
+
+<details>
+<summary><b>Infernals</b>: Blaze, Wither Skeleton, Strider. Fireproof natives of the Nether that hate the cold.</summary>
+
+<a href="non-mod-resources/Infernal%20Infographic.png"><img src="non-mod-resources/Infernal%20Infographic.png" alt="Infernal infographic" width="420"></a>
+
+**Blaze**
+- ➕ Can fire a volley of fireballs
+- ➕ Immune to fire
+- ➕ Melee attacks ignite enemies
+- ➕ Gains slow falling when falling quickly
+- ➖ Damaged by snowballs and cold biomes without Water Breathing
+
+**Wither Skeleton**
+- ➕ Melee attacks wither enemies
+- ➕ Immune to withering
+- ➕ Immune to fire
+- 🔹 2.5 blocks tall
+- ➖ Damaged by snowballs and cold biomes without Water Breathing
+
+**Strider**
+- ➕ Can be ridden by other players
+- ➕ Can eat Warped Fungus for a speed boost
+- ➕ Can stride through lava
+- ➕ Immune to fire
+- 🔹 2.5 blocks tall
+- ➖ Damaged by snowballs and cold biomes without Water Breathing
+
+</details>
+
+<details>
+<summary><b>Sentinels</b>: Creaking, Warden. Guardians of the dark with powerful, risky abilities.</summary>
+
+<a href="non-mod-resources/Sentinel%20Infographic.png"><img src="non-mod-resources/Sentinel%20Infographic.png" alt="Sentinel infographic" width="420"></a>
+
+**Creaking**
+- ➕ Can place a destructible Creaking Heart: grants heavy resistance and strength
+- ➕ Can respawn at the Creaking Heart
+- ➖ Cannot leave the area of the Creaking Heart without removing it
+- ➖ Creaking Heart gives brief slowness and weakness upon destruction
+- ➖ Sunlight applies slight weakness
+- ➖ Frozen by direct eye contact
+
+**Warden**
+- ➕ Can unleash a massive Sonic Boom
+- ➕ Can burrow through the ground
+- ➕ Melee attacks deal increased damage and knockback
+- ➕ Nearby sounds become visual cues
+- ➕ Doubled max health
+- 🔹 3 blocks tall
+- 🔹 Takes reduced knockback
+- ➖ Nearsighted
+
+</details>
+
+<details>
+<summary><b>Swampers</b>: Witch, Cave Spider, Frog. Swamp dwellers empowered by the moon.</summary>
+
+<a href="non-mod-resources/Swamper%20Infographic.png"><img src="non-mod-resources/Swamper%20Infographic.png" alt="Swamper infographic" width="420"></a>
+
+**Witch**
+- ➕ Can periodically brew a free potion
+- ➕ Better potions during fuller moons
+- ➕ Immune to poison
+
+**Cave Spider**
+- ➕ Melee attacks poison enemies
+- ➕ Fuller moons apply stronger poison and grant a potion buff
+- ➕ Can throw a web periodically
+- ➕ Can climb like a spider
+- ➕ Can fall safely from higher
+- ➕ Can walk over crops, magma blocks and sculk safely
+- ➕ Less affected by cobwebs
+- 🔹 1 block tall
+- 🔹 Takes increased knockback
+- ➖ Halved max health
+- ➖ Deals reduced melee damage
+
+**Frog**
+- ➕ Sticky tongue attack applies a biome-specific debuff
+- ➕ Sneaking charges a big leap
+- ➕ Can fall safely from higher
+- ➕ Can walk over crops, magma blocks and sculk safely
+- ➕ Fuller moons increase max health
+- ➕ Immune to poison
+- 🔹 1 block tall
+- 🔹 Takes increased knockback
+- ➖ Halved max health
+- ➖ Deals reduced melee damage
+
+</details>
+
+<details>
+<summary><b>Windswepts</b>: Breeze, Parrot, Ghastling. Light, airborne creatures that never fall hard.</summary>
+
+<a href="non-mod-resources/Windswept%20Infographic.png"><img src="non-mod-resources/Windswept%20Infographic.png" alt="Windswept infographic" width="420"></a>
+
+**Breeze**
+- ➕ Can unleash a blast of Wind Charges
+- ➕ Resistant to projectiles
+- ➕ Sneaking charges a big leap
+- ➕ Gains slow falling when falling quickly
+- ➖ Deals reduced melee damage
+
+**Parrot**
+- ➕ Wings allow brief gliding and grant a speed boost
+- ➕ Can walk over crops, magma blocks and sculk safely
+- ➕ Gains slow falling when falling quickly
+- 🔹 Takes increased knockback
+- ➖ Allergic to chocolate
+
+**Ghastling**
+- ➕ Can hover slowly for a prolonged period
+- ➕ Can launch a freezing blast
+- ➕ Gains slow falling when falling quickly
+- ➕ Can be ridden by other players
+- ➖ Takes damage in dry biomes without Fire Resistance or a Turtle Shell
+
+</details>
+
+All of the infographics are also available as [one image](non-mod-resources/Full%20Infographic.png).
+
+## Videos
+| Mod Spotlight / Tutorial | 1.2.0 Changes Showcase | 1.3.0 Changes Showcase |
+|:---:|:---:|:---:|
+| [![Mod Tutorial](https://img.youtube.com/vi/QApJcu1rpD0/mqdefault.jpg)](https://www.youtube.com/watch?v=QApJcu1rpD0) | [![1.2.0 Changes Showcase](https://img.youtube.com/vi/ZWrzjhnXP8E/mqdefault.jpg)](https://www.youtube.com/watch?v=ZWrzjhnXP8E) | [![1.3.0 Changes Showcase](https://img.youtube.com/vi/8HL_ekXbSds/mqdefault.jpg)](https://www.youtube.com/watch?v=8HL_ekXbSds) |
+
+## Installation
+1. Install [Fabric Loader](https://fabricmc.net/use/server/) and [Fabric API](https://modrinth.com/mod/fabric-api) on your server.
+2. Download Ancestral Archetypes from [Modrinth](https://modrinth.com/mod/ancestral-archetypes), [CurseForge](https://www.curseforge.com/minecraft/mc-mods/ancestral-archetypes) or [GitHub Releases](https://github.com/borisshoes/AncestralArchetypes/releases) and put the jar in the server's `mods` folder. Every other library the mod uses is bundled in the jar.
+3. Set up the resource pack as described below.
+
+Players do not need to install anything.
+
+### Resource Pack
+The server has the ability to automatically generate and serve the mod's resource pack to your players when they connect. To do this, you must enable auto-host:
+1. Launch the server with the mod installed at least once to generate the configs.
+2. Open `config/polymer/auto-host.json` in the server folder.
+3. In the first few lines there will be a line that says `"enabled": false`. Change this to `true`.
+4. (Optional) You can also set the value to make the resource pack required by players, or set the `"message"` line to inform players why the resource pack is important to download when they are prompted to have it be auto downloaded.
+
+If everything is done correctly, then players will automatically load into the server with the resource pack installed. Without the resource pack the mod still works, but Ability Items show as vanilla items instead of their own textures.
+
+## Customizing Archetypes
+Every Archetype's ability list can be edited in game, without a restart:
+* `/archetypes addArchetypeAbility <subarchetype> <ability>` adds an ability to a mob.
+* `/archetypes removeArchetypeAbility <subarchetype> <ability>` removes one.
+* `/archetypes resetArchetypeAbilities <subarchetype>` restores the defaults.
 
 ### Variant Abilities
-There are a few variants of abilities that are not used by any archetypes by default, but can be added through the admin commands listed below. These are:
-* ```Short-Legged``` Reduces player step height by 0.5 blocks.
-* ```Long-Legged``` Increases player step height by 1 block.
-* ```Vulnerable in Water``` You take 50% extra damage when in water and rain.
-* ```Vulnerable when Dry``` You take 50% extra damage when in hot biomes without a Turtle Shell or Fire Resistance.
-* ```Vulnerable when Cold``` You take 50% extra damage when in cold biomes without Water Breathing.
+There are a few variants of abilities that are not used by any Archetype by default, but can be added with the commands above. These are:
+* `Short-Legged` Reduces player step height by 0.5 blocks.
+* `Long-Legged` Increases player step height by 1 block.
+* `Vulnerable in Water` You take 50% extra damage when in water and rain.
+* `Vulnerable when Dry` You take 50% extra damage when in hot biomes without a Turtle Shell or Fire Resistance.
+* `Vulnerable when Cold` You take 50% extra damage when in cold biomes without Water Breathing.
 
 ## Commands
 ### Player Commands
-* ```/archetypes changeArchetype``` Opens a GUI for a user to change their Archetype.
-* ```/archetypes list``` Opens a GUI for a user to view all Archetypes.
-* ```/archetypes items``` Gives a user the Ability Items for their Archetype, has a 1 minute cooldown.
-* ```/archetypes setHorseVariant <color> <markings>``` Sets the color of your Spirit Horse as a Horse Archetype.
-* ```/archetypes setMountName <name>``` Sets the name of your Spirit Mount as a Centaur Archetype.
-* ```/archetypes setGliderColor <hex color> [<trim color>]``` Sets the color of your Glider Wings as a Parrot or Ender Dragon Archetype.
-* ```/archetypes setHelmetColor <hex color> [<trim color>]``` Sets the color of your Aviator Helmet as a Ghastling Archetype.
-* ```/archetypes toggleReminders``` Toggles the periodic reminders for players that are missing an Archetype or an Ability Item
-* ```/archetypes abilities``` Shows the abilities and descriptions for your Archetype, as well as any relevant config values
-* ```/archetypes abilities <archetype>``` Shows the above command for the specified Archetype
+* `/archetypes changeArchetype` Opens a GUI for a user to change their Archetype.
+* `/archetypes list` Opens a GUI for a user to view all Archetypes.
+* `/archetypes abilities` Shows the abilities and descriptions for your Archetype, as well as any relevant config values.
+* `/archetypes abilities <archetype>` Shows the above command for the specified Archetype.
+* `/archetypes items` Gives a user the Ability Items for their Archetype, has a 1 minute cooldown.
+* `/archetypes toggleReminders` Toggles the periodic reminders for players that are missing an Archetype or an Ability Item.
+* `/archetypes setHorseVariant <color> <markings>` Sets the color of your Spirit Horse as a Horse Archetype.
+* `/archetypes setMountName <name>` Sets the name of your Spirit Mount as a Centaur Archetype.
+* `/archetypes setGliderColor <hex color> [<trim color>]` Sets the color of your Glider Wings as a Parrot or Ender Dragon Archetype.
+* `/archetypes setHelmetColor <hex color> [<trim color>]` Sets the color of your Aviator Helmet as a Ghastling Archetype.
 
 ### Admin Commands
-* ```/archetypes resetCooldowns <targets>``` Resets the abilities of the selected players.
-* ```/archetypes setArchetype <targets> <archetype>``` Sets the Archetypes of the selected players.
-* ```/archetypes addChanges <targets> <changes>``` Gives a number of allowed Archetype changes to the selected players.
-* ```/archetypes getArchetype <player>``` Gets a player's Archetype.
-* ```/archetypes distribution``` Gets the distribution of all players' selected Archetypes.
-* ```/archetypes getPlayersOfArchetype <archetype>``` Lists all players of a given Archetype.
-* ```/archetypes getAllPlayerArchetypes``` Lists all players and their Archetype.
-* ```/archetypes resetArchetypeAbilities <subarchetype>``` Resets an Archetype's ability list to their defaults.
-* ```/archetypes addArchetypeAbility <subarchetype> <ability>``` Adds an ability to an Archetype.
-* ```/archetypes removeArchetypeAbility <subarchetype> <ability>``` Removes an ability from an Archetype.
+* `/archetypes setArchetype <targets> <archetype>` Sets the Archetypes of the selected players.
+* `/archetypes addChanges <targets> <changes>` Gives a number of allowed Archetype changes to the selected players.
+* `/archetypes resetCooldowns <targets>` Resets the ability cooldowns of the selected players.
+* `/archetypes getArchetype <player>` Gets a player's Archetype.
+* `/archetypes getPlayersOfArchetype <archetype>` Lists all players of a given Archetype.
+* `/archetypes getAllPlayerArchetypes` Lists all players and their Archetype.
+* `/archetypes distribution` Gets the distribution of all players' selected Archetypes.
+* `/archetypes addArchetypeAbility <subarchetype> <ability>` Adds an ability to an Archetype.
+* `/archetypes removeArchetypeAbility <subarchetype> <ability>` Removes an ability from an Archetype.
+* `/archetypes resetArchetypeAbilities <subarchetype>` Resets an Archetype's ability list to their defaults.
 
-### Admin Configuration Commands
-The following commands can be used to adjust configurable settings in the AncestralArchetypes.properties file without a server reboot. These commands can be suffixed with "get" or "set" followed by a value to get or set the current setting. 
+## Admin Configuration Commands
+The following commands can be used to adjust configurable settings in the AncestralArchetypes.properties file without a server reboot. These commands can be suffixed with "get" or "set" followed by a value to get or set the current setting. Durations and cooldowns are in ticks (20 ticks = 1 second) unless stated otherwise.
+
 * `/archetypes config addedStarveDamage` The amount of added starvation damage dealt to those with Insatiable. (default: 3.0)
 * `/archetypes config archetypeChangeCooldown` The cooldown period, in ticks, after changing Archetypes before another change can be made. (default: 0)
 * `/archetypes config berryEaterEatDuration` The duration to eat berries with Berry Eater, in ticks. (default: 30)
@@ -80,14 +471,15 @@ The following commands can be used to adjust configurable settings in the Ancest
 * `/archetypes config berryEaterSweetRegenRate` The regeneration rate granted by sweet berries to Berry Eater. (default: 0.035)
 * `/archetypes config berryEaterSweetStrength` The strength modifier granted by sweet berries to Berry Eater. (default: 0.25)
 * `/archetypes config berryEaterSweetStrengthDuration` The duration of sweet berry strength from Berry Eater, in ticks. (default: 400)
+* `/archetypes config biomeAdaptiveColdSlownessAmplifier` The movement speed reduction applied by Biome Adaptive in cold biomes. (default: 0.4)
+* `/archetypes config biomeAdaptiveColdSlownessDuration` The duration of the cold-biome slowness effect from Biome Adaptive, in ticks. (default: 100)
 * `/archetypes config biomeAdaptiveHotVulnerability` The damage modifier applied by Biome Adaptive in hot biomes. (default: 0.25)
 * `/archetypes config biomeAdaptiveHotVulnerabilityDuration` The duration of the hot-biome vulnerability effect from Biome Adaptive, in ticks. (default: 100)
-* `/archetypes config biomeAdaptiveSlownessAmplifier` The movement speed reduction applied by Biome Adaptive in cold biomes. (default: 0.4)
-* `/archetypes config biomeAdaptiveSlownessDuration` The duration of the cold-biome slowness effect from Biome Adaptive, in ticks. (default: 100)
 * `/archetypes config biomeAdaptiveTemperateFeeble` The damage reduction modifier applied by Biome Adaptive in temperate biomes. (default: 0.25)
 * `/archetypes config biomeAdaptiveTemperateFeebleDuration` The duration of the temperate-biome feeble effect from Biome Adaptive, in ticks. (default: 100)
 * `/archetypes config biomeDamage` The amount of damage dealt to Aquarians or Infernals for being in an incompatible biome. (default: 2.5)
 * `/archetypes config blazingStrikeDuration` The duration, in ticks, that Blazing Strikes ignites enemies for. (default: 100)
+* `/archetypes config bouncyBounciness` The bounciness modifier for those with Bouncy. (default: 0.95)
 * `/archetypes config burrowCooldown` The cooldown of Burrow, in ticks. (default: 600)
 * `/archetypes config burrowRange` The range of Burrow, in blocks. (default: 32.0)
 * `/archetypes config canAlwaysChangeArchetype` Whether players can change their Archetype at will, or use the limited change system. (default: false)
@@ -106,7 +498,7 @@ The following commands can be used to adjust configurable settings in the Ancest
 * `/archetypes config creakingHeartRange` The range of Creaking Heart effects, in blocks. (default: 32.0)
 * `/archetypes config creakingHeartResistance` The damage resistance modifier granted by Creaking Heart. (default: 0.45)
 * `/archetypes config creakingHeartRespawnTimer` The respawn timer for Creaking Heart, in ticks. (default: 200)
-* `/archetypes config creakingHeartScale` The size modifier of the Creaking Heart. (default: 1.0)
+* `/archetypes config creakingHeartScale` The size modifier of the Creaking Heart. (default: 0.95)
 * `/archetypes config creakingHeartSlowness` The slowness modifier applied by Creaking Heart. (default: 0.3)
 * `/archetypes config creakingHeartSlownessDuration` The duration of Creaking Heart slowness, in ticks. (default: 200)
 * `/archetypes config creakingHeartStrength` The strength modifier granted by Creaking Heart. (default: 0.5)
@@ -114,7 +506,7 @@ The following commands can be used to adjust configurable settings in the Ancest
 * `/archetypes config creakingHeartWeakness` The weakness modifier applied by Creaking Heart. (default: 0.1)
 * `/archetypes config creakingHeartWeaknessDuration` The duration of Creaking Heart weakness, in ticks. (default: 600)
 * `/archetypes config damageStunDuration` The duration of the movement stun applied to Centaurs. (default: 15)
-* `/archetypes config daylightWeakWeakness` The weakness modifier applied by Daylight Weak in sunlight. (default: 0.75)
+* `/archetypes config daylightWeakWeakness` The weakness modifier applied by Daylight Weak in sunlight. (default: 0.25)
 * `/archetypes config echolocationRange` The detection range of Echolocation, in blocks. (default: 24.0)
 * `/archetypes config enderflameBuffetCooldown` The cooldown of Enderflame's Buffet ability, in ticks. (default: 800)
 * `/archetypes config enderflameBuffetDamage` The damage dealt by Enderflame's Buffet attack. (default: 1.5)
@@ -152,32 +544,30 @@ The following commands can be used to adjust configurable settings in the Ancest
 * `/archetypes config ironFoodDurationModifier` The modifier applied to the consume duration of foods for Iron Eater. (default: 1.0)
 * `/archetypes config ironFoodHealthModifier` The modifier applied to the health regained by Iron Eater. (default: 1.0)
 * `/archetypes config jumpyJumpBoost` The extra jump power given to those with Jumpy (default: 0.35)
-* `/archetypes config leapCooldown` The cooldown of Leap, in ticks. (default: 100)
-* `/archetypes config leapJumpPowerModifier` The jump power modifier applied by Leap. (default: 1.0)
-* `/archetypes config leapMaxChargeTime` The maximum charge duration of Leap, in ticks. (default: 100)
 * `/archetypes config knockbackIncrease` The modifier multiplied against the knockback dealt to those with Increased Knockback. (default: 2.0)
 * `/archetypes config knockbackReduction` The modifier multiplied against the knockback dealt to those with Decreased Knockback (default: 0.5)
 * `/archetypes config lavaWalkerSpeedMultiplier` The speed multiplier applied to the speed of lava walkers in lava. (default: 3.0)
+* `/archetypes config leapCooldown` The cooldown of Leap, in ticks. (default: 100)
+* `/archetypes config leapJumpPowerModifier` The jump power modifier applied by Leap. (default: 1.0)
+* `/archetypes config leapMaxChargeTime` The maximum charge duration of Leap, in ticks. (default: 50)
 * `/archetypes config levitationBulletCooldown` The cooldown of the Levitation Bullet ability, in ticks. (default: 300)
 * `/archetypes config levitationBulletCount` The number of projectiles created by the Seeker Bullet Barrage. (default: 3)
 * `/archetypes config levitationBulletDamage` The damage done by Levitation Bullet. (default: 4.0)
 * `/archetypes config levitationBulletDuration` The duration of levitation applied by a Levitation Bullet, in ticks. (default: 200)
 * `/archetypes config levitationBulletLevel` The level of levitation applied by a Levitation Bullet. (default: 1)
-* `/archetypes config lightweightIncreasedKnockback` The modifier multiplied against the attack knockback dealt by those with Lightweight. (default: 2.0)
 * `/archetypes config lightweightDragReduction` The amount of air drag reduction for those with Lightweight. (default: 0.35)
-* `/archetypes config bouncyBounciness` The bounciness modifier for those with Bouncy. (default: 0.95)
+* `/archetypes config lightweightIncreasedKnockback` The modifier multiplied against the attack knockback dealt by those with Lightweight. (default: 2.0)
 * `/archetypes config logCommandUsage` Whether to log admin command usage to the server console. (default: false)
 * `/archetypes config longArmsRange` The additional reach granted by Long Arms. (default: 0.5)
 * `/archetypes config longLeggedStepIncrease` The additional step height granted by Long-Legged. (default: 1.0)
 * `/archetypes config longTeleportCooldown` The cooldown of Long Teleport, in ticks. (default: 600)
 * `/archetypes config longTeleportDistance` The distance teleported by Long Teleport, in blocks. (default: 16.0)
-* `/archetypes config mobSneakAttackModifier` The damage modifier applied to damage dealt to mobs the first time by those with Sneak Attack (default: 2.0)
 * `/archetypes config metamorphAbilityDuration` The duration of Metamorph, in ticks. (default: 6000)
 * `/archetypes config metamorphEatDuration` The time it takes to consume the Metamorph trigger item, in ticks. (default: 100)
 * `/archetypes config metamorphGoldRegenRate` The regeneration rate per moon phase when metamorphed into Gold. (default: 0.25)
+* `/archetypes config metamorphIceDragReduction` The air drag reduction when metamorphed into Ice. (default: 0.75)
 * `/archetypes config metamorphIceFreezeRange` The range at which entities are frozen when metamorphed into Ice. (default: 4.0)
 * `/archetypes config metamorphIceFrictionReduction` The movement friction reduction applied when metamorphed into Ice. (default: 0.9)
-* `/archetypes config metamorphIceDragReduction` The air drag reduction when metamorphed into Ice. (default: 0.5)
 * `/archetypes config metamorphIronBlastModifier` The blast damage modifier when metamorphed into Iron. (default: 0.75)
 * `/archetypes config metamorphIronKnockbackModifier` The knockback modifier when metamorphed into Iron. (default: 0.5)
 * `/archetypes config metamorphIronProjectileModifier` The projectile damage modifier when metamorphed into Iron. (default: 0.5)
@@ -192,6 +582,10 @@ The following commands can be used to adjust configurable settings in the Ancest
 * `/archetypes config metamorphTntExplosionPower` The power of the explosion when metamorphed into TNT. (default: 7.5)
 * `/archetypes config metamorphTntFireFuseTime` The fuse time when ignited by fire metamorphed as TNT. (default: 120)
 * `/archetypes config metamorphWoolFallModifier` The fall damage modifier when metamorphed into Wool. (default: 0.5)
+* `/archetypes config mobSneakAttackModifier` The damage modifier applied to damage dealt to mobs the first time by those with Sneak Attack (default: 2.0)
+* `/archetypes config moonlitCaveSpiderRegenRate` The amount of health restored per tick to Moonlit Cave Spiders during a full moon. (default: 0.02)
+* `/archetypes config moonlitCaveSpiderSpeed` The speed modifier granted to Moonlit Cave Spiders during a half moon. (default: 0.2)
+* `/archetypes config moonlitCaveSpiderStrength` The strength modifier granted to Moonlit Cave Spiders during a gibbous moon. (default: 0.25)
 * `/archetypes config moonlitCaveSpiderVenomDurationPerPhase` The additional poison duration per moon phase for Moonlit Cave Spiders, in ticks. (default: 50)
 * `/archetypes config moonlitCaveSpiderVenomStrengthPerPhase` The additional venom strength added per moon phase to Moonlit Cave Spiders. (default: 0.5)
 * `/archetypes config moonlitFrogHealthPerMoonPhase` The health fraction granted to Frogs with Moonlit per moon phase. (default: 0.125)
@@ -218,9 +612,9 @@ The following commands can be used to adjust configurable settings in the Ancest
 * `/archetypes config remindersOnByDefault` Whether new players receive reminders about missing an Archetype or Ability Item. (default: true)
 * `/archetypes config resilientJointsExtraFallBlocks` The additional blocks that can be fallen before taking fall damage for those with Resilient Joints. (default: 4.0)
 * `/archetypes config rideableTeamOnly` Whether the Rideable ability only allows teammates to ride the player. (default: true)
-* `/archetypes config shyNoticingAngle` The cone angle for Shy where presence is detected, in degrees. (default: 90.0)
-* `/archetypes config shyViewingAngle` The viewing cone angle for Shy where direct looking is detected, in degrees. (default: 12.5)
 * `/archetypes config shortLeggedStepReduction` The step height reduction applied by Short-Legged. (default: 0.5)
+* `/archetypes config shyNoticingAngle` The cone angle for Shy where presence is detected, in degrees. (default: 100.0)
+* `/archetypes config shyViewingAngle` The viewing cone angle for Shy where direct looking is detected, in degrees. (default: 12.5)
 * `/archetypes config skiddishAllyTeamedWithRogue` Whether Skiddish counts someone without a team as an ally when you are on a team. (default: false)
 * `/archetypes config skiddishAllyUnteamedWithRogue` Whether Skiddish counts someone without a team as an ally when you don't have a team. (default: false)
 * `/archetypes config skiddishAllyUnteamedWithTeamed` Whether Skiddish counts someone on a team as an ally when you don't have a team. (default: false)
@@ -234,12 +628,12 @@ The following commands can be used to adjust configurable settings in the Ancest
 * `/archetypes config slowHoverFlightRecoveryTime` The recovery time before Slow Hover Flight can be regained, in seconds per second. (default: 0.15)
 * `/archetypes config slowHoverFlightSpeed` The movement speed modifier while in Slow Hover Flight. (default: 0.015)
 * `/archetypes config sneakySpeedBoost` The additional speed modifier added when sneaking to those with Sneaky. (default: 0.5)
+* `/archetypes config snowballDamage` The amount of damage done to those with Damaged by Cold by snowballs. (default: 3.0)
 * `/archetypes config snowBlastCooldown` The cooldown of Snow Blast, in ticks. (default: 500)
 * `/archetypes config snowBlastDamage` The damage dealt by Snow Blast. (default: 4.0)
 * `/archetypes config snowBlastRange` The effective range of Snow Blast, in blocks. (default: 5.0)
 * `/archetypes config snowBlastSlownessDuration` The duration of the Slowness effect applied by Snow Blast, in ticks. (default: 100)
-* `/archetypes config snowBlastSlownessStrength` The effect level of the Slowness effect applied by Snow Blast. (default: 3)
-* `/archetypes config snowballDamage` The amount of damage done to those with Damaged by Cold by snowballs. (default: 3.0)
+* `/archetypes config snowBlastSlownessStrength` The level of the slow applied by Snow Blast. Each level removes 15% movement speed. (default: 3)
 * `/archetypes config softhitterDamageReduction` The modifier applied against the melee damage dealt by those with Soft Hitter. (default: 0.85)
 * `/archetypes config sonicBlastChargeDuration` The charge duration of Sonic Blast, in ticks. (default: 100)
 * `/archetypes config sonicBlastCooldown` The cooldown of Sonic Blast, in ticks. (default: 500)
@@ -320,6 +714,33 @@ Config command permissions are generated dynamically for each config value. Thes
 
 For example, the permission nodes for the `biomeDamage` config would be `ancestralarchetypes.config.biomedamage.get` and `ancestralarchetypes.config.biomedamage.set`.
 
+## Building from Source
+Building requires JDK 25.
 
-### LICENSE NOTICE
-By using this project in any form, you hereby give your "express assent" for the terms of the license of this project, and acknowledge that I, BorisShoes, have fulfilled my obligation under the license to "make a reasonable effort under the circumstances to obtain the express assent of recipients to the terms of this License.
+```bash
+./gradlew build
+```
+
+The mod jar is written to `build/libs/`.
+
+## Support and Contributing
+- Questions and discussion: [Discord](https://discord.gg/dTKPeNEg6r)
+- Bug reports and suggestions: [GitHub Issues](https://github.com/borisshoes/AncestralArchetypes/issues)
+- Translations are welcome. The language files are in `src/main/resources/data/ancestralarchetypes/lang` and `src/main/resources/assets/ancestralarchetypes/lang`, and both need the same entries.
+
+## Try My Other Mods!
+All server-side Fabric mods — no client installation required.
+
+| | Mod | Description | Links |
+|:---:|---|---|---|
+| <img src="https://cdn.modrinth.com/data/9J7sCd3t/e6ce366187de25be0efc7ecc736fc27f05452888_96.webp" alt="Arcana Novum" width="64"> | **Arcana Novum** | Minecraft's biggest server-side magic mod: powerful items, multiblock structures, custom bosses and deep lore. | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white)](https://github.com/borisshoes/ArcanaNovum) [![Modrinth](https://img.shields.io/badge/Modrinth-00AF5C?logo=modrinth&logoColor=white)](https://modrinth.com/mod/arcana-novum) [![CurseForge](https://img.shields.io/badge/CurseForge-F16436?logo=curseforge&logoColor=white)](https://www.curseforge.com/minecraft/mc-mods/arcana-novum) |
+| <img src="https://cdn.modrinth.com/data/QfXOzeIK/b35cbf33da842f170d0aa562033aaddc2a9ab653_96.webp" alt="Ender Nexus" width="64"> | **Ender Nexus** | Highly configurable /home, /spawn, /warp, /tpa and /rtp commands all in one, and individually disablable. | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white)](https://github.com/borisshoes/EnderNexus/) [![Modrinth](https://img.shields.io/badge/Modrinth-00AF5C?logo=modrinth&logoColor=white)](https://modrinth.com/mod/ender-nexus) [![CurseForge](https://img.shields.io/badge/CurseForge-F16436?logo=curseforge&logoColor=white)](https://www.curseforge.com/minecraft/mc-mods/ender-nexus-fabric-teleports) |
+| <img src="https://cdn.modrinth.com/data/Z63eULDV/dae01789d609498b8f1637ab31d8fe20b6108020_96.webp" alt="Fabric Mail" width="64"> | **Fabric Mail** | An in-game virtual mailbox system for sending packages and messages between online and offline players. | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white)](https://github.com/borisshoes/fabric-mail/) [![Modrinth](https://img.shields.io/badge/Modrinth-00AF5C?logo=modrinth&logoColor=white)](https://modrinth.com/mod/fabric-mail) [![CurseForge](https://img.shields.io/badge/CurseForge-F16436?logo=curseforge&logoColor=white)](https://www.curseforge.com/minecraft/mc-mods/fabric-mail) |
+| <img src="https://cdn.modrinth.com/data/u40ARaBc/028062616fc2fb729afdbdc697d60f93ff61a918_96.webp" alt="Fabric Trade" width="64"> | **Fabric Trade** | Adds /trade, a secure player-to-player trading interface. | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white)](https://github.com/borisshoes/fabric-trade/) [![Modrinth](https://img.shields.io/badge/Modrinth-00AF5C?logo=modrinth&logoColor=white)](https://modrinth.com/mod/fabric-trade) [![CurseForge](https://img.shields.io/badge/CurseForge-F16436?logo=curseforge&logoColor=white)](https://www.curseforge.com/minecraft/mc-mods/fabric-trade) |
+| <img src="https://cdn.modrinth.com/data/WdlqG9Gd/a401b9bf08c33d85c907025d6689c657b5168508_96.webp" alt="Limited AFK" width="64"> | **Limited AFK** | AFK detection and management with configurable kick thresholds for servers. | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white)](https://github.com/borisshoes/LimitedAFK/) [![Modrinth](https://img.shields.io/badge/Modrinth-00AF5C?logo=modrinth&logoColor=white)](https://modrinth.com/mod/limited-afk) [![CurseForge](https://img.shields.io/badge/CurseForge-F16436?logo=curseforge&logoColor=white)](https://www.curseforge.com/minecraft/mc-mods/limited-afk) |
+| <img src="https://cdn.modrinth.com/data/klpvLefw/97afbda2e56c3f14e04d0f9e0e1fe99db6bd2f27_96.webp" alt="Links in Chat" width="64"> | **Links in Chat** | Makes URLs posted in chat clickable. | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white)](https://github.com/borisshoes/fabric-linksinchat/) [![Modrinth](https://img.shields.io/badge/Modrinth-00AF5C?logo=modrinth&logoColor=white)](https://modrinth.com/mod/links-in-chat) [![CurseForge](https://img.shields.io/badge/CurseForge-F16436?logo=curseforge&logoColor=white)](https://www.curseforge.com/minecraft/mc-mods/links-in-chat) |
+
+## License
+Ancestral Archetypes is licensed under the [Open Software License 3.0](LICENSE).
+
+By using this project in any form, you hereby give your "express assent" for the terms of the license of this project, and acknowledge that I, BorisShoes, have fulfilled my obligation under the license to "make a reasonable effort under the circumstances to obtain the express assent of recipients to the terms of this License."

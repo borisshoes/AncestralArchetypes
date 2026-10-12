@@ -9,12 +9,14 @@ import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.ancestralarchetypes.gui.MountInventoryGui;
 import net.borisshoes.ancestralarchetypes.items.AbilityItem;
+import net.borisshoes.ancestralarchetypes.misc.ArchetypeUtils;
 import net.borisshoes.ancestralarchetypes.misc.MetamorphTypes;
+import net.borisshoes.borislib.conditions.ConditionInstance;
+import net.borisshoes.borislib.conditions.Conditions;
 import net.borisshoes.borislib.gui.GraphicalItem;
 import net.borisshoes.borislib.utils.MinecraftUtils;
 import net.borisshoes.borislib.utils.SoundUtils;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Holder;
 import net.minecraft.core.particles.DustColorTransitionOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -33,21 +35,19 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.OwnableEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.inventory.HorseInventoryMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -212,34 +212,6 @@ public abstract class LivingEntityMixin {
       return original;
    }
    
-   @ModifyVariable(method = "knockback", at = @At("HEAD"), argsOnly = true, name = "power")
-   private double archetypes$knockback(double power){
-      LivingEntity entity = (LivingEntity) (Object) this;
-      double newStrength = power;
-      
-      if(entity instanceof ServerPlayer player){
-         PlayerArchetypeData profile = profile(player);
-         
-         if(profile.hasAbility(ArchetypeRegistry.INCREASED_KNOCKBACK)){
-            newStrength *= (float) CONFIG.getDouble(ArchetypeRegistry.KNOCKBACK_INCREASE);
-         }
-         if(profile.hasAbility(ArchetypeRegistry.LIGHTWEIGHT)){
-            newStrength *= (float) CONFIG.getDouble(ArchetypeRegistry.LIGHTWEIGHT_INCREASED_KNOCKBACK);
-         }
-         if(profile.hasAbility(ArchetypeRegistry.REDUCED_KNOCKBACK)){
-            newStrength *= (float) CONFIG.getDouble(ArchetypeRegistry.KNOCKBACK_DECREASE);
-         }
-         
-         if(profile.getMetamorph() == MetamorphTypes.NETHERITE){
-            newStrength *= (float) CONFIG.getDouble(ArchetypeRegistry.METAMORPH_NETHERITE_KNOCKBACK_MODIFIER);
-         }
-         if(profile.getMetamorph() == MetamorphTypes.IRON){
-            newStrength *= (float) CONFIG.getDouble(ArchetypeRegistry.METAMORPH_IRON_KNOCKBACK_MODIFIER);
-         }
-      }
-      return newStrength;
-   }
-   
    @Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)
    private void archetypes$damage(ServerLevel world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir){
       LivingEntity entity = (LivingEntity) (Object) this;
@@ -360,33 +332,6 @@ public abstract class LivingEntityMixin {
          if(profile.hasAbility(ArchetypeRegistry.PROJECTILE_RESISTANT) && source.is(DamageTypeTags.IS_PROJECTILE)){
             newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.PROJECTILE_RESISTANT_REDUCTION);
          }
-         if(profile.hasAbility(ArchetypeRegistry.SLIPPERY) && player.isInWaterOrRain() && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)){
-            if(profile.hasAbility(ArchetypeRegistry.GREAT_SWIMMER)){
-               newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.GREAT_SWIMMER_SLIPPERY_DAMAGE_MODIFIER);
-            }else{
-               newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.SLIPPERY_DAMAGE_MODIFIER);
-            }
-         }
-         if(profile.hasAbility(ArchetypeRegistry.VULNERABLE_IN_WATER) && player.isInWaterOrRain()){
-            newReturn *= (float) (1.0 + CONFIG.getDouble(ArchetypeRegistry.VULNERABLE_IN_WATER_VULNERABILITY));
-         }
-         if(profile.hasAbility(ArchetypeRegistry.VULNERABLE_IN_COLD) && !player.hasEffect(MobEffects.WATER_BREATHING)){
-            Holder<Biome> biome = player.level().getBiome(player.blockPosition());
-            float temp = biome.value().getBaseTemperature();
-            boolean shouldFreeze = (biome.is(ArchetypeRegistry.COLD_DAMAGE_INCLUDE_BIOMES) ||
-                  (temp < 0.1 && !biome.is(ArchetypeRegistry.COLD_DAMAGE_EXCEPTION_BIOMES))) && !(player.isCreative() || player.isSpectator());
-            if(shouldFreeze){
-               newReturn *= (float) (1.0 + CONFIG.getDouble(ArchetypeRegistry.VULNERABLE_IN_COLD_VULNERABILITY));
-            }
-         }
-         if(profile.hasAbility(ArchetypeRegistry.VULNERABLE_WHEN_DRY) && !player.hasEffect(MobEffects.FIRE_RESISTANCE)){
-            Holder<Biome> biome = player.level().getBiome(player.blockPosition());
-            boolean shouldDryOut = (biome.is(ArchetypeRegistry.DRY_OUT_INCLUDE_BIOMES) || (!biome.value().hasPrecipitation() && !biome.is(ArchetypeRegistry.DRY_OUT_EXCEPTION_BIOMES))) &&
-                  !player.isInWater() && !(player.isCreative() || player.isSpectator()) && !player.getItemBySlot(EquipmentSlot.HEAD).is(Items.TURTLE_HELMET);
-            if(shouldDryOut){
-               newReturn *= (float) (1.0 + CONFIG.getDouble(ArchetypeRegistry.VULNERABLE_WHEN_DRY_VULNERABILITY));
-            }
-         }
          if(profile.hasAbility(ArchetypeRegistry.FORTIFY) && profile.isFortifyActive() && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)){
             newReturn *= (float) CONFIG.getDouble(ArchetypeRegistry.FORTIFY_DAMAGE_MODIFIER);
             SoundUtils.playSound(player.level(), player.blockPosition(), SoundEvents.HEAVY_CORE_STEP, SoundSource.PLAYERS, 2f, player.getRandom().nextFloat() + 0.5F);
@@ -395,8 +340,10 @@ public abstract class LivingEntityMixin {
             newReturn += (float) CONFIG.getDouble(ArchetypeRegistry.ADDED_STARVE_DAMAGE);
          }
          if(profile.hasAbility(ArchetypeRegistry.STUNNED_BY_DAMAGE) && amount > CONFIG.getDouble(ArchetypeRegistry.STARTLE_MIN_DAMAGE) && !source.is(ArchetypeRegistry.NO_STARTLE)){
-            MobEffectInstance slowness = new MobEffectInstance(MobEffects.SLOWNESS, CONFIG.getInt(ArchetypeRegistry.DAMAGE_STUN_DURATION), 9, false, false, true);
-            player.addEffect(slowness);
+            Conditions.addCondition(player.level().getServer(), player, new ConditionInstance(
+                  Conditions.TORPOR, archetypesId("damage_stun"), CONFIG.getInt(ArchetypeRegistry.DAMAGE_STUN_DURATION), ArchetypeUtils.STUN_TORPOR,
+                  true, false, false,
+                  AttributeModifier.Operation.ADD_VALUE, null));
          }
       }
       

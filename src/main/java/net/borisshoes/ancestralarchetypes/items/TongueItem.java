@@ -98,24 +98,28 @@ public class TongueItem extends AbilityItem {
                Holder<Condition> conditionType;
                float value;
                int duration;
+               AttributeModifier.Operation operation = AttributeModifier.Operation.ADD_MULTIPLIED_BASE;
                if(biome.is(BiomeTags.SPAWNS_COLD_VARIANT_FROGS)){
                   conditionType = Conditions.TORPOR;
                   value = AncestralArchetypes.CONFIG.getFloat(ArchetypeRegistry.BIOME_ADAPTIVE_COLD_SLOWNESS_AMPLIFIER);
                   duration = AncestralArchetypes.CONFIG.getInt(ArchetypeRegistry.BIOME_ADAPTIVE_COLD_SLOWNESS_DURATION);
                }else if(biome.is(BiomeTags.SPAWNS_WARM_VARIANT_FROGS)){
                   conditionType = Conditions.VULNERABILITY;
+                  operation = AttributeModifier.Operation.ADD_VALUE;
                   value = AncestralArchetypes.CONFIG.getFloat(ArchetypeRegistry.BIOME_ADAPTIVE_HOT_VULNERABILITY);
                   duration = AncestralArchetypes.CONFIG.getInt(ArchetypeRegistry.BIOME_ADAPTIVE_HOT_VULNERABILITY_DURATION);
                }else{
                   conditionType = Conditions.FEEBLE;
-                  value = -AncestralArchetypes.CONFIG.getFloat(ArchetypeRegistry.BIOME_ADAPTIVE_TEMPERATE_FEEBLE);
+                  value = AncestralArchetypes.CONFIG.getFloat(ArchetypeRegistry.BIOME_ADAPTIVE_TEMPERATE_FEEBLE);
                   duration = AncestralArchetypes.CONFIG.getInt(ArchetypeRegistry.BIOME_ADAPTIVE_TEMPERATE_FEEBLE_DURATION);
                }
                
-               Conditions.addCondition(player.level().getServer(), livingHit, new ConditionInstance(
-                     conditionType, archetypesId("biome_adaptive_tongue"), duration, value,
-                     true, true, false,
-                     AttributeModifier.Operation.ADD_VALUE, player.getUUID()));
+               if(duration > 0){
+                  Conditions.addCondition(player.level().getServer(), livingHit, new ConditionInstance(
+                        conditionType, archetypesId("biome_adaptive_tongue"), duration, value,
+                        true, true, false,
+                        operation, player.getUUID()));
+               }
             }
             
             // Tongue tip ends at the hit entity's center

@@ -3,6 +3,8 @@ package net.borisshoes.ancestralarchetypes.entities;
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.mixins.ThrowableItemProjectileAccessor;
+import net.borisshoes.borislib.conditions.ConditionInstance;
+import net.borisshoes.borislib.conditions.Conditions;
 import net.borisshoes.borislib.utils.SoundUtils;
 import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 import net.minecraft.core.BlockPos;
@@ -16,8 +18,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
@@ -85,7 +86,13 @@ public class SnowblastEntity extends Snowball implements PolymerEntity {
          world.sendParticles(ParticleTypes.ITEM_SNOWBALL, hitResult.getLocation().x(), hitResult.getLocation().y(), hitResult.getLocation().z(), 50, 0.25, 0.25, 0.25, 0.5);
          for(LivingEntity livingEntity : living){
             livingEntity.hurtServer(world, new DamageSource(world.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(DamageTypes.FREEZE), this, this.getOwner()), damage);
-            livingEntity.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, duration, lvl - 1), this.getOwner());
+            if(duration > 0){
+               // Each level slows by 15%, like the Slowness effect it replaces
+               Conditions.addCondition(world.getServer(), livingEntity, new ConditionInstance(
+                     Conditions.TORPOR, archetypesId("snow_blast"), duration, Math.min(1, 0.15f * lvl),
+                     true, true, false,
+                     AttributeModifier.Operation.ADD_MULTIPLIED_BASE, this.getOwner() != null ? this.getOwner().getUUID() : null));
+            }
             world.sendParticles(ParticleTypes.SNOWFLAKE, livingEntity.getX(), livingEntity.getY() + livingEntity.getBbHeight() / 2.0, livingEntity.getZ(), 25, livingEntity.getBbWidth() / 2.0, livingEntity.getBbHeight() / 2.0, livingEntity.getBbWidth() / 2.0, 0.1);
             world.sendParticles(ParticleTypes.ITEM_SNOWBALL, livingEntity.getX(), livingEntity.getY() + livingEntity.getBbHeight() / 2.0, livingEntity.getZ(), 25, livingEntity.getBbWidth() / 2.0, livingEntity.getBbHeight() / 2.0, livingEntity.getBbWidth() / 2.0, 0.1);
 //            if(livingEntity.getBlockStateAtPos().isIn(BlockTags.REPLACEABLE)){

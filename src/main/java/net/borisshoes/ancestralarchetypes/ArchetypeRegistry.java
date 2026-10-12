@@ -563,6 +563,15 @@ public class ArchetypeRegistry {
    
    public static final IConfigSetting<?> MOONLIT_CAVE_SPIDER_VENOM_STRENGTH_PER_PHASE = registerConfigSetting(new ConfigSetting<>(
          new DoubleConfigValue("moonlitCaveSpiderVenomStrengthPerPhase", 0.5, new DoubleConfigValue.DoubleLimits(0))));
+
+   public static final IConfigSetting<?> MOONLIT_CAVE_SPIDER_SPEED = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("moonlitCaveSpiderSpeed", 0.2, new DoubleConfigValue.DoubleLimits(0))));
+
+   public static final IConfigSetting<?> MOONLIT_CAVE_SPIDER_STRENGTH = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("moonlitCaveSpiderStrength", 0.25, new DoubleConfigValue.DoubleLimits(0))));
+
+   public static final IConfigSetting<?> MOONLIT_CAVE_SPIDER_REGEN_RATE = registerConfigSetting(new ConfigSetting<>(
+         new DoubleConfigValue("moonlitCaveSpiderRegenRate", 0.02, new DoubleConfigValue.DoubleLimits(0))));
    
    public static final IConfigSetting<?> SNOW_BLAST_RANGE = registerConfigSetting(new ConfigSetting<>(
          new DoubleConfigValue("snowBlastRange", 5.0, new DoubleConfigValue.DoubleLimits(0))));
@@ -655,7 +664,7 @@ public class ArchetypeRegistry {
          new DoubleConfigValue("creakingHeartSlowness", 0.3, new DoubleConfigValue.DoubleLimits(0.0))));
    
    public static final IConfigSetting<?> CREAKING_HEART_SCALE = registerConfigSetting(new ConfigSetting<>(
-         new DoubleConfigValue("creakingHeartScale", 1.0, new DoubleConfigValue.DoubleLimits(0.0))));
+         new DoubleConfigValue("creakingHeartScale", 0.95, new DoubleConfigValue.DoubleLimits(0.0))));
    
    public static final IConfigSetting<?> CREAKING_HEART_HEALTH = registerConfigSetting(new ConfigSetting<>(
          new DoubleConfigValue("creakingHeartHealth", 40.0, new DoubleConfigValue.DoubleLimits(0.0))));
@@ -785,7 +794,7 @@ public class ArchetypeRegistry {
    public static final ArchetypeAbility CAMEL_SPIRIT_MOUNT = register(new ArchetypeAbility.ArchetypeAbilityBuilder("camel_spirit_mount").setReliantConfigs(SPIRIT_MOUNT_KILL_COOLDOWN, SPIRIT_MOUNT_REGENERATION_RATE).setDisplayStack(new ItemStackTemplate(Items.OAK_BOAT)).setActive().build());
    public static final ArchetypeAbility VENOMOUS = register(new ArchetypeAbility.ArchetypeAbilityBuilder("venomous").setReliantConfigs(VENOMOUS_POISON_DURATION, VENOMOUS_POISON_STRENGTH).setDisplayStack(new ItemStackTemplate(Items.SPIDER_EYE)).build());
    public static final ArchetypeAbility CLIMBING = register(new ArchetypeAbility.ArchetypeAbilityBuilder("climbing").setDisplayStack(new ItemStackTemplate(Items.LADDER)).build());
-   public static final ArchetypeAbility MOONLIT_CAVE_SPIDER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("moonlit_cave_spider").setReliantConfigs(MOONLIT_CAVE_SPIDER_VENOM_STRENGTH_PER_PHASE, MOONLIT_CAVE_SPIDER_VENOM_DURATION_PER_PHASE).setDisplayStack(new ItemStackTemplate(Items.SEA_LANTERN)).build());
+   public static final ArchetypeAbility MOONLIT_CAVE_SPIDER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("moonlit_cave_spider").setReliantConfigs(MOONLIT_CAVE_SPIDER_VENOM_STRENGTH_PER_PHASE, MOONLIT_CAVE_SPIDER_VENOM_DURATION_PER_PHASE, MOONLIT_CAVE_SPIDER_SPEED, MOONLIT_CAVE_SPIDER_STRENGTH, MOONLIT_CAVE_SPIDER_REGEN_RATE).setDisplayStack(new ItemStackTemplate(Items.SEA_LANTERN)).build());
    public static final ArchetypeAbility WEAVING = register(new ArchetypeAbility.ArchetypeAbilityBuilder("weaving").setReliantConfigs(WEAVING_WEB_COOLDOWN).setDisplayStack(new ItemStackTemplate(Items.STRING)).setActive().build());
    public static final ArchetypeAbility SLOW_HOVER = register(new ArchetypeAbility.ArchetypeAbilityBuilder("slow_hover").setReliantConfigs(SLOW_HOVER_FLIGHT_COOLDOWN, SLOW_HOVER_FLIGHT_DURATION, SLOW_HOVER_FLIGHT_SPEED, SLOW_HOVER_FLIGHT_RECOVERY_TIME).setDisplayStack(new ItemStackTemplate(Items.SNOW_BLOCK)).setActive().build());
    public static final ArchetypeAbility RIDEABLE = register(new ArchetypeAbility.ArchetypeAbilityBuilder("rideable").setDisplayStack(new ItemStackTemplate(Items.SADDLE)).build());

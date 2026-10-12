@@ -60,17 +60,6 @@ public abstract class PlayerMixin {
       return Math.max(original, newValue);
    }
    
-   @ModifyReturnValue(method = "getDestroySpeed", at = @At("RETURN"))
-   private float archetypes$overallBlockBreakingSpeed(float original){
-      Player player = (Player) (Object) this;
-      if(player.level().isClientSide() || !(player instanceof ServerPlayer serverPlayer)) return original;
-      PlayerArchetypeData profile = profile(serverPlayer);
-      double newValue = original;
-      if(profile.hasAbility(ArchetypeRegistry.HASTY))
-         newValue *= CONFIG.getDouble(ArchetypeRegistry.HASTY_MINING_MODIFIER);
-      return (float) newValue;
-   }
-   
    @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getDamageAfterArmorAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F"))
    private void archetypes$thorns(ServerLevel world, DamageSource source, float amount, CallbackInfo ci){
       LivingEntity entity = (LivingEntity) (Object) this;
