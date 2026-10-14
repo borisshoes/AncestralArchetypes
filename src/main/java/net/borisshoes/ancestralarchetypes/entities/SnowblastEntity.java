@@ -3,6 +3,7 @@ package net.borisshoes.ancestralarchetypes.entities;
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.mixins.ThrowableItemProjectileAccessor;
+import net.borisshoes.ancestralarchetypes.misc.ArchetypeUtils;
 import net.borisshoes.borislib.conditions.ConditionInstance;
 import net.borisshoes.borislib.conditions.Conditions;
 import net.borisshoes.borislib.utils.SoundUtils;
@@ -90,8 +91,8 @@ public class SnowblastEntity extends Snowball implements PolymerEntity {
                // Each level slows by 15%, like the Slowness effect it replaces
                Conditions.addCondition(world.getServer(), livingEntity, new ConditionInstance(
                      Conditions.TORPOR, archetypesId("snow_blast"), duration, Math.min(1, 0.15f * lvl),
-                     true, true, false,
-                     AttributeModifier.Operation.ADD_MULTIPLIED_BASE, this.getOwner() != null ? this.getOwner().getUUID() : null));
+                     true, ArchetypeUtils.particles(true), false,
+                     AttributeModifier.Operation.ADD_MULTIPLIED_BASE, this.getOwner() != null ? this.getOwner().getUUID() : null, ArchetypeUtils.conditionName("snow_blast", this.getOwner())));
             }
             world.sendParticles(ParticleTypes.SNOWFLAKE, livingEntity.getX(), livingEntity.getY() + livingEntity.getBbHeight() / 2.0, livingEntity.getZ(), 25, livingEntity.getBbWidth() / 2.0, livingEntity.getBbHeight() / 2.0, livingEntity.getBbWidth() / 2.0, 0.1);
             world.sendParticles(ParticleTypes.ITEM_SNOWBALL, livingEntity.getX(), livingEntity.getY() + livingEntity.getBbHeight() / 2.0, livingEntity.getZ(), 25, livingEntity.getBbWidth() / 2.0, livingEntity.getBbHeight() / 2.0, livingEntity.getBbWidth() / 2.0, 0.1);

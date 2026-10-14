@@ -4,6 +4,7 @@ import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.borisshoes.ancestralarchetypes.AncestralArchetypes;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
+import net.borisshoes.ancestralarchetypes.misc.ArchetypeUtils;
 import net.borisshoes.ancestralarchetypes.misc.TongueAnimation;
 import net.borisshoes.borislib.BorisLib;
 import net.borisshoes.borislib.conditions.Condition;
@@ -96,20 +97,24 @@ public class TongueItem extends AbilityItem {
             if(profile.hasAbility(ArchetypeRegistry.BIOME_ADAPTIVE)){
                Holder<Biome> biome = world.getBiome(user.blockPosition());
                Holder<Condition> conditionType;
+               String nameKey;
                float value;
                int duration;
                AttributeModifier.Operation operation = AttributeModifier.Operation.ADD_MULTIPLIED_BASE;
                if(biome.is(BiomeTags.SPAWNS_COLD_VARIANT_FROGS)){
                   conditionType = Conditions.TORPOR;
+                  nameKey = "tongue_frigid";
                   value = AncestralArchetypes.CONFIG.getFloat(ArchetypeRegistry.BIOME_ADAPTIVE_COLD_SLOWNESS_AMPLIFIER);
                   duration = AncestralArchetypes.CONFIG.getInt(ArchetypeRegistry.BIOME_ADAPTIVE_COLD_SLOWNESS_DURATION);
                }else if(biome.is(BiomeTags.SPAWNS_WARM_VARIANT_FROGS)){
                   conditionType = Conditions.VULNERABILITY;
+                  nameKey = "tongue_barbed";
                   operation = AttributeModifier.Operation.ADD_VALUE;
                   value = AncestralArchetypes.CONFIG.getFloat(ArchetypeRegistry.BIOME_ADAPTIVE_HOT_VULNERABILITY);
                   duration = AncestralArchetypes.CONFIG.getInt(ArchetypeRegistry.BIOME_ADAPTIVE_HOT_VULNERABILITY_DURATION);
                }else{
                   conditionType = Conditions.FEEBLE;
+                  nameKey = "tongue_enfeebling";
                   value = AncestralArchetypes.CONFIG.getFloat(ArchetypeRegistry.BIOME_ADAPTIVE_TEMPERATE_FEEBLE);
                   duration = AncestralArchetypes.CONFIG.getInt(ArchetypeRegistry.BIOME_ADAPTIVE_TEMPERATE_FEEBLE_DURATION);
                }
@@ -117,8 +122,8 @@ public class TongueItem extends AbilityItem {
                if(duration > 0){
                   Conditions.addCondition(player.level().getServer(), livingHit, new ConditionInstance(
                         conditionType, archetypesId("biome_adaptive_tongue"), duration, value,
-                        true, true, false,
-                        operation, player.getUUID()));
+                        true, ArchetypeUtils.particles(true), false,
+                        operation, player.getUUID(), ArchetypeUtils.conditionName(nameKey, player)));
                }
             }
             

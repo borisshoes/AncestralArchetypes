@@ -3,17 +3,21 @@ package net.borisshoes.ancestralarchetypes.misc;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DynamicOps;
 import net.borisshoes.ancestralarchetypes.AncestralArchetypes;
+import net.borisshoes.ancestralarchetypes.SubArchetype;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.mixins.EntityAccessor;
 import net.borisshoes.borislib.BorisLib;
 import net.borisshoes.borislib.conditions.Condition;
 import net.borisshoes.borislib.conditions.ConditionInstance;
+import net.borisshoes.borislib.conditions.ConditionParticles;
 import net.borisshoes.borislib.conditions.Conditions;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -40,21 +44,36 @@ public class ArchetypeUtils {
    // Slows to a crawl without the full root of an infinite Torpor, so jumping still works
    public static final float STUN_TORPOR = 999f;
 
+   // Condition names take the color of the source's subarchetype, an uncolored name is used when it has none
+   public static Component conditionName(String key, Entity source){
+      MutableComponent name = Component.translatable("text.ancestralarchetypes.condition." + key);
+      if(source instanceof ServerPlayer player){
+         SubArchetype subArchetype = AncestralArchetypes.profile(player).getSubArchetype();
+         if(subArchetype != null) name.withColor(subArchetype.getColor());
+      }
+      return name;
+   }
+
+   // Particles are the condition's defaults when shown, none otherwise
+   public static Optional<ConditionParticles> particles(boolean show){
+      return show ? Optional.empty() : Optional.of(ConditionParticles.NONE);
+   }
+
    // Refreshes the condition behind a passive ability, it lapses half a second after the last call
-   public static void passiveCondition(ServerPlayer player, Holder<Condition> condition, String id, float value, AttributeModifier.Operation operation){
+   public static void passiveCondition(ServerPlayer player, Holder<Condition> condition, String id, String nameKey, float value, AttributeModifier.Operation operation){
       if(!(value > 0)) return;
       Conditions.addCondition(player.level().getServer(), player, new ConditionInstance(
             condition, AncestralArchetypes.archetypesId(id), 10, value,
-            true, false, true,
-            operation, null));
+            true, particles(false), true,
+            operation, null, conditionName(nameKey, player)));
    }
 
-   // Applies a multiplier as a compounding percentage of the amplifier above 1, or of the attenuator below 1
-   public static void passiveMultiplier(ServerPlayer player, Holder<Condition> amplifier, Holder<Condition> attenuator, String id, double multiplier){
+   // Applies a multiplier as an additive magnitude of the amplifier above 1, or an additive percentage of the attenuator below 1
+   public static void passiveMultiplier(ServerPlayer player, Holder<Condition> amplifier, Holder<Condition> attenuator, String id, String nameKey, double multiplier){
       if(multiplier > 1){
-         passiveCondition(player, amplifier, id, (float) (multiplier - 1), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+         passiveCondition(player, amplifier, id, nameKey, (float) (multiplier - 1), AttributeModifier.Operation.ADD_VALUE);
       }else{
-         passiveCondition(player, attenuator, id, (float) (1 - Math.max(0, multiplier)), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+         passiveCondition(player, attenuator, id, nameKey, (float) (1 - Math.max(0, multiplier)), AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
       }
    }
 

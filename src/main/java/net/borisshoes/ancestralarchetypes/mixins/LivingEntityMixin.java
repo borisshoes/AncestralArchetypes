@@ -342,8 +342,8 @@ public abstract class LivingEntityMixin {
          if(profile.hasAbility(ArchetypeRegistry.STUNNED_BY_DAMAGE) && amount > CONFIG.getDouble(ArchetypeRegistry.STARTLE_MIN_DAMAGE) && !source.is(ArchetypeRegistry.NO_STARTLE)){
             Conditions.addCondition(player.level().getServer(), player, new ConditionInstance(
                   Conditions.TORPOR, archetypesId("damage_stun"), CONFIG.getInt(ArchetypeRegistry.DAMAGE_STUN_DURATION), ArchetypeUtils.STUN_TORPOR,
-                  true, false, false,
-                  AttributeModifier.Operation.ADD_VALUE, null));
+                  true, ArchetypeUtils.particles(false), false,
+                  AttributeModifier.Operation.ADD_VALUE, null, ArchetypeUtils.conditionName("damage_stun", player)));
          }
       }
       

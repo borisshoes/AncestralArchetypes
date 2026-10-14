@@ -6,6 +6,7 @@ import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.ancestralarchetypes.callbacks.GlowBerryShieldCallback;
 import net.borisshoes.ancestralarchetypes.callbacks.WaxShieldCallback;
+import net.borisshoes.ancestralarchetypes.misc.ArchetypeUtils;
 import net.borisshoes.ancestralarchetypes.misc.MetamorphTypes;
 import net.borisshoes.borislib.BorisLib;
 import net.borisshoes.borislib.conditions.ConditionInstance;
@@ -95,8 +96,8 @@ public class ItemMixin {
                      Conditions.CELERITY,
                      archetypesId("fungus_speed"),
                      speedTime, speedBoost,
-                     true, true, false,
-                     AttributeModifier.Operation.ADD_VALUE, null));
+                     true, ArchetypeUtils.particles(true), false,
+                     AttributeModifier.Operation.ADD_VALUE, null, ArchetypeUtils.conditionName("fungus_speed", playerEntity)));
             }
          }
          
@@ -111,8 +112,8 @@ public class ItemMixin {
                      Conditions.MIGHT,
                      archetypesId("sweet_berry_might"),
                      damageTime, damageBoost,
-                     true, true, false,
-                     AttributeModifier.Operation.ADD_VALUE, null));
+                     true, ArchetypeUtils.particles(true), false,
+                     AttributeModifier.Operation.ADD_VALUE, null, ArchetypeUtils.conditionName("sweet_berry", playerEntity)));
             }
             
             if(regenTime > 0){
@@ -120,8 +121,8 @@ public class ItemMixin {
                      Conditions.REJUVENATION,
                      archetypesId("sweet_berry_regen"),
                      regenTime, regenRate * 20, // Config is health per tick, Rejuvenation is health per second
-                     true, true, false,
-                     AttributeModifier.Operation.ADD_VALUE, null));
+                     true, ArchetypeUtils.particles(true), false,
+                     AttributeModifier.Operation.ADD_VALUE, null, ArchetypeUtils.conditionName("sweet_berry", playerEntity)));
             }
          }
          
@@ -136,8 +137,8 @@ public class ItemMixin {
                      Conditions.CELERITY,
                      archetypesId("glow_berry_speed"),
                      speedTime, speedBoost,
-                     true, true, false,
-                     AttributeModifier.Operation.ADD_VALUE, null));
+                     true, ArchetypeUtils.particles(true), false,
+                     AttributeModifier.Operation.ADD_VALUE, null, ArchetypeUtils.conditionName("glow_berry", playerEntity)));
             }
             
             float curAbs = playerEntity.getAbsorptionAmount();

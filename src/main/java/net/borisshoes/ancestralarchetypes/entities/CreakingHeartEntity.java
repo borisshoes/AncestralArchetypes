@@ -8,6 +8,7 @@ import eu.pb4.polymer.virtualentity.api.elements.BlockDisplayElement;
 import eu.pb4.polymer.virtualentity.api.elements.ItemDisplayElement;
 import net.borisshoes.ancestralarchetypes.AncestralArchetypes;
 import net.borisshoes.ancestralarchetypes.ArchetypeParticles;
+import net.borisshoes.ancestralarchetypes.misc.ArchetypeUtils;
 import net.borisshoes.ancestralarchetypes.ArchetypeRegistry;
 import net.borisshoes.ancestralarchetypes.PlayerArchetypeData;
 import net.borisshoes.ancestralarchetypes.mixins.InteractionAccessor;
@@ -213,14 +214,14 @@ public class CreakingHeartEntity extends LivingEntity implements PolymerEntity, 
                         Conditions.FORTITUDE,
                         archetypesId("creaking_fortitude"),
                         10, ConditionMath.reductionToMagnitude(Mth.clamp(resist, 0, 1)),
-                        true, false, true,
-                        AttributeModifier.Operation.ADD_VALUE, null));
+                        true, ArchetypeUtils.particles(false), true,
+                        AttributeModifier.Operation.ADD_VALUE, null, ArchetypeUtils.conditionName("creaking_bond", player)));
                   Conditions.addCondition(player.level().getServer(), player, new ConditionInstance(
                         Conditions.MIGHT,
                         archetypesId("creaking_might"),
                         10, strength,
-                        true, true, true,
-                        AttributeModifier.Operation.ADD_VALUE, null));
+                        true, ArchetypeUtils.particles(true), true,
+                        AttributeModifier.Operation.ADD_VALUE, null, ArchetypeUtils.conditionName("creaking_bond", player)));
                }else if(distance <= range + lenience && inDimension){ // Progressive slowness
                   float minSlow = 0.5f;
                   float maxSlow = 0.9f;
@@ -229,8 +230,8 @@ public class CreakingHeartEntity extends LivingEntity implements PolymerEntity, 
                         Conditions.TORPOR,
                         archetypesId("creaking_range_slow"),
                         10, slow,
-                        false, false, true,
-                        AttributeModifier.Operation.ADD_MULTIPLIED_BASE, null));
+                        false, ArchetypeUtils.particles(false), true,
+                        AttributeModifier.Operation.ADD_MULTIPLIED_BASE, null, ArchetypeUtils.conditionName("creaking_strain", player)));
                   if(rangeWarnCooldown <= 0){
                      player.sendSystemMessage(Component.translatable("text.ancestralarchetypes.creaking_heart_leaving_range").withColor(TextColor.RED.getValue()), false);
                      rangeWarnCooldown = 100;
@@ -392,16 +393,16 @@ public class CreakingHeartEntity extends LivingEntity implements PolymerEntity, 
                   Conditions.TORPOR,
                   archetypesId("creaking_slow"),
                   slowDur, slow,
-                  true, true, false,
-                  AttributeModifier.Operation.ADD_MULTIPLIED_BASE, null));
+                  true, ArchetypeUtils.particles(true), false,
+                  AttributeModifier.Operation.ADD_MULTIPLIED_BASE, null, ArchetypeUtils.conditionName("creaking_heartbreak", player)));
          }
          if(weakDur > 0){
             Conditions.addCondition(player.level().getServer(), player, new ConditionInstance(
                   Conditions.FEEBLE,
                   archetypesId("creaking_weak"),
                   weakDur, weak,
-                  true, true, false,
-                  AttributeModifier.Operation.ADD_MULTIPLIED_BASE, null));
+                  true, ArchetypeUtils.particles(true), false,
+                  AttributeModifier.Operation.ADD_MULTIPLIED_BASE, null, ArchetypeUtils.conditionName("creaking_heartbreak", player)));
          }
          
          MutableComponent text;
